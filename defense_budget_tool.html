@@ -140,6 +140,8 @@
 
   /* Per-column colors: background + border when active */
   .fy-btn[data-col="fy25_base"]  { --c: #4a90d9; }
+  .fy-btn[data-col="fy25_rec"]   { --c: #74b3e8; }
+  .fy-btn[data-col="fy25_total"] { --c: #2a6baa; }
   .fy-btn[data-col="fy26_base"]  { --c: #5bc4a0; }
   .fy-btn[data-col="fy26_rec"]   { --c: #e8a838; }
   .fy-btn[data-col="fy26_total"] { --c: #9b72cf; }
@@ -459,12 +461,14 @@
 
     <span class="sidebar-label">Fiscal Years</span>
     <div class="fy-grid">
-      <button class="fy-btn active" data-col="fy25_base"  onclick="toggleCol(this)"><span class="dot"></span>FY25</button>
-      <button class="fy-btn active" data-col="fy26_base"  onclick="toggleCol(this)"><span class="dot"></span>FY26 Disc.</button>
-      <button class="fy-btn active" data-col="fy26_rec"   onclick="toggleCol(this)"><span class="dot"></span>FY26 Mand.</button>
+      <button class="fy-btn"        data-col="fy25_base"  onclick="toggleCol(this)"><span class="dot"></span>FY25 Base</button>
+      <button class="fy-btn"        data-col="fy25_rec"   onclick="toggleCol(this)"><span class="dot"></span>FY25 Rec.</button>
+      <button class="fy-btn active" data-col="fy25_total" onclick="toggleCol(this)"><span class="dot"></span>FY25 Total</button>
+      <button class="fy-btn"        data-col="fy26_base"  onclick="toggleCol(this)"><span class="dot"></span>FY26 Disc.</button>
+      <button class="fy-btn"        data-col="fy26_rec"   onclick="toggleCol(this)"><span class="dot"></span>FY26 Mand.</button>
       <button class="fy-btn active" data-col="fy26_total" onclick="toggleCol(this)"><span class="dot"></span>FY26 Total</button>
-      <button class="fy-btn active" data-col="fy27_base"  onclick="toggleCol(this)"><span class="dot"></span>FY27 Disc.</button>
-      <button class="fy-btn active" data-col="fy27_rec"   onclick="toggleCol(this)"><span class="dot"></span>FY27 Mand.</button>
+      <button class="fy-btn"        data-col="fy27_base"  onclick="toggleCol(this)"><span class="dot"></span>FY27 Disc.</button>
+      <button class="fy-btn"        data-col="fy27_rec"   onclick="toggleCol(this)"><span class="dot"></span>FY27 Mand.</button>
       <button class="fy-btn active" data-col="fy27_total" onclick="toggleCol(this)"><span class="dot"></span>FY27 Total</button>
     </div>
 
@@ -519,7 +523,8 @@
 // ─────────────────────────────────────────────
 // DATA
 // All dollar values in $thousands. null = not applicable.
-// Structure: { fy25_base, fy26_base, fy26_rec, fy26_total, fy27_base, fy27_rec, fy27_total }
+// Structure: { fy25_base, fy25_rec*, fy25_total*, fy26_base, fy26_rec, fy26_total, fy27_base, fy27_rec, fy27_total }
+// * fy25_rec and fy25_total only populated at component/appropriation level; no program-level FY25 rec exists in P-1
 // qty: same keys, units vary by program (noted in qtyUnit field)
 // ─────────────────────────────────────────────
 
@@ -529,14 +534,14 @@ const DATA = {
   dow: {
     label: 'Grand Total — Department of War',
     breadcrumb: 'Department of War',
-    data: { fy25_base:186510870, fy26_base:168279764, fy26_rec:55552276, fy26_total:223832040, fy27_base:257591400, fy27_rec:155504385, fy27_total:413095785 }
+    data: { fy25_base:186510870, fy25_rec:596550, fy25_total:187107420, fy26_base:168279764, fy26_rec:55552276, fy26_total:223832040, fy27_base:257591400, fy27_rec:155504385, fy27_total:413095785 }
   },
 
   // ── ARMY ─────────────────────────────────────
   army: {
     label: 'Total — Department of the Army',
     breadcrumb: 'Department of the Army',
-    data: { fy25_base:32308141, fy26_base:28120250, fy26_rec:2590768, fy26_total:30711018, fy27_base:35984971, fy27_rec:24483244, fy27_total:60468215 }
+    data: { fy25_base:32308141, fy25_rec:1500, fy25_total:32309641, fy26_base:28120250, fy26_rec:2590768, fy26_total:30711018, fy27_base:35984971, fy27_rec:24483244, fy27_total:60468215 }
   },
   'army-aircraft': {
     label: 'Aircraft Procurement, Army',
@@ -562,7 +567,7 @@ const DATA = {
   'army-other': {
     label: 'Other Procurement, Army',
     breadcrumb: 'Army → Other Procurement',
-    data: { fy25_base:10137471, fy26_base:9412655, fy26_rec:641040, fy26_total:10053695, fy27_base:12667053, fy27_rec:null, fy27_total:12667053 }
+    data: { fy25_base:10137471, fy25_rec:1500, fy25_total:10138971, fy26_base:9412655, fy26_rec:641040, fy26_total:10053695, fy27_base:12667053, fy27_rec:null, fy27_total:12667053 }
   },
   'army-chem': {
     label: 'Chemical Agents & Munitions Destruction, Defense',
@@ -660,7 +665,7 @@ const DATA = {
   navy: {
     label: 'Total — Department of the Navy',
     breadcrumb: 'Department of the Navy',
-    data: { fy25_base:83524387, fy26_base:69953674, fy26_rec:33400185, fy26_total:103353859, fy27_base:126006432, fy27_rec:24017834, fy27_total:150024266 }
+    data: { fy25_base:83524387, fy25_rec:31650, fy25_total:83556037, fy26_base:69953674, fy26_rec:33400185, fy26_total:103353859, fy27_base:126006432, fy27_rec:24017834, fy27_total:150024266 }
   },
   'navy-aircraft': {
     label: 'Aircraft Procurement, Navy',
@@ -685,7 +690,7 @@ const DATA = {
   'navy-other': {
     label: 'Other Procurement, Navy',
     breadcrumb: 'Navy → Other Procurement',
-    data: { fy25_base:15817464, fy26_base:14693978, fy26_rec:5802107, fy26_total:20496085, fy27_base:18866679, fy27_rec:50000, fy27_total:18916679 }
+    data: { fy25_base:15817464, fy25_rec:31650, fy25_total:15849114, fy26_base:14693978, fy26_rec:5802107, fy26_total:20496085, fy27_base:18866679, fy27_rec:50000, fy27_total:18916679 }
   },
   'usmc': {
     label: 'Procurement, Marine Corps',
@@ -888,7 +893,7 @@ const DATA = {
   af: {
     label: 'Total — Department of the Air Force',
     breadcrumb: 'Department of the Air Force',
-    data: { fy25_base:61127825, fy26_base:61343424, fy26_rec:13314321, fy26_total:74657745, fy27_base:83551842, fy27_rec:17659220, fy27_total:101211062 }
+    data: { fy25_base:61127825, fy25_rec:1200, fy25_total:61129025, fy26_base:61343424, fy26_rec:13314321, fy26_total:74657745, fy27_base:83551842, fy27_rec:17659220, fy27_total:101211062 }
   },
   'af-aircraft': {
     label: 'Aircraft Procurement, Air Force',
@@ -913,7 +918,7 @@ const DATA = {
   'af-other': {
     label: 'Other Procurement, Air Force',
     breadcrumb: 'Air Force → Other Procurement',
-    data: { fy25_base:31035504, fy26_base:32605147, fy26_rec:448300, fy26_total:33053447, fy27_base:39199963, fy27_rec:null, fy27_total:39199963 }
+    data: { fy25_base:31035504, fy25_rec:1200, fy25_total:31036704, fy26_base:32605147, fy26_rec:448300, fy26_total:33053447, fy27_base:39199963, fy27_rec:null, fy27_total:39199963 }
   },
 
   // AF programs
@@ -1034,12 +1039,12 @@ const DATA = {
   dw: {
     label: 'Total — Defense-Wide',
     breadcrumb: 'Defense-Wide',
-    data: { fy25_base:9550517, fy26_base:8862416, fy26_rec:6247002, fy26_total:15109418, fy27_base:12048155, fy27_rec:89344087, fy27_total:101392242 }
+    data: { fy25_base:9550517, fy25_rec:562200, fy25_total:10112717, fy26_base:8862416, fy26_rec:6247002, fy26_total:15109418, fy27_base:12048155, fy27_rec:89344087, fy27_total:101392242 }
   },
   'dw-proc': {
     label: 'Procurement, Defense-Wide',
     breadcrumb: 'Defense-Wide → Procurement',
-    data: { fy25_base:7912456, fy26_base:7642723, fy26_rec:3897002, fy26_total:11539725, fy27_base:10354868, fy27_rec:39389949, fy27_total:49744817 },
+    data: { fy25_base:7912456, fy25_rec:412200, fy25_total:8324656, fy26_base:7642723, fy26_rec:3897002, fy26_total:11539725, fy27_base:10354868, fy27_rec:39389949, fy27_total:49744817 },
     note: '* FY27 mandatory corrected to $39.390B per DoW errata.'
   },
   'ngre': {
@@ -1260,7 +1265,9 @@ const HIERARCHY = {
 // ─────────────────────────────────────────────
 
 const ALL_COLS = [
-  { key: 'fy25_base',  label: 'FY25',        fy: 'FY25', type: 'base'  },
+  { key: 'fy25_base',  label: 'FY25 Base',   fy: 'FY25', type: 'base'  },
+  { key: 'fy25_rec',   label: 'FY25 Rec.',   fy: 'FY25', type: 'rec'   },
+  { key: 'fy25_total', label: 'FY25 Total',  fy: 'FY25', type: 'total' },
   { key: 'fy26_base',  label: 'FY26 Disc.',  fy: 'FY26', type: 'base'  },
   { key: 'fy26_rec',   label: 'FY26 Mand.',  fy: 'FY26', type: 'rec'   },
   { key: 'fy26_total', label: 'FY26 Total',  fy: 'FY26', type: 'total' },
@@ -1272,6 +1279,8 @@ const ALL_COLS = [
 // Colors for chart bars
 const COL_COLORS = {
   fy25_base:  '#4a90d9',
+  fy25_rec:   '#74b3e8',
+  fy25_total: '#2a6baa',
   fy26_base:  '#5bc4a0',
   fy26_rec:   '#e8a838',
   fy26_total: '#9b72cf',
