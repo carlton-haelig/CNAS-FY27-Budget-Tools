@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DoW Procurement Budget Comparison</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
@@ -314,6 +316,58 @@
     padding-left: 10px;
     margin-top: 8px;
   }
+
+  /* Tom Select dark theme */
+  .ts-wrapper { margin-bottom: 0; }
+  .ts-control {
+    background: var(--surface2) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 3px !important;
+    color: var(--text) !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+    font-size: 13px !important;
+    padding: 7px 10px !important;
+    box-shadow: none !important;
+    min-height: unset !important;
+  }
+  .ts-control input { color: var(--text) !important; font-size: 13px !important; font-family: 'IBM Plex Sans', sans-serif !important; }
+  .ts-control input::placeholder { color: var(--text-muted) !important; }
+  .ts-dropdown {
+    background: var(--surface2) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 3px !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+    font-size: 13px !important;
+    color: var(--text) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6) !important;
+  }
+  .ts-dropdown .option { padding: 7px 14px !important; color: var(--text) !important; cursor: pointer; }
+  .ts-dropdown .option.active,
+  .ts-dropdown .option:hover { background: var(--accent) !important; color: #fff !important; }
+  .ts-dropdown .optgroup-header {
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 10px !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    color: var(--text-muted) !important;
+    padding: 8px 14px 4px !important;
+    background: var(--surface) !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+  .ts-dropdown .no-results { color: var(--text-muted) !important; padding: 8px 14px !important; font-size: 12px !important; }
+  .ts-wrapper.single .ts-control:after { border-top-color: var(--text-muted) !important; }
+  .ts-wrapper.single.input-active .ts-control:after { border-bottom-color: var(--text-muted) !important; }
+  .quick-jump-wrap { padding: 0 14px 14px; }
+  .quick-jump-clear {
+    margin-top: 5px;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-decoration: underline;
+    display: none;
+  }
+  .quick-jump-clear.visible { display: block; }
 </style>
 </head>
 <body>
@@ -327,6 +381,14 @@
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
+
+    <span class="sidebar-label">Quick Jump</span>
+    <div class="quick-jump-wrap">
+      <select id="quick-jump" placeholder="Search programs..."></select>
+      <span class="quick-jump-clear" id="quick-jump-clear" onclick="clearQuickJump()">✕ Clear selection</span>
+    </div>
+
+    <hr class="divider">
 
     <span class="sidebar-label">Category</span>
     <div class="selector-group">
@@ -350,20 +412,20 @@
 
     <hr class="divider">
 
-    <span class="sidebar-label">Columns</span>
+    <span class="sidebar-label">Fiscal Years</span>
     <div class="fy-grid">
       <button class="fy-btn active" data-col="fy25_base"  onclick="toggleCol(this)"><span class="dot"></span>FY25</button>
       <button class="fy-btn active" data-col="fy26_base"  onclick="toggleCol(this)"><span class="dot"></span>FY26 Disc.</button>
       <button class="fy-btn active" data-col="fy26_rec"   onclick="toggleCol(this)"><span class="dot"></span>FY26 Mand.</button>
-      <button class="fy-btn"        data-col="fy26_total" onclick="toggleCol(this)"><span class="dot"></span>FY26 Total</button>
+      <button class="fy-btn active" data-col="fy26_total" onclick="toggleCol(this)"><span class="dot"></span>FY26 Total</button>
       <button class="fy-btn active" data-col="fy27_base"  onclick="toggleCol(this)"><span class="dot"></span>FY27 Disc.</button>
       <button class="fy-btn active" data-col="fy27_rec"   onclick="toggleCol(this)"><span class="dot"></span>FY27 Mand.</button>
-      <button class="fy-btn"        data-col="fy27_total" onclick="toggleCol(this)"><span class="dot"></span>FY27 Total</button>
+      <button class="fy-btn active" data-col="fy27_total" onclick="toggleCol(this)"><span class="dot"></span>FY27 Total</button>
     </div>
 
     <hr class="divider">
 
-    <span class="sidebar-label">Chart Type</span>
+    <span class="sidebar-label">Discretionary vs. Mandatory Display</span>
     <div class="selector-group">
       <div class="chart-toggle" style="width:100%">
         <button id="btn-grouped" class="active" style="flex:1" onclick="setChartType('grouped')">Grouped</button>
@@ -1394,6 +1456,144 @@ function renderTable(entry, cols) {
     body.appendChild(tr);
   });
 }
+
+// ─────────────────────────────────────────────
+// QUICK JUMP — Tom Select
+// ─────────────────────────────────────────────
+
+// Build flat option list with optgroups from hierarchy + DATA
+function buildQuickJumpOptions() {
+  const groups = [];
+
+  // Helper to push a group
+  function addGroup(label, items) {
+    if (items.length) groups.push({ label, items });
+  }
+
+  // Department of War (top-level only)
+  addGroup('Department of War', [
+    { value: 'dow', text: 'Grand Total — Department of War' }
+  ]);
+
+  // Each service: service total + appropriations + programs
+  const services = [
+    { key: 'army', label: 'Army' },
+    { key: 'navy', label: 'Navy' },
+    { key: 'af',   label: 'Air Force' },
+    { key: 'dw',   label: 'Defense-Wide' },
+  ];
+
+  services.forEach(({ key, label }) => {
+    const items = [];
+    const node = HIERARCHY[key];
+    // Service total
+    if (DATA[key]) items.push({ value: key, text: DATA[key].label });
+    // Appropriations + programs
+    node.level2.forEach(l2 => {
+      if (DATA[l2.value]) items.push({ value: l2.value, text: DATA[l2.value].label });
+      if (l2.programs) {
+        l2.programs.forEach(p => {
+          if (DATA[p.value]) items.push({ value: p.value, text: DATA[p.value].label });
+        });
+      }
+    });
+    addGroup(label, items);
+  });
+
+  return groups;
+}
+
+var tomSelect = null;
+
+function initQuickJump() {
+  if (tomSelect) { tomSelect.destroy(); tomSelect = null; }
+  const groups = buildQuickJumpOptions();
+
+  // Build flat options + optgroups arrays for Tom Select config
+  const tsOptions = [];
+  const tsOptgroups = [];
+
+  groups.forEach(g => {
+    tsOptgroups.push({ value: g.label, label: g.label });
+    g.items.forEach(item => {
+      tsOptions.push({ value: item.value, text: item.text, optgroup: g.label });
+    });
+  });
+
+  tomSelect = new TomSelect('#quick-jump', {
+    options: tsOptions,
+    optgroups: tsOptgroups,
+    optgroupField: 'optgroup',
+    labelField: 'text',
+    valueField: 'value',
+    searchField: ['text'],
+    placeholder: 'Search all programs…',
+    allowEmptyOption: false,
+    maxOptions: 200,
+    onChange(val) {
+      if (!val) return;
+      jumpToKey(val);
+      document.getElementById('quick-jump-clear').classList.add('visible');
+    }
+  });
+}
+
+function jumpToKey(key) {
+  if (!DATA[key]) return;
+
+  // Figure out which level1/level2/level3 this key belongs to
+  let l1val = null, l2val = null, l3val = null;
+
+  // Is it a top-level service or DoW?
+  if (key === 'dow') { l1val = 'dow'; }
+  else if (key === 'army') { l1val = 'army'; l2val = 'army'; }
+  else if (key === 'navy') { l1val = 'navy'; l2val = 'navy'; }
+  else if (key === 'af')   { l1val = 'af';   l2val = 'af'; }
+  else if (key === 'dw')   { l1val = 'dw';   l2val = 'dw'; }
+  else {
+    // Search hierarchy for key
+    const services = ['army','navy','af','dw'];
+    outer: for (const svc of services) {
+      for (const l2 of HIERARCHY[svc].level2) {
+        if (l2.value === key) { l1val = svc; l2val = key; break outer; }
+        if (l2.programs) {
+          for (const p of l2.programs) {
+            if (p.value === key) { l1val = svc; l2val = l2.value; l3val = key; break outer; }
+          }
+        }
+      }
+    }
+  }
+
+  if (!l1val) return;
+
+  // Set level1
+  const s1 = document.getElementById('sel-level1');
+  s1.value = l1val;
+  onLevel1Change();
+
+  // Set level2
+  if (l2val) {
+    const s2 = document.getElementById('sel-level2');
+    s2.value = l2val;
+    onLevel2Change();
+  }
+
+  // Set level3
+  if (l3val) {
+    const s3 = document.getElementById('sel-level3');
+    s3.value = l3val;
+    onLevel3Change();
+  }
+}
+
+function clearQuickJump() {
+  if (tomSelect) tomSelect.clear();
+  document.getElementById('quick-jump-clear').classList.remove('visible');
+}
+
+// Init on load
+document.addEventListener('DOMContentLoaded', initQuickJump);
 </script>
 </body>
 </html>
