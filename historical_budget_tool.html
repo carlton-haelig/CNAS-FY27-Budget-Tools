@@ -603,7 +603,7 @@ function buildSeriesButtons(mode) {
     const btn = document.createElement('button');
     btn.className = 'series-btn active';
     btn.dataset.key = d.key;
-    btn.style.setProperty('--c', d.color);
+    btn.dataset.color = d.color;
     btn.style.borderColor = d.color + '60';
     btn.style.background = d.color + '22';
     btn.innerHTML = `<span class="dot" style="background:${d.color}"></span>${d.label}`;
@@ -613,6 +613,7 @@ function buildSeriesButtons(mode) {
 }
 
 function toggleSeries(btn, key) {
+  const color = btn.dataset.color;
   if (activeSeries.has(key)) {
     activeSeries.delete(key);
     btn.classList.remove('active');
@@ -621,7 +622,6 @@ function toggleSeries(btn, key) {
   } else {
     activeSeries.add(key);
     btn.classList.add('active');
-    const color = btn.querySelector('.dot').style.background;
     btn.style.background = color + '22';
     btn.style.borderColor = color + '60';
   }
