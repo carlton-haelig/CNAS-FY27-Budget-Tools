@@ -460,13 +460,6 @@ const SERIES_DEFS = {
 };
 
 // ─────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────
-let chartInstance = null;
-let displayMode = 'abs';
-let activeSeries = new Set();
-
-// ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -477,25 +470,24 @@ function onModeChange() {
   const mode = document.getElementById('sel-mode').value;
   document.getElementById('service-sel-wrap').style.display = mode === 'service' ? 'block' : 'none';
 
-  // Destroy chart and reset canvas to prevent stale render on mode switch
-  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
-  const canvas = document.getElementById('myChart');
-  const parent = canvas.parentNode;
-  parent.removeChild(canvas);
-  const newCanvas = document.createElement('canvas');
-  newCanvas.id = 'myChart';
-  parent.appendChild(newCanvas);
+  // Destroy existing chart instance
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+    // Reset canvas to clear stale state on mode switch
+    const canvas = document.getElementById('myChart');
+    const parent = canvas.parentNode;
+    parent.removeChild(canvas);
+    const newCanvas = document.createElement('canvas');
+    newCanvas.id = 'myChart';
+    parent.appendChild(newCanvas);
+  }
 
   // FY range defaults
   const fyFrom = document.getElementById('fy-from');
   const fyTo = document.getElementById('fy-to');
-  if (mode === 'rdte_coeff') {
-    fyFrom.min = 1948;
-    fyFrom.value = 1970;
-  } else {
-    fyFrom.min = 1948;
-    fyFrom.value = 1970;
-  }
+  fyFrom.min = 1948;
+  fyFrom.value = 1970;
   fyTo.value = 2024;
 
   buildSeriesButtons(mode);
