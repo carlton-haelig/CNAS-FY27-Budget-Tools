@@ -813,6 +813,14 @@ const DATA = {
     data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:4444000, fy27_rec:null, fy27_total:4444000 },
     qty:  { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:2, fy27_rec:null, fy27_total:2 }
   },
+  'lha': {
+    label: 'LHA Replacement (America Class)',
+    breadcrumb: 'Navy → Shipbuilding → LHA Replacement',
+    qtyUnit: 'hulls',
+    data: { fy25_base:237633, fy26_base:93603, fy26_rec:1179926, fy26_total:1273529, fy27_base:3850319, fy27_rec:2000, fy27_total:3852319 },
+    qty:  { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:1, fy27_rec:null, fy27_total:1 },
+    note: 'Includes advance procurement, prior-year completions, and new-ship funding. FY25/26 reflect advance procurement and PY completion costs only; FY27 funds one new hull.'
+  },
   'cps': {
     label: 'Conventional Prompt Strike (CPS)',
     breadcrumb: 'Navy → Weapons → CPS',
@@ -914,6 +922,20 @@ const DATA = {
     label: 'Procurement, Space Force',
     breadcrumb: 'Air Force → Space Force Procurement',
     data: { fy25_base:3966003, fy26_base:4036035, fy26_rec:258350, fy26_total:4294385, fy27_base:9645353, fy27_rec:9436600, fy27_total:19081953 }
+  },
+  'nssl': {
+    label: 'National Security Space Launch (NSSL)',
+    breadcrumb: 'Air Force → Space Force → NSSL',
+    qtyUnit: 'launches',
+    data: { fy25_base:1769486, fy26_base:1329263, fy26_rec:null, fy26_total:1329263, fy27_base:3370958, fy27_rec:819000, fy27_total:4189958 },
+    qty:  { fy25_base:7, fy26_base:4, fy26_rec:null, fy26_total:4, fy27_base:13, fy27_rec:null, fy27_total:13 }
+  },
+  'sda': {
+    label: 'Space Development Agency Launch',
+    breadcrumb: 'Air Force → Space Force → SDA',
+    qtyUnit: 'launches',
+    data: { fy25_base:326868, fy26_base:648446, fy26_rec:null, fy26_total:648446, fy27_base:835197, fy27_rec:null, fy27_total:835197 },
+    qty:  { fy25_base:4, fy26_base:7, fy26_rec:null, fy26_total:7, fy27_base:9, fy27_rec:null, fy27_total:9 }
   },
   'af-other': {
     label: 'Other Procurement, Air Force',
@@ -1203,6 +1225,7 @@ const HIERARCHY = {
         { value: 'lpd17', label: 'LPD-17 San Antonio' },
         { value: 'mls', label: 'Medium Landing Ship' },
         { value: 'sub-tender', label: 'Submarine Tender' },
+        { value: 'lha', label: 'LHA Replacement (America Class)' },
       ]},
       { value: 'navy-other', label: 'Other Procurement, Navy', programs: [
         { value: 'csuas-navy', label: 'C-SUAS System (Navy)' },
@@ -1236,7 +1259,10 @@ const HIERARCHY = {
         { value: 'famm', label: 'Family of Affordable Mass Missiles (FAMM)' },
       ]},
       { value: 'af-ammo', label: 'Ammunition, Air Force', programs: [] },
-      { value: 'space', label: 'Procurement, Space Force', programs: [] },
+      { value: 'space', label: 'Procurement, Space Force', programs: [
+        { value: 'nssl', label: 'National Security Space Launch (NSSL)' },
+        { value: 'sda', label: 'Space Development Agency Launch' },
+      ]},
       { value: 'af-other', label: 'Other Procurement, Air Force', programs: [] },
     ]
   },
