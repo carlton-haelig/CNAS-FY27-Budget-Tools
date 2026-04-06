@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DoD Historical Budget Trends</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0e1117;
+    --surface: #161b27;
+    --surface2: #1e2535;
+    --border: #2a3348;
+    --accent: #4a90d9;
+    --text: #d4dae8;
+    --text-muted: #6b7a99;
+    --red: #e05c5c;
+    --green: #5bc4a0;
+    --gold: #e8a838;
+    --purple: #9b72cf;
+    --pink: #e07cb0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── SHARED NAV ── */
+  .app-nav {
+    background: #0a0d14;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 44px;
+    gap: 4px;
+  }
+
+  .app-nav .nav-brand {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-right: 20px;
+    white-space: nowrap;
+  }
+
+  .app-nav a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--text-muted);
+    padding: 0 14px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .app-nav a:hover { color: var(--text); }
+  .app-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── TOOL HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    background: var(--surface);
+  }
+
+  header h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  header span {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 44px - 53px);
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    padding: 20px 0;
+    overflow-y: auto;
+  }
+
+  .sidebar-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 18px 8px;
+    display: block;
+  }
+
+  .selector-group { padding: 0 14px 14px; }
+
+  select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    padding: 8px 10px;
+    border-radius: 3px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%236b7a99'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+    margin-bottom: 6px;
+  }
+  select:focus { outline: none; border-color: var(--accent); }
+  select:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  /* Series toggles */
+  .series-grid { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 6px; }
+
+  .series-btn {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 11px;
+    border-radius: 4px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: transparent;
+    opacity: 0.38;
+    transition: opacity 0.15s, border-color 0.15s;
+    text-align: left;
+    user-select: none;
+  }
+  .series-btn.active { opacity: 1; }
+  .series-btn .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  /* FY range */
+  .fy-range { padding: 0 14px 14px; }
+  .range-row { display: flex; gap: 8px; align-items: center; }
+  .range-row label { font-size: 11px; color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; min-width: 28px; }
+  .range-row input[type=number] {
+    width: 72px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 3px;
+  }
+  .range-row input:focus { outline: none; border-color: var(--accent); }
+
+  /* ── MAIN ── */
+  .main { padding: 28px 32px; overflow-y: auto; }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    gap: 10px;
+  }
+
+  .results { display: none; }
+  .results.visible { display: block; }
+
+  .result-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .result-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .result-name { font-size: 20px; font-weight: 600; color: var(--text); line-height: 1.2; }
+
+  .result-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    align-self: flex-end;
+  }
+
+  .chart-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 24px;
+    position: relative;
+    height: 360px;
+  }
+
+  /* Era bands legend */
+  .era-legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .era-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .era-swatch { width: 14px; height: 10px; border-radius: 2px; }
+
+  /* Table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: auto;
+    margin-bottom: 24px;
+    max-height: 360px;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+
+  thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); position: sticky; top: 0; }
+
+  th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 9px 14px;
+    text-align: right;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  th:first-child { text-align: left; }
+
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  td {
+    padding: 8px 14px;
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  td:first-child { text-align: left; font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+  td.null-val { color: var(--text-muted); }
+
+  .note {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    border-left: 2px solid var(--border);
+    padding-left: 10px;
+    margin-top: 8px;
+  }
+
+  /* Chart toggle */
+  .chart-toggle {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .chart-toggle button {
+    background: var(--surface2);
+    border: none;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .chart-toggle button.active { background: var(--accent); color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- SHARED NAV -->
+<nav class="app-nav">
+  <span class="nav-brand">DoW Budget Suite</span>
+  <a href="index.html">Home</a>
+  <a href="defense_budget_tool.html">P-1 Comparison</a>
+  <a href="historical_budget_tool.html" class="active">Historical Trends</a>
+</nav>
+
+<header>
+  <h1>Historical Budget Trends</h1>
+  <span>FY1948–FY2026 · FY2026 Constant Dollars · RDTE &amp; Procurement</span>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <span class="sidebar-label">View Mode</span>
+    <div class="selector-group">
+      <select id="sel-mode" onchange="onModeChange()">
+        <option value="topline">Department-Wide (Topline)</option>
+        <option value="service">By Service</option>
+        <option value="capability">Capability Area</option>
+        <option value="rdte_coeff">RDTE:Procurement Ratio</option>
+      </select>
+    </div>
+
+    <div id="service-sel-wrap" style="display:none">
+      <span class="sidebar-label">Service</span>
+      <div class="selector-group">
+        <select id="sel-service" onchange="render()">
+          <option value="army">Department of the Army</option>
+          <option value="navy">Department of the Navy</option>
+          <option value="af">Department of the Air Force</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="cap-sel-wrap" style="display:none">
+      <span class="sidebar-label">Capability Area</span>
+      <div class="selector-group">
+        <select id="sel-cap" onchange="onCapChange()">
+          <option value="tacair">Tactical Aircraft</option>
+          <option value="fires">Ground-Based Fires</option>
+          <option value="hypersonics">Hypersonic Weapons</option>
+          <option value="shipbuilding">Shipbuilding</option>
+          <option value="space">Space Modernization</option>
+        </select>
+        <select id="sel-program" onchange="render()">
+          <option value="">— Total only —</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <span class="sidebar-label">Series</span>
+    <div class="series-grid" id="series-grid">
+      <!-- populated by JS -->
+    </div>
+
+    <hr class="divider">
+
+    <span class="sidebar-label">FY Range</span>
+    <div class="fy-range">
+      <div class="range-row">
+        <label>From</label>
+        <input type="number" id="fy-from" value="1970" min="1948" max="2026" onchange="render()">
+      </div>
+      <div style="height:6px"></div>
+      <div class="range-row">
+        <label>To</label>
+        <input type="number" id="fy-to" value="2026" min="1948" max="2026" onchange="render()">
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <span class="sidebar-label">Display</span>
+    <div class="selector-group">
+      <div class="chart-toggle" style="width:100%">
+        <button id="btn-abs" class="active" style="flex:1" onclick="setDisplay('abs')">$M</button>
+        <button id="btn-pct" style="flex:1" onclick="setDisplay('pct')">% Topline</button>
+      </div>
+    </div>
+
+    <div id="era-toggle-wrap">
+      <div style="height:10px"></div>
+      <span class="sidebar-label">Era Bands</span>
+      <div class="selector-group">
+        <div class="chart-toggle" style="width:100%">
+          <button id="btn-era-on" class="active" style="flex:1" onclick="setEras(true)">Show</button>
+          <button id="btn-era-off" style="flex:1" onclick="setEras(false)">Hide</button>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="empty-state" id="empty-state" style="display:none">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span>Select options to view trends</span>
+    </div>
+
+    <div class="results" id="results">
+      <div class="result-header">
+        <div>
+          <div class="result-title" id="res-title"></div>
+          <div class="result-name" id="res-name"></div>
+        </div>
+        <div class="result-meta" id="res-meta"></div>
+      </div>
+
+      <div id="era-legend-wrap" class="era-legend"></div>
+
+      <div class="chart-wrap">
+        <canvas id="myChart"></canvas>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr id="table-head"></tr></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+
+      <div class="note" id="data-note">All values in FY2026 constant dollars (millions USD). FY2025 and FY2026 deflators are equivalent per DoD Green Book methodology (deflators not yet updated for FY2026 at time of data collection).</div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const RAW = {"deflators":{"1970":{"milpers":8.93,"o&m":11.8,"proc":13.82,"rdte":14.27},"1971":{"milpers":9.55,"o&m":12.54,"proc":14.68,"rdte":15.02},"1972":{"milpers":10.86,"o&m":13.19,"proc":15.77,"rdte":15.87},"1973":{"milpers":12.06,"o&m":14.23,"proc":17.12,"rdte":16.97},"1974":{"milpers":12.86,"o&m":15.83,"proc":18.86,"rdte":18.72},"1975":{"milpers":13.8,"o&m":16.97,"proc":21.04,"rdte":20.59},"1976":{"milpers":14.61,"o&m":18.77,"proc":23.28,"rdte":22.79},"1977":{"milpers":15.38,"o&m":20.19,"proc":24.11,"rdte":23.96},"1978":{"milpers":16.42,"o&m":21.99,"proc":26.43,"rdte":26.06},"1979":{"milpers":17.43,"o&m":23.31,"proc":29.24,"rdte":29.02},"1980":{"milpers":18.81,"o&m":27.35,"proc":32.14,"rdte":31.64},"1981":{"milpers":21.56,"o&m":30.36,"proc":34.79,"rdte":34.22},"1982":{"milpers":24.7,"o&m":31.92,"proc":36.93,"rdte":36},"1983":{"milpers":25.86,"o&m":32.87,"proc":38.64,"rdte":37.39},"1984":{"milpers":27.06,"o&m":33.45,"proc":39.96,"rdte":38.75},"1985":{"milpers":29.9,"o&m":34.42,"proc":41.19,"rdte":39.95},"1986":{"milpers":31.03,"o&m":34.67,"proc":42.5,"rdte":41.03},"1987":{"milpers":31.86,"o&m":35.95,"proc":43.96,"rdte":42.39},"1988":{"milpers":33.12,"o&m":37.25,"proc":45.65,"rdte":44.11},"1989":{"milpers":34.2,"o&m":38.93,"proc":47.29,"rdte":45.93},"1990":{"milpers":34.76,"o&m":40.25,"proc":48.83,"rdte":47.65},"1991":{"milpers":36.69,"o&m":44.22,"proc":50.16,"rdte":49.22},"1992":{"milpers":37.54,"o&m":44.18,"proc":51.28,"rdte":50.54},"1993":{"milpers":39.23,"o&m":44.98,"proc":52.28,"rdte":51.29},"1994":{"milpers":40.19,"o&m":46.18,"proc":53.23,"rdte":52.31},"1995":{"milpers":41.2,"o&m":47.28,"proc":54.07,"rdte":53.38},"1996":{"milpers":42.1,"o&m":48.41,"proc":54.82,"rdte":54.39},"1997":{"milpers":43.4,"o&m":49.57,"proc":55.47,"rdte":55.15},"1998":{"milpers":45.41,"o&m":51.16,"proc":56.09,"rdte":55.84},"1999":{"milpers":46.83,"o&m":52.25,"proc":56.88,"rdte":56.55},"2000":{"milpers":49.13,"o&m":53.32,"proc":57.73,"rdte":57.6},"2001":{"milpers":50.83,"o&m":55.9,"proc":58.61,"rdte":58.53},"2002":{"milpers":53.8,"o&m":56.96,"proc":59.6,"rdte":59.41},"2003":{"milpers":55.82,"o&m":58.03,"proc":60.87,"rdte":60.57},"2004":{"milpers":57.42,"o&m":60.13,"proc":62.41,"rdte":62.15},"2005":{"milpers":59.38,"o&m":63.59,"proc":64.04,"rdte":63.98},"2006":{"milpers":61.38,"o&m":65.84,"proc":65.57,"rdte":65.75},"2007":{"milpers":63.05,"o&m":67.33,"proc":66.88,"rdte":67.26},"2008":{"milpers":65.11,"o&m":69.48,"proc":67.93,"rdte":68.63},"2009":{"milpers":67.21,"o&m":69.71,"proc":68.91,"rdte":69.62},"2010":{"milpers":69.06,"o&m":71.43,"proc":69.99,"rdte":70.64},"2011":{"milpers":70.37,"o&m":73.04,"proc":71.15,"rdte":71.99},"2012":{"milpers":71.6,"o&m":74.2,"proc":72.24,"rdte":73.08},"2013":{"milpers":72.82,"o&m":75.56,"proc":73.25,"rdte":74.02},"2014":{"milpers":73.8,"o&m":76.21,"proc":74.32,"rdte":74.95},"2015":{"milpers":74.61,"o&m":76.77,"proc":75.5,"rdte":75.9},"2016":{"milpers":75.61,"o&m":76.67,"proc":76.94,"rdte":77.09},"2017":{"milpers":77.07,"o&m":78.24,"proc":78.66,"rdte":78.65},"2018":{"milpers":78.83,"o&m":80.05,"proc":80.61,"rdte":80.27},"2019":{"milpers":80.65,"o&m":82.11,"proc":82.96,"rdte":81.9},"2020":{"milpers":82.83,"o&m":84.18,"proc":85.93,"rdte":84.3},"2021":{"milpers":85.45,"o&m":86.86,"proc":89.62,"rdte":87.97},"2022":{"milpers":88.7,"o&m":91.61,"proc":93.13,"rdte":92.09},"2023":{"milpers":92.28,"o&m":95.18,"proc":95.77,"rdte":95.32},"2024":{"milpers":96.18,"o&m":97.69,"proc":97.92,"rdte":97.83},"2025":{"milpers":100,"o&m":100,"proc":100,"rdte":100},"2026":{"milpers":100,"o&m":100,"proc":100,"rdte":100}},"topline":{"1970":{"milpers":257312.43,"o&m":182347.458,"proc":138610.709,"rdte":51850.035,"milcon":6590.909,"total":666478.376},"1971":{"milpers":236910.995,"o&m":162854.864,"proc":118283.379,"rdte":47423.435,"milcon":7136.954,"total":605033.223},"1972":{"milpers":213139.963,"o&m":161137.225,"proc":117254.28,"rdte":47788.28,"milcon":6877.384,"total":581056.231},"1973":{"milpers":196011.609,"o&m":155664.09,"proc":106302.57,"rdte":47259.87,"milcon":7549.927,"total":550383.543},"1974":{"milpers":187433.904,"o&m":150758.054,"proc":92454.931,"rdte":43803.419,"milcon":8051.439,"total":522333.76},"1975":{"milpers":180326.087,"o&m":154130.819,"proc":82172.053,"rdte":41923.264,"milcon":7303.236,"total":507255.595},"1976":{"milpers":174058.864,"o&m":153708.045,"proc":90189.003,"rdte":41772.707,"milcon":8035.18,"total":512087.794},"1977":{"milpers":168706.112,"o&m":158568.598,"proc":112297.802,"rdte":44177.796,"milcon":8104.144,"total":538373.373},"1978":{"milpers":165554.202,"o&m":158726.694,"proc":113310.632,"rdte":44140.445,"milcon":6361.149,"total":535892.94},"1979":{"milpers":164371.773,"o&m":162488.202,"proc":107082.763,"rdte":42598.208,"milcon":7994.324,"total":533679.932},"1980":{"milpers":165151.515,"o&m":170427.788,"proc":109169.259,"rdte":42642.225,"milcon":6767.707,"total":543371.604},"1981":{"milpers":170435.993,"o&m":181976.285,"proc":135682.667,"rdte":48597.312,"milcon":9640.227,"total":599757.431},"1982":{"milpers":173396.761,"o&m":194279.449,"proc":171353.913,"rdte":55805.556,"milcon":13180.212,"total":662266.583},"1983":{"milpers":176481.052,"o&m":203103.134,"proc":198276.398,"rdte":60949.452,"milcon":11166.003,"total":706761.705},"1984":{"milpers":178037.694,"o&m":210550.075,"proc":208706.206,"rdte":69329.032,"milcon":12170.344,"total":739487.254},"1985":{"milpers":227688.963,"o&m":225586.868,"proc":218560.33,"rdte":76530.663,"milcon":13524.61,"total":772728.036},"1986":{"milpers":231050.596,"o&m":220184.598,"proc":205414.118,"rdte":81574.458,"milcon":12279.394,"total":760776.805},"1987":{"milpers":233807.282,"o&m":223410.292,"proc":189331.21,"rdte":84265.157,"milcon":11984.697,"total":751709.652},"1988":{"milpers":231168.478,"o&m":222067.114,"proc":179848.85,"rdte":83604.625,"milcon":12149.055,"total":738153.373},"1989":{"milpers":229380.117,"o&m":222509.633,"proc":167925.566,"rdte":81223.601,"milcon":12204.555,"total":721991.085},"1990":{"milpers":226881.473,"o&m":219952.795,"proc":163237.764,"rdte":75116.474,"milcon":10784.027,"total":702909.53},"1991":{"milpers":228874.353,"o&m":248222.524,"proc":142376.396,"rdte":70528.241,"milcon":11173.003,"total":711778.185},"1992":{"milpers":215916.356,"o&m":208567.225,"proc":120746.88,"rdte":74948.556,"milcon":9918.473,"total":644508.475},"1993":{"milpers":193685.955,"o&m":201794.131,"proc":102565.034,"rdte":73458.764,"milcon":7632.916,"total":604878.869},"1994":{"milpers":177389.898,"o&m":192921.178,"proc":82211.159,"rdte":65968.266,"milcon":12353.614,"total":553244.552},"1995":{"milpers":173478.155,"o&m":198792.301,"proc":79681.894,"rdte":64484.826,"milcon":11012.373,"total":547759.104},"1996":{"milpers":165555.819,"o&m":192590.374,"proc":79226.56,"rdte":64561.5,"milcon":13563.134,"total":536612.666},"1997":{"milpers":161721.198,"o&m":185261.247,"proc":77787.994,"rdte":66148.685,"milcon":10962.381,"total":523124.1},"1998":{"milpers":153459.59,"o&m":187365.129,"proc":80021.394,"rdte":66590.258,"milcon":9873.623,"total":517314.833},"1999":{"milpers":151037.796,"o&m":196480.383,"proc":89258.087,"rdte":67381.079,"milcon":9145.497,"total":531428.293},"2000":{"milpers":149680.44,"o&m":200283.196,"proc":96140.655,"rdte":67279.514,"milcon":9444.25,"total":544409.031},"2001":{"milpers":151979.146,"o&m":221869.41,"proc":107370.756,"rdte":71327.524,"milcon":9062.822,"total":580807.339},"2002":{"milpers":161981.413,"o&m":251007.725,"proc":106278.523,"rdte":81843.124,"milcon":11324.715,"total":634716.914},"2003":{"milpers":195379.792,"o&m":297570.222,"proc":130722.852,"rdte":96263.827,"milcon":10801.245,"total":749954.971},"2004":{"milpers":201234.761,"o&m":295183.769,"proc":133249.479,"rdte":103567.176,"milcon":10381.424,"total":765959.019},"2005":{"milpers":204296.059,"o&m":311130.681,"proc":153886.633,"rdte":108308.847,"milcon":11380.277,"total":809270.414},"2006":{"milpers":206362.007,"o&m":321439.854,"proc":160614.61,"rdte":110556.654,"milcon":14983.227,"total":836748.323},"2007":{"milpers":206640.761,"o&m":356295.856,"proc":200933.014,"rdte":115356.824,"milcon":21539.038,"total":918296.837},"2008":{"milpers":210413.147,"o&m":369715.026,"proc":242431.915,"rdte":115762.786,"milcon":33086.912,"total":989764.862},"2009":{"milpers":216013.986,"o&m":388107.875,"proc":195671.165,"rdte":115844.585,"milcon":38802.96,"total":969794.64},"2010":{"milpers":221542.137,"o&m":408460.031,"proc":194154.879,"rdte":114177.52,"milcon":33542.324,"total":985036.309},"2011":{"milpers":218314.623,"o&m":416549.836,"proc":184781.448,"rdte":105757.744,"milcon":24011.276,"total":961210.769},"2012":{"milpers":213160.615,"o&m":388963.612,"proc":165891.473,"rdte":99849.48,"milcon":17630.556,"total":895139.289},"2013":{"milpers":200822.576,"o&m":339464.002,"proc":141411.604,"rdte":86906.242,"milcon":14140.241,"total":790430.732},"2014":{"milpers":194588.076,"o&m":340589.162,"proc":135566.469,"rdte":84667.111,"milcon":13063.257,"total":775227.424},"2015":{"milpers":186339.633,"o&m":323356.78,"proc":137785.43,"rdte":84437.418,"milcon":8506.339,"total":745619.148},"2016":{"milpers":182917.603,"o&m":323245.076,"proc":155820.12,"rdte":91624.076,"milcon":9763.382,"total":767495.105},"2017":{"milpers":180391.852,"o&m":329953.988,"proc":160161.454,"rdte":95126.51,"milcon":9576.239,"total":778840.598},"2018":{"milpers":182863.123,"o&m":342727.046,"proc":183876.69,"rdte":114811.262,"milcon":13084.376,"total":840674.578},"2019":{"milpers":184701.798,"o&m":344754.597,"proc":179067.02,"rdte":117467.643,"milcon":13755.785,"total":844402.339},"2020":{"milpers":186104.069,"o&m":355653.362,"proc":167751.658,"rdte":125905.101,"milcon":19238.139,"total":859290.789},"2021":{"milpers":190936.22,"o&m":328054.34,"proc":159436.51,"rdte":121783.563,"milcon":8282.506,"total":813918.269},"2022":{"milpers":188036.077,"o&m":336253.684,"proc":166984.86,"rdte":129761.103,"milcon":14505.553,"total":842420.626},"2023":{"milpers":189118.986,"o&m":354914.898,"proc":190351.885,"rdte":147810.533,"milcon":17566.242,"total":906774.432},"2024":{"milpers":184071.346,"o&m":352873.593,"proc":208943.309,"rdte":152818.626,"milcon":17025.426,"total":839502.978},"2025":{"milpers":185535.71,"o&m":350048.4,"proc":"#REF!","rdte":143346,"milcon":17260.15,"total":849906},"2026":{"milpers":194653.3,"o&m":337569.236,"proc":0,"rdte":142001.11,"milcon":0,"total":848300}},"army":{"1970":{"milpers":107681.971,"o&m":66245.763,"proc":32633.864,"rdte":11345.48,"milcon":2610.39},"1971":{"milpers":99465.969,"o&m":56770.335,"proc":23242.507,"rdte":11025.3,"milcon":3500.59},"1972":{"milpers":83296.501,"o&m":55413.192,"proc":21547.242,"rdte":11291.745,"milcon":2997.275},"1973":{"milpers":71973.466,"o&m":52234.715,"proc":16448.598,"rdte":11107.837,"milcon":3244.033},"1974":{"milpers":68545.879,"o&m":46519.267,"proc":13997.879,"rdte":10400.641,"milcon":3408.893},"1975":{"milpers":66818.841,"o&m":43246.906,"proc":12191.065,"rdte":8576.979,"milcon":3012.385},"1976":{"milpers":65756.331,"o&m":44064.997,"proc":13135.739,"rdte":8644.142,"milcon":3117.515},"1977":{"milpers":64843.953,"o&m":45354.136,"proc":18361.676,"rdte":9561.77,"milcon":2764.943},"1978":{"milpers":63806.334,"o&m":44943.156,"proc":20147.56,"rdte":9389.87,"milcon":2455.54},"1979":{"milpers":63316.122,"o&m":46126.126,"proc":20858.413,"rdte":9079.945,"milcon":2838.221},"1980":{"milpers":64300.904,"o&m":44983.547,"proc":20373.367,"rdte":8988.622,"milcon":2343.938},"1981":{"milpers":65663.265,"o&m":47493.412,"proc":30071.86,"rdte":9129.164,"milcon":2776.204},"1982":{"milpers":67214.575,"o&m":52534.461,"proc":37519.632,"rdte":10055.556,"milcon":2921.99},"1983":{"milpers":67730.085,"o&m":54888.956,"proc":40584.886,"rdte":10406.526,"milcon":2584.329},"1984":{"milpers":68429.416,"o&m":57423.019,"proc":41869.369,"rdte":10818.065,"milcon":3222.165},"1985":{"milpers":87953.177,"o&m":60502.615,"proc":43753.338,"rdte":10655.82,"milcon":4142.963},"1986":{"milpers":89155.656,"o&m":61471.012,"proc":39948.235,"rdte":11057.763,"milcon":3789.372},"1987":{"milpers":89456.999,"o&m":65510.431,"proc":35077.343,"rdte":11071.007,"milcon":3489.45},"1988":{"milpers":88611.111,"o&m":64979.866,"proc":32966.046,"rdte":10587.168,"milcon":3368.187},"1989":{"milpers":87593.567,"o&m":65956.846,"proc":31002.326,"rdte":11166.993,"milcon":3122.046},"1990":{"milpers":86662.831,"o&m":67840.994,"proc":28715.953,"rdte":11137.461,"milcon":2356.262},"1991":{"milpers":89888.253,"o&m":89285.391,"proc":22553.828,"rdte":11277.936,"milcon":2573.694},"1992":{"milpers":84254.129,"o&m":57181.983,"proc":17531.201,"rdte":12677.087,"milcon":2457.745},"1993":{"milpers":72730.054,"o&m":50204.535,"proc":15057.383,"rdte":11797.621,"milcon":1348.71},"1994":{"milpers":67044.041,"o&m":46006.929,"proc":13652.076,"rdte":10279.105,"milcon":2523.364},"1995":{"milpers":64628.641,"o&m":49094.755,"proc":13425.19,"rdte":10121.768,"milcon":1494.188},"1996":{"milpers":61308.789,"o&m":49177.856,"proc":15034.659,"rdte":8746.093,"milcon":3767.742},"1997":{"milpers":60359.447,"o&m":46326.407,"proc":15842.798,"rdte":8913.871,"milcon":2163.988},"1998":{"milpers":57460.912,"o&m":44806.489,"proc":13089.677,"rdte":8995.344,"milcon":2410.182},"1999":{"milpers":56914.371,"o&m":48260.287,"proc":16714.135,"rdte":8896.552,"milcon":3004.086},"2000":{"milpers":56440.057,"o&m":50581.395,"proc":18151.741,"rdte":9225.694,"milcon":2728.067},"2001":{"milpers":57570.332,"o&m":49697.674,"proc":20274.697,"rdte":10700.495,"milcon":2809.818},"2002":{"milpers":60157.993,"o&m":54743.68,"proc":19458.054,"rdte":11812.826,"milcon":4214.238},"2003":{"milpers":79188.463,"o&m":87885.576,"proc":25961.886,"rdte":12539.211,"milcon":3370.474},"2004":{"milpers":85283.873,"o&m":103716.947,"proc":25947.765,"rdte":16415.125,"milcon":3381.743},"2005":{"milpers":87418.323,"o&m":115901.871,"proc":40621.487,"rdte":16530.166,"milcon":5552.267},"2006":{"milpers":89524.275,"o&m":115015.188,"proc":42999.847,"rdte":17768.821,"milcon":6396.767},"2007":{"milpers":90696.273,"o&m":139910.887,"proc":72908.194,"rdte":16880.761,"milcon":11718.867},"2008":{"milpers":94994.624,"o&m":141293.898,"proc":98595.613,"rdte":18292.292,"milcon":15040.578},"2009":{"milpers":99378.069,"o&m":144815.665,"proc":63237.556,"rdte":17457.627,"milcon":17449.216},"2010":{"milpers":102247.321,"o&m":154902.702,"proc":56836.691,"rdte":16578.426,"milcon":14136.298},"2011":{"milpers":99639.051,"o&m":157348.028,"proc":50803.935,"rdte":13557.439,"milcon":10224.101},"2012":{"milpers":95687.151,"o&m":132563.342,"proc":35424.972,"rdte":11911.604,"milcon":6454.167},"2013":{"milpers":89082.67,"o&m":106065.379,"proc":27098.976,"rdte":10822.751,"milcon":4192.182},"2014":{"milpers":83970.19,"o&m":95169.925,"proc":23739.236,"rdte":9505.003,"milcon":3028.264},"2015":{"milpers":79406.246,"o&m":85889.019,"proc":22260.927,"rdte":8885.375,"milcon":1962.493},"2016":{"milpers":76518.979,"o&m":83325.942,"proc":25482.194,"rdte":10198.469,"milcon":1819.24},"2017":{"milpers":74752.822,"o&m":87827.198,"proc":27876.939,"rdte":11256.198,"milcon":1473.074},"2018":{"milpers":75925.409,"o&m":93090.568,"proc":36145.639,"rdte":14492.338,"milcon":2823.154},"2019":{"milpers":75812.771,"o&m":95070.028,"proc":33565.574,"rdte":13884.005,"milcon":2125.311},"2020":{"milpers":75645.298,"o&m":96404.134,"proc":30229.256,"rdte":15234.875,"milcon":2235.401},"2021":{"milpers":77066.121,"o&m":79466.958,"proc":28069.627,"rdte":16138.456,"milcon":1731.807},"2022":{"milpers":75352.875,"o&m":76225.303,"proc":32243.101,"rdte":15920.295,"milcon":2753.097},"2023":{"milpers":75650.195,"o&m":79430.553,"proc":41590.268,"rdte":17938.523,"milcon":3133.737},"2024":{"milpers":70965.897,"o&m":72801.72,"proc":40908.429,"rdte":17499.264,"milcon":3081.793},"2025":{"milpers":70657,"o&m":71956,"proc":25595.031,"rdte":14363.431,"milcon":3141},"2026":{"milpers":72958,"o&m":72556,"proc":26433.705,"rdte":14549.223,"milcon":3519}},"navy":{"1970":{"milpers":74714.446,"o&m":47703.39,"proc":54790.159,"rdte":15886.475,"milcon":2090.909},"1971":{"milpers":66837.696,"o&m":42663.477,"proc":50640.327,"rdte":14640.479,"milcon":1924.439},"1972":{"milpers":62642.726,"o&m":42729.34,"proc":55770.45,"rdte":15192.187,"milcon":2152.589},"1973":{"milpers":60862.355,"o&m":41735.77,"proc":52313.084,"rdte":14979.375,"milcon":2669.264},"1974":{"milpers":58335.925,"o&m":45514.845,"proc":46818.664,"rdte":14444.444,"milcon":3016.565},"1975":{"milpers":56760.87,"o&m":47477.902,"proc":39966.73,"rdte":14822.729,"milcon":2441.071},"1976":{"milpers":55023.956,"o&m":49206.18,"proc":43286.082,"rdte":14541.466,"milcon":2548.653},"1977":{"milpers":53823.147,"o&m":52387.32,"proc":54122.771,"rdte":15847.245,"milcon":2247.891},"1978":{"milpers":53252.132,"o&m":54656.662,"proc":53340.9,"rdte":15556.408,"milcon":1908.345},"1979":{"milpers":52736.661,"o&m":55937.366,"proc":48614.911,"rdte":15354.928,"milcon":2497.635},"1980":{"milpers":52886.762,"o&m":59667.276,"proc":48382.078,"rdte":14421.618,"milcon":1809.724},"1981":{"milpers":55718.924,"o&m":64074.44,"proc":56714.573,"rdte":14675.628,"milcon":2339.943},"1982":{"milpers":56497.976,"o&m":66929.825,"proc":68730.03,"rdte":16186.111,"milcon":4030.987},"1983":{"milpers":58054.911,"o&m":70057.803,"proc":84438.406,"rdte":16311.848,"milcon":2921.647},"1984":{"milpers":58643.755,"o&m":72439.462,"proc":75883.383,"rdte":19680,"milcon":3214.469},"1985":{"milpers":74802.676,"o&m":79767.577,"proc":76564.7,"rdte":22588.235,"milcon":3930.25},"1986":{"milpers":76023.203,"o&m":73937.121,"proc":74374.118,"rdte":23139.166,"milcon":3993.748},"1987":{"milpers":77777.778,"o&m":72770.515,"proc":73785.259,"rdte":21894.315,"milcon":3303.965},"1988":{"milpers":77303.744,"o&m":74518.121,"proc":80963.855,"rdte":21450.918,"milcon":3299.221},"1989":{"milpers":77885.965,"o&m":71952.222,"proc":66993.022,"rdte":20169.824,"milcon":3472.282},"1990":{"milpers":77580.552,"o&m":68896.894,"proc":67972.558,"rdte":18279.119,"milcon":2531.884},"1991":{"milpers":77070.046,"o&m":73471.28,"proc":60681.818,"rdte":16186.51,"milcon":2484.245},"1992":{"milpers":74906.766,"o&m":59769.126,"proc":48736.349,"rdte":16968.738,"milcon":1682.243},"1993":{"milpers":69462.146,"o&m":53714.984,"proc":39959.832,"rdte":17215.832,"milcon":693.901},"1994":{"milpers":65225.18,"o&m":51117.367,"proc":29738.869,"rdte":15618.429,"milcon":2817.089},"1995":{"milpers":61293.689,"o&m":53343.909,"proc":31816.164,"rdte":16092.169,"milcon":778.028},"1996":{"milpers":58460.808,"o&m":51921.091,"proc":28608.172,"rdte":15576.393,"milcon":5649.77},"1997":{"milpers":57188.94,"o&m":49243.494,"proc":30993.33,"rdte":14291.931,"milcon":3586.56},"1998":{"milpers":53939.661,"o&m":50607.897,"proc":34779.818,"rdte":14126.074,"milcon":3078.173},"1999":{"milpers":52769.592,"o&m":51732.057,"proc":36297.468,"rdte":15812.555,"milcon":2117.605},"2000":{"milpers":52124.975,"o&m":51305.326,"proc":40751.776,"rdte":15737.847,"milcon":1780.846},"2001":{"milpers":53051.348,"o&m":52944.544,"proc":45396.69,"rdte":16395.011,"milcon":2403.021},"2002":{"milpers":55784.387,"o&m":57018.961,"proc":41135.906,"rdte":19153.341,"milcon":2414.372},"2003":{"milpers":64820.853,"o&m":73451.663,"proc":45097.749,"rdte":22618.458,"milcon":3073.898},"2004":{"milpers":63974.225,"o&m":60936.305,"proc":47902.58,"rdte":23769.912,"milcon":2270.986},"2005":{"milpers":65360.391,"o&m":65568.486,"proc":50737.039,"rdte":26691.153,"milcon":2126.499},"2006":{"milpers":65591.398,"o&m":67302.552,"proc":56228.458,"rdte":28851.711,"milcon":2885.026},"2007":{"milpers":64777.161,"o&m":69270.756,"proc":60113.636,"rdte":29325.007,"milcon":3443.728},"2008":{"milpers":65650.438,"o&m":73149.108,"proc":69381.716,"rdte":26937.199,"milcon":5030.249},"2009":{"milpers":66888.856,"o&m":74702.338,"proc":61397.475,"rdte":28453.031,"milcon":7026.988},"2010":{"milpers":67867.072,"o&m":77249.055,"proc":68895.557,"rdte":28238.958,"milcon":6450.502},"2011":{"milpers":67447.776,"o&m":80470.975,"proc":66073.085,"rdte":24817.336,"milcon":5488.372},"2012":{"milpers":66416.201,"o&m":78707.547,"proc":64306.478,"rdte":24251.505,"milcon":3631.944},"2013":{"milpers":62986.817,"o&m":73594.494,"proc":58741.297,"rdte":21011.889,"milcon":2598.414},"2014":{"milpers":62004.065,"o&m":76450.597,"proc":57061.356,"rdte":19941.294,"milcon":2462.988},"2015":{"milpers":61136.577,"o&m":70564.022,"proc":56193.377,"rdte":21168.643,"milcon":1801.373},"2016":{"milpers":60677.159,"o&m":72109.039,"proc":62373.278,"rdte":23781.295,"milcon":2500.646},"2017":{"milpers":59888.413,"o&m":72646.984,"proc":64249.936,"rdte":22698.029,"milcon":2131.416},"2018":{"milpers":60509.958,"o&m":78078.701,"proc":73024.439,"rdte":23003.613,"milcon":2825.607},"2019":{"milpers":61391.197,"o&m":78090.367,"proc":73980.231,"rdte":22879.121,"milcon":4048.89},"2020":{"milpers":61791.621,"o&m":82289.142,"proc":71015.943,"rdte":24418.743,"milcon":7538.777},"2021":{"milpers":63665.301,"o&m":79222.887,"proc":68347.467,"rdte":22906.673,"milcon":2438.622},"2022":{"milpers":62639.233,"o&m":82609.977,"proc":69219.371,"rdte":23925.508,"milcon":4933.789},"2023":{"milpers":63133.94,"o&m":86007.565,"proc":87759.151,"rdte":27441.251,"milcon":6011.892},"2024":{"milpers":60686.213,"o&m":81962.33,"proc":73878.676,"rdte":28618.86,"milcon":5900.133},"2025":{"milpers":61882.0,"o&m":87609,"proc":81835.382,"rdte":25967.177,"milcon":4682},"2026":{"milpers":64113,"o&m":85118,"proc":62924.291,"rdte":25708.049,"milcon":6345}},"af":{"1970":{"milpers":74916.013,"o&m":58177.966,"proc":50571.635,"rdte":21415.557,"milcon":1779.221},"1971":{"milpers":70607.33,"o&m":53405.104,"proc":44128.065,"rdte":18754.993,"milcon":1652.893},"1972":{"milpers":67200.737,"o&m":53282.79,"proc":39587.825,"rdte":18449.905,"milcon":1645.777},"1973":{"milpers":63175.788,"o&m":51152.495,"proc":37137.85,"rdte":18385.386,"milcon":1558.695},"1974":{"milpers":60552.1,"o&m":48464.94,"proc":31293.743,"rdte":16356.838,"milcon":1525.719},"1975":{"milpers":56746.377,"o&m":48515.027,"proc":29548.479,"rdte":16022.341,"milcon":1773.871},"1976":{"milpers":53271.732,"o&m":46430.474,"proc":32899.485,"rdte":15822.729,"milcon":2309.132},"1977":{"milpers":50039.012,"o&m":46646.855,"proc":38797.18,"rdte":15926.544,"milcon":2940.961},"1978":{"milpers":48501.827,"o&m":45084.129,"proc":38581.158,"rdte":16201.074,"milcon":1863.885},"1979":{"milpers":48313.253,"o&m":46353.496,"proc":36668.947,"rdte":15020.675,"milcon":1699.779},"1980":{"milpers":47963.849,"o&m":51978.062,"proc":39520.846,"rdte":15805.942,"milcon":1845.738},"1981":{"milpers":49053.803,"o&m":55533.597,"proc":47970.681,"rdte":20844.535,"milcon":2951.841},"1982":{"milpers":49684.211,"o&m":57885.338,"proc":63701.598,"rdte":24702.778,"milcon":4552.868},"1983":{"milpers":50699.923,"o&m":60103.438,"proc":70825.569,"rdte":28325.756,"milcon":4241.7},"1984":{"milpers":50964.523,"o&m":60857.997,"proc":88140.641,"rdte":31561.29,"milcon":4161.108},"1985":{"milpers":64933.11,"o&m":63710.052,"proc":94530.226,"rdte":32811.014,"milcon":4241.9},"1986":{"milpers":65871.737,"o&m":62212.287,"proc":84727.059,"rdte":31952.23,"milcon":3972.109},"1987":{"milpers":66572.505,"o&m":60623.088,"proc":75884.895,"rdte":35081.387,"milcon":3280.779},"1988":{"milpers":65253.623,"o&m":62469.799,"proc":60832.421,"rdte":34076.173,"milcon":3272.525},"1989":{"milpers":63900.585,"o&m":64621.115,"proc":64730.387,"rdte":31680.819,"milcon":3025.355},"1990":{"milpers":62638.09,"o&m":63336.646,"proc":61650.625,"rdte":28442.812,"milcon":2789.045},"1991":{"milpers":61916.053,"o&m":65626.413,"proc":48871.611,"rdte":24156.847,"milcon":2321.61},"1992":{"milpers":56755.461,"o&m":51672.703,"proc":45902.886,"rdte":25823.11,"milcon":2419.964},"1993":{"milpers":51493.755,"o&m":50844.82,"proc":41134.277,"rdte":24934.685,"milcon":2025.02},"1994":{"milpers":45118.189,"o&m":53144.218,"proc":32878.076,"rdte":23280.444,"milcon":3026.893},"1995":{"milpers":47555.825,"o&m":51897.208,"proc":29275.014,"rdte":21740.352,"milcon":2026.622},"1996":{"milpers":45786.223,"o&m":48347.449,"proc":30315.578,"rdte":23015.26,"milcon":2363.134},"1997":{"milpers":44172.811,"o&m":45985.475,"proc":25938.345,"rdte":25548.504,"milcon":2878.013},"1998":{"milpers":42059.018,"o&m":49122.361,"proc":27327.509,"rdte":25569.484,"milcon":2834.447},"1999":{"milpers":41353.833,"o&m":51804.785,"proc":32013.01,"rdte":24282.935,"milcon":2485.344},"2000":{"milpers":41113.373,"o&m":51198.425,"proc":32780.184,"rdte":25220.486,"milcon":2146.103},"2001":{"milpers":41357.466,"o&m":53796.064,"proc":37780.242,"rdte":24454.126,"milcon":2413.32},"2002":{"milpers":46037.175,"o&m":60207.163,"proc":39582.215,"rdte":24371.318,"milcon":3013.768},"2003":{"milpers":51372.268,"o&m":74551.094,"proc":52022.343,"rdte":31261.351,"milcon":2683.926},"2004":{"milpers":51976.663,"o&m":65755.862,"proc":51855.472,"rdte":32555.109,"milcon":2957.229},"2005":{"milpers":51515.662,"o&m":64961.472,"proc":56349.157,"rdte":32006.877,"milcon":2318.118},"2006":{"milpers":51246.334,"o&m":70730.559,"proc":54660.668,"rdte":33750.57,"milcon":3549.863},"2007":{"milpers":51168.914,"o&m":71716.917,"proc":59632.177,"rdte":36413.916,"milcon":3542.634},"2008":{"milpers":49766.549,"o&m":75231.721,"proc":64615.045,"rdte":38389.917,"milcon":4580.198},"2009":{"milpers":49747.061,"o&m":79010.185,"proc":63198.375,"rdte":38447.285,"milcon":4503.772},"2010":{"milpers":51429.192,"o&m":78747.025,"proc":59092.728,"rdte":39520.102,"milcon":4741.75},"2011":{"milpers":51226.375,"o&m":80995.345,"proc":59152.495,"rdte":38090.013,"milcon":2513.037},"2012":{"milpers":51057.263,"o&m":77811.321,"proc":56770.487,"rdte":36440.887,"milcon":2169.444},"2013":{"milpers":48751.717,"o&m":68729.487,"proc":47021.16,"rdte":31292.894,"milcon":709.404},"2014":{"milpers":48613.821,"o&m":73075.712,"proc":47062.702,"rdte":31786.524,"milcon":1897.712},"2015":{"milpers":45796.81,"o&m":72099.779,"proc":51325.828,"rdte":31119.895,"milcon":1693.08},"2016":{"milpers":45721.465,"o&m":73123.777,"proc":59448.921,"rdte":32746.141,"milcon":2289.889},"2017":{"milpers":45749.319,"o&m":74867.076,"proc":59160.946,"rdte":36086.459,"milcon":2912.095},"2018":{"milpers":46427.756,"o&m":76223.61,"proc":63896.539,"rdte":47437.399,"milcon":3273.24},"2019":{"milpers":47497.83,"o&m":75476.799,"proc":60820.878,"rdte":50572.65,"milcon":4057.197},"2020":{"milpers":48667.15,"o&m":77042.053,"proc":58671.011,"rdte":54332.147,"milcon":6170.164},"2021":{"milpers":50204.798,"o&m":75300.484,"proc":54693.149,"rdte":52891.895,"milcon":1479.687},"2022":{"milpers":50045.096,"o&m":77462.067,"proc":55207.774,"rdte":57632.751,"milcon":3746.262},"2023":{"milpers":50334.85,"o&m":80861.526,"proc":62683.513,"rdte":65055.602,"milcon":4762.153},"2024":{"milpers":48239.759,"o&m":77695.772,"proc":67856.404,"rdte":67695.194,"milcon":4680.895},"2025":{"milpers":49341,"o&m":81808,"proc":59755.013,"rdte":65434.066,"milcon":3569},"2026":{"milpers":50926,"o&m":80472,"proc":57636.598,"rdte":67503.754,"milcon":5751}},"tacair":{"columns":["Tactical Aircraft Total RDTE","Tactical Aircraft Total Procurement","A-10 RDTE","A-10 Procurement","AV-8B RDTE","AV-8B Procurement","CCA RDTE","CCA Procurement","EA-18G RDTE","EA-18G Procurement","F/A-18/A/B/C/D/E/F RDTE","F/A-18/A/B/C/D/E/F Procurement","F-15 RDTE","F-15 Procurement","F-16 RDTE","F-16 Procurement","F-22 RDTE","F-22 Procurement","B-21 RDTE","B-21 Procurement","F-35 RDTE (all)","F-35 Procurement (all)","F-35 RDTE (USN)","F-35 RDTE (USMC)","F-35 RDTE (USAF)","F-35 Procurement (USN)","F-35 Procurement (USMC)","F-35 Procurement (USAF)","NGAD RDTE (USAF)","NGAD Procurement (USAF)","F/A-XX RDTE (USN)","F/A-XX Procurement (USN)"],"data":{"2012":{"Tactical Aircraft Total RDTE":5551.078,"Tactical Aircraft Total Procurement":13664.277,"A-10 RDTE":15.06,"A-10 Procurement":17.342,"AV-8B RDTE":31.212,"AV-8B Procurement":103.357,"CCA RDTE":0,"CCA Procurement":0,"EA-18G RDTE":20.211,"EA-18G Procurement":12.112,"F/A-18/A/B/C/D/E/F RDTE":260.415,"F/A-18/A/B/C/D/E/F Procurement":3814.593,"F-15 RDTE":252.689,"F-15 Procurement":356.675,"F-16 RDTE":205.67,"F-16 Procurement":84.833,"F-22 RDTE":733.24,"F-22 Procurement":507.522,"B-21 RDTE":396.241,"B-21 Procurement":0,"F-35 RDTE (all)":3636.34,"F-35 Procurement (all)":8767.843,"F-35 RDTE (USN)":1710.094,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":1926.245,"F-35 Procurement (USN)":3897.146,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":4870.698,"NGAD RDTE (USAF)":0,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":0,"F/A-XX Procurement (USN)":0},"2013":{"Tactical Aircraft Total RDTE":4954.219,"Tactical Aircraft Total Procurement":12240.749,"A-10 RDTE":16.681,"A-10 Procurement":318.472,"AV-8B RDTE":21.789,"AV-8B Procurement":102.298,"CCA RDTE":0,"CCA Procurement":0,"EA-18G RDTE":15.9,"EA-18G Procurement":9.099,"F/A-18/A/B/C/D/E/F RDTE":235.971,"F/A-18/A/B/C/D/E/F Procurement":4374.116,"F-15 RDTE":211.455,"F-15 Procurement":262.83,"F-16 RDTE":244.874,"F-16 Procurement":17.454,"F-22 RDTE":599.112,"F-22 Procurement":415.894,"B-21 RDTE":349.51,"B-21 Procurement":0,"F-35 RDTE (all)":3258.927,"F-35 Procurement (all)":6740.587,"F-35 RDTE (USN)":1731.165,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":1527.763,"F-35 Procurement (USN)":2772.943,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":3967.644,"NGAD RDTE (USAF)":0,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":0,"F/A-XX Procurement (USN)":0},"2014":{"Tactical Aircraft Total RDTE":3659.161,"Tactical Aircraft Total Procurement":10296.42,"A-10 RDTE":18.323,"A-10 Procurement":3.092,"AV-8B RDTE":40.415,"AV-8B Procurement":130.129,"CCA RDTE":0,"CCA Procurement":0,"EA-18G RDTE":14.076,"EA-18G Procurement":30.7,"F/A-18/A/B/C/D/E/F RDTE":199.809,"F/A-18/A/B/C/D/E/F Procurement":1259.459,"F-15 RDTE":312.346,"F-15 Procurement":466.398,"F-16 RDTE":167.143,"F-16 Procurement":16.916,"F-22 RDTE":478.757,"F-22 Procurement":481.985,"B-21 RDTE":465.143,"B-21 Procurement":0,"F-35 RDTE (all)":1963.149,"F-35 Procurement (all)":7907.741,"F-35 RDTE (USN)":1114.636,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":848.512,"F-35 Procurement (USN)":3396.101,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":4511.64,"NGAD RDTE (USAF)":0,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":0,"F/A-XX Procurement (USN)":0},"2015":{"Tactical Aircraft Total RDTE":4477.958,"Tactical Aircraft Total Procurement":10970.25,"A-10 RDTE":0,"A-10 Procurement":0,"AV-8B RDTE":32.356,"AV-8B Procurement":71.611,"CCA RDTE":0,"CCA Procurement":0,"EA-18G RDTE":24.576,"EA-18G Procurement":25.23,"F/A-18/A/B/C/D/E/F RDTE":152.736,"F/A-18/A/B/C/D/E/F Procurement":932.879,"F-15 RDTE":322.841,"F-15 Procurement":661.505,"F-16 RDTE":202.398,"F-16 Procurement":25.213,"F-22 RDTE":414.004,"F-22 Procurement":412.838,"B-21 RDTE":1163.851,"B-21 Procurement":0,"F-35 RDTE (all)":2141.186,"F-35 Procurement (all)":8840.974,"F-35 RDTE (USN)":1323.402,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":817.784,"F-35 Procurement (USN)":3235.189,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":5605.784,"NGAD RDTE (USAF)":24.011,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":0,"F/A-XX Procurement (USN)":0},"2016":{"Tactical Aircraft Total RDTE":4748.18,"Tactical Aircraft Total Procurement":15095.873,"A-10 RDTE":21.014,"A-10 Procurement":0,"AV-8B RDTE":34.945,"AV-8B Procurement":101.462,"CCA RDTE":0,"CCA Procurement":0,"EA-18G RDTE":58.871,"EA-18G Procurement":15.491,"F/A-18/A/B/C/D/E/F RDTE":217.085,"F/A-18/A/B/C/D/E/F Procurement":1623.848,"F-15 RDTE":511.348,"F-15 Procurement":780.01,"F-16 RDTE":237.033,"F-16 Procurement":27.428,"F-22 RDTE":447.599,"F-22 Procurement":231.834,"B-21 RDTE":921.507,"B-21 Procurement":0,"F-35 RDTE (all)":2256.625,"F-35 Procurement (all)":12315.799,"F-35 RDTE (USN)":1402.751,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":853.873,"F-35 Procurement (USN)":4790.144,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":7525.655,"NGAD RDTE (USAF)":42.152,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":0,"F/A-XX Procurement (USN)":0},"2017":{"Tactical Aircraft Total RDTE":5775.833,"Tactical Aircraft Total Procurement":15555.372,"A-10 RDTE":14.435,"A-10 Procurement":105.249,"AV-8B RDTE":45.441,"AV-8B Procurement":71.543,"CCA RDTE":0,"CCA Procurement":0,"EA-18G RDTE":128.195,"EA-18G Procurement":39.508,"F/A-18/A/B/C/D/E/F RDTE":291.457,"F/A-18/A/B/C/D/E/F Procurement":2732.935,"F-15 RDTE":759.348,"F-15 Procurement":188.642,"F-16 RDTE":194.464,"F-16 Procurement":382.549,"F-22 RDTE":564.305,"F-22 Procurement":373.413,"B-21 RDTE":1640.568,"B-21 Procurement":0,"F-35 RDTE (all)":2107.531,"F-35 Procurement (all)":11661.532,"F-35 RDTE (USN)":1423.063,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":684.468,"F-35 Procurement (USN)":5053.084,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":6608.448,"NGAD RDTE (USAF)":28.318,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":1.772,"F/A-XX Procurement (USN)":0},"2018":{"Tactical Aircraft Total RDTE":6603.077,"Tactical Aircraft Total Procurement":19631.071,"A-10 RDTE":21.75,"A-10 Procurement":135.231,"AV-8B RDTE":56.198,"AV-8B Procurement":56.586,"CCA RDTE":0,"CCA Procurement":0,"EA-18G RDTE":176.603,"EA-18G Procurement":50.212,"F/A-18/A/B/C/D/E/F RDTE":357.997,"F/A-18/A/B/C/D/E/F Procurement":3651.506,"F-15 RDTE":653.46,"F-15 Procurement":597.565,"F-16 RDTE":336.895,"F-16 Procurement":314.037,"F-22 RDTE":749.345,"F-22 Procurement":464.143,"B-21 RDTE":2385.214,"B-21 Procurement":0,"F-35 RDTE (all)":1511.855,"F-35 Procurement (all)":14361.79,"F-35 RDTE (USN)":716.352,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":795.503,"F-35 Procurement (USN)":6263.224,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":8098.566,"NGAD RDTE (USAF)":353.761,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":0,"F/A-XX Procurement (USN)":0},"2019":{"Tactical Aircraft Total RDTE":6784.353,"Tactical Aircraft Total Procurement":18545.35,"A-10 RDTE":33.623,"A-10 Procurement":202.58,"AV-8B RDTE":59.913,"AV-8B Procurement":99.384,"CCA RDTE":0,"CCA Procurement":0,"EA-18G RDTE":293.465,"EA-18G Procurement":63.826,"F/A-18/A/B/C/D/E/F RDTE":414.695,"F/A-18/A/B/C/D/E/F Procurement":3780.65,"F-15 RDTE":408.674,"F-15 Procurement":812.383,"F-16 RDTE":237.85,"F-16 Procurement":372.304,"F-22 RDTE":697.107,"F-22 Procurement":414.496,"B-21 RDTE":2673.926,"B-21 Procurement":0,"F-35 RDTE (all)":1453.6,"F-35 Procurement (all)":12799.728,"F-35 RDTE (USN)":733.567,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":720.033,"F-35 Procurement (USN)":6164.852,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":6634.876,"NGAD RDTE (USAF)":505.419,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":6.082,"F/A-XX Procurement (USN)":0},"2020":{"Tactical Aircraft Total RDTE":8594.032,"Tactical Aircraft Total Procurement":19988.16,"A-10 RDTE":30.288,"A-10 Procurement":146.384,"AV-8B RDTE":36.189,"AV-8B Procurement":44.379,"CCA RDTE":0,"CCA Procurement":0,"EA-18G RDTE":163.361,"EA-18G Procurement":105.376,"F/A-18/A/B/C/D/E/F RDTE":398.727,"F/A-18/A/B/C/D/E/F Procurement":3437.485,"F-15 RDTE":823.915,"F-15 Procurement":3190.62,"F-16 RDTE":230.96,"F-16 Procurement":306.658,"F-22 RDTE":656.477,"F-22 Procurement":266.1,"B-21 RDTE":3414.944,"B-21 Procurement":0,"F-35 RDTE (all)":1795.821,"F-35 Procurement (all)":12491.157,"F-35 RDTE (USN)":893.938,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":901.883,"F-35 Procurement (USN)":5237.405,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":7253.752,"NGAD RDTE (USAF)":1035.04,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":8.311,"F/A-XX Procurement (USN)":0},"2021":{"Tactical Aircraft Total RDTE":8001.213,"Tactical Aircraft Total Procurement":18882.557,"A-10 RDTE":27.593,"A-10 Procurement":151.521,"AV-8B RDTE":22.956,"AV-8B Procurement":40.637,"CCA RDTE":0,"CCA Procurement":0,"EA-18G RDTE":132.476,"EA-18G Procurement":70.21,"F/A-18/A/B/C/D/E/F RDTE":335.811,"F/A-18/A/B/C/D/E/F Procurement":3007.362,"F-15 RDTE":553.132,"F-15 Procurement":1984.696,"F-16 RDTE":241.108,"F-16 Procurement":699.471,"F-22 RDTE":742.609,"F-22 Procurement":438.392,"B-21 RDTE":3119.783,"B-21 Procurement":0,"F-35 RDTE (all)":1837.067,"F-35 Procurement (all)":12490.268,"F-35 RDTE (USN)":902.691,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":934.376,"F-35 Procurement (USN)":5283.805,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":7206.463,"NGAD RDTE (USAF)":988.678,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":0,"F/A-XX Procurement (USN)":0},"2022":{"Tactical Aircraft Total RDTE":8848.142,"Tactical Aircraft Total Procurement":16334.094,"A-10 RDTE":36.306,"A-10 Procurement":67.983,"AV-8B RDTE":14.864,"AV-8B Procurement":43.633,"CCA RDTE":0,"CCA Procurement":0,"EA-18G RDTE":68.904,"EA-18G Procurement":475.761,"F/A-18/A/B/C/D/E/F RDTE":354.337,"F/A-18/A/B/C/D/E/F Procurement":2052.248,"F-15 RDTE":476.767,"F-15 Procurement":1893.654,"F-16 RDTE":256.336,"F-16 Procurement":745.112,"F-22 RDTE":695.75,"F-22 Procurement":449.539,"B-21 RDTE":3013.987,"B-21 Procurement":115.996,"F-35 RDTE (all)":2353.158,"F-35 Procurement (all)":10490.168,"F-35 RDTE (USN)":1067.194,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":1285.964,"F-35 Procurement (USN)":5327.419,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":5162.749,"NGAD RDTE (USAF)":1577.733,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":0,"F/A-XX Procurement (USN)":0},"2023":{"Tactical Aircraft Total RDTE":8862.635,"Tactical Aircraft Total Procurement":20297.215,"A-10 RDTE":35.076,"A-10 Procurement":87.681,"AV-8B RDTE":13.411,"AV-8B Procurement":30.617,"CCA RDTE":0,"CCA Procurement":0,"EA-18G RDTE":126.633,"EA-18G Procurement":628.365,"F/A-18/A/B/C/D/E/F RDTE":363.267,"F/A-18/A/B/C/D/E/F Procurement":1903.375,"F-15 RDTE":377.771,"F-15 Procurement":3607.354,"F-16 RDTE":263.347,"F-16 Procurement":809.746,"F-22 RDTE":578.642,"F-22 Procurement":778.937,"B-21 RDTE":3186.633,"B-21 Procurement":2221.72,"F-35 RDTE (all)":2230.081,"F-35 Procurement (all)":10229.42,"F-35 RDTE (USN)":1081.346,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":1148.735,"F-35 Procurement (USN)":5201.472,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":5027.948,"NGAD RDTE (USAF)":1687.775,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":0,"F/A-XX Procurement (USN)":0},"2024":{"Tactical Aircraft Total RDTE":8951.185,"Tactical Aircraft Total Procurement":15978.07,"A-10 RDTE":0,"A-10 Procurement":0,"AV-8B RDTE":8.397,"AV-8B Procurement":3.24,"CCA RDTE":0,"CCA Procurement":0,"EA-18G RDTE":163.331,"EA-18G Procurement":130.58,"F/A-18/A/B/C/D/E/F RDTE":312.269,"F/A-18/A/B/C/D/E/F Procurement":1405.75,"F-15 RDTE":384.029,"F-15 Procurement":110.682,"F-16 RDTE":122.242,"F-16 Procurement":255.87,"F-22 RDTE":654.307,"F-22 Procurement":316.257,"B-21 RDTE":2941.678,"B-21 Procurement":2318.927,"F-35 RDTE (all)":2366.877,"F-35 Procurement (all)":11436.764,"F-35 RDTE (USN)":1001.961,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":1364.917,"F-35 Procurement (USN)":5416.5,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":6020.263,"NGAD RDTE (USAF)":1998.053,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":0,"F/A-XX Procurement (USN)":0},"2025":{"Tactical Aircraft Total RDTE":10260.212,"Tactical Aircraft Total Procurement":15388.591,"A-10 RDTE":0,"A-10 Procurement":0,"AV-8B RDTE":5.23,"AV-8B Procurement":3.584,"CCA RDTE":711.747,"CCA Procurement":0,"EA-18G RDTE":167.45,"EA-18G Procurement":123.848,"F/A-18/A/B/C/D/E/F RDTE":374.486,"F/A-18/A/B/C/D/E/F Procurement":1203.574,"F-15 RDTE":442.173,"F-15 Procurement":39.76,"F-16 RDTE":104.252,"F-16 Procurement":194.805,"F-22 RDTE":758.754,"F-22 Procurement":818.537,"B-21 RDTE":2654.073,"B-21 Procurement":2600.468,"F-35 RDTE (all)":2164.011,"F-35 Procurement (all)":10404.015,"F-35 RDTE (USN)":982.672,"F-35 RDTE (USMC)":0,"F-35 RDTE (USAF)":1181.339,"F-35 Procurement (USN)":5037.047,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":5366.968,"NGAD RDTE (USAF)":2424.208,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":453.828,"F/A-XX Procurement (USN)":0},"2026":{"Tactical Aircraft Total RDTE":9556.518,"Tactical Aircraft Total Procurement":15869.314,"A-10 RDTE":0,"A-10 Procurement":0,"AV-8B RDTE":0,"AV-8B Procurement":0,"CCA RDTE":111.365,"CCA Procurement":15.048,"EA-18G RDTE":184.921,"EA-18G Procurement":147.07,"F/A-18/A/B/C/D/E/F RDTE":392.463,"F/A-18/A/B/C/D/E/F Procurement":1437.612,"F-15 RDTE":563.97,"F-15 Procurement":125.156,"F-16 RDTE":216.638,"F-16 Procurement":448.116,"F-22 RDTE":852.332,"F-22 Procurement":977.526,"B-21 RDTE":2347.225,"B-21 Procurement":3452.116,"F-35 RDTE (all)":2233.922,"F-35 Procurement (all)":9266.67,"F-35 RDTE (USN)":1003.382,"F-35 RDTE (USMC)":"#REF!","F-35 RDTE (USAF)":1230.54,"F-35 Procurement (USN)":4799.589,"F-35 Procurement (USMC)":0,"F-35 Procurement (USAF)":4467.081,"NGAD RDTE (USAF)":2579.362,"NGAD Procurement (USAF)":0,"F/A-XX RDTE (USN)":74.32,"F/A-XX Procurement (USN)":0}}},"fires":{"columns":["Fires Total RDTE","Fires Total Procurement","HIMARS TOTAL RDTE","HIMARS TOTAL PROCUREMENT","HIMARS (Army) RDTE","HIMARS (Army) Procurement","HIMARS (USMC) RDTE","HIMARS (USMC) Procurement","GMLRS (Army) RDTE","GMLRS (Army) Procurement","MLRS (Army) RDTE","MLRS (Army) Procurement","MRC RDTE","MRC Procurement","PrSM RDTE","PrSM Procurement","ATACMS RDTE","ATACMS Procurement","NMESIS RDTE","NMESIS  (USMC) Procurement","OPF RDTE","OPF Procurement","LRF RDTE","LRF Procurement"],"data":{"2012":{"Fires Total RDTE":82.805,"Fires Total Procurement":594.986,"HIMARS TOTAL RDTE":2.531,"HIMARS TOTAL PROCUREMENT":97.231,"HIMARS (Army) RDTE":0,"HIMARS (Army) Procurement":60.0,"HIMARS (USMC) RDTE":2.531,"HIMARS (USMC) Procurement":37.231,"GMLRS (Army) RDTE":59.205,"GMLRS (Army) Procurement":461.195,"MLRS (Army) RDTE":21.069,"MLRS (Army) Procurement":36.56,"MRC RDTE":0,"MRC Procurement":0,"PrSM RDTE":0,"PrSM Procurement":0,"ATACMS RDTE":0,"ATACMS Procurement":0,"NMESIS RDTE":0,"NMESIS  (USMC) Procurement":0,"OPF RDTE":0,"OPF Procurement":0,"LRF RDTE":0,"LRF Procurement":0},"2013":{"Fires Total RDTE":144.881,"Fires Total Procurement":457.835,"HIMARS TOTAL RDTE":7.12,"HIMARS TOTAL PROCUREMENT":140.16,"HIMARS (Army) RDTE":0,"HIMARS (Army) Procurement":24.352,"HIMARS (USMC) RDTE":7.12,"HIMARS (USMC) Procurement":115.808,"GMLRS (Army) RDTE":74.522,"GMLRS (Army) Procurement":292.543,"MLRS (Army) RDTE":63.24,"MLRS (Army) Procurement":25.132,"MRC RDTE":0,"MRC Procurement":0,"PrSM RDTE":0,"PrSM Procurement":0,"ATACMS RDTE":0,"ATACMS Procurement":0,"NMESIS RDTE":0,"NMESIS  (USMC) Procurement":0,"OPF RDTE":0,"OPF Procurement":0,"LRF RDTE":0,"LRF Procurement":0},"2014":{"Fires Total RDTE":204.973,"Fires Total Procurement":533.802,"HIMARS TOTAL RDTE":1.622,"HIMARS TOTAL PROCUREMENT":16.017,"HIMARS (Army) RDTE":1.621,"HIMARS (Army) Procurement":8.214,"HIMARS (USMC) RDTE":0.001,"HIMARS (USMC) Procurement":7.803,"GMLRS (Army) RDTE":71.685,"GMLRS (Army) Procurement":367.364,"MLRS (Army) RDTE":51.605,"MLRS (Army) Procurement":41.164,"MRC RDTE":0,"MRC Procurement":0,"PrSM RDTE":0,"PrSM Procurement":0,"ATACMS RDTE":80.06,"ATACMS Procurement":109.257,"NMESIS RDTE":0,"NMESIS  (USMC) Procurement":0,"OPF RDTE":0,"OPF Procurement":0,"LRF RDTE":0,"LRF Procurement":0},"2015":{"Fires Total RDTE":136.914,"Fires Total Procurement":243.338,"HIMARS TOTAL RDTE":6.173,"HIMARS TOTAL PROCUREMENT":38.306,"HIMARS (Army) RDTE":3.792,"HIMARS (Army) Procurement":7.958,"HIMARS (USMC) RDTE":2.381,"HIMARS (USMC) Procurement":30.348,"GMLRS (Army) RDTE":57.696,"GMLRS (Army) Procurement":168.404,"MLRS (Army) RDTE":19.729,"MLRS (Army) Procurement":36.628,"MRC RDTE":0,"MRC Procurement":0,"PrSM RDTE":0,"PrSM Procurement":0,"ATACMS RDTE":53.318,"ATACMS Procurement":0,"NMESIS RDTE":0,"NMESIS  (USMC) Procurement":0,"OPF RDTE":0,"OPF Procurement":0,"LRF RDTE":0,"LRF Procurement":0},"2016":{"Fires Total RDTE":107.245,"Fires Total Procurement":483.335,"HIMARS TOTAL RDTE":3.395,"HIMARS TOTAL PROCUREMENT":25.257,"HIMARS (Army) RDTE":1.688,"HIMARS (Army) Procurement":4.091,"HIMARS (USMC) RDTE":1.707,"HIMARS (USMC) Procurement":21.166,"GMLRS (Army) RDTE":46.74,"GMLRS (Army) Procurement":333.222,"MLRS (Army) RDTE":0,"MLRS (Army) Procurement":98.707,"MRC RDTE":0,"MRC Procurement":0,"PrSM RDTE":0,"PrSM Procurement":0,"ATACMS RDTE":57.11,"ATACMS Procurement":26.149,"NMESIS RDTE":0,"NMESIS  (USMC) Procurement":0,"OPF RDTE":0,"OPF Procurement":0,"LRF RDTE":0,"LRF Procurement":0},"2017":{"Fires Total RDTE":81.12,"Fires Total Procurement":788.477,"HIMARS TOTAL RDTE":13.099,"HIMARS TOTAL PROCUREMENT":3.019,"HIMARS (Army) RDTE":11.813,"HIMARS (Army) Procurement":2.348,"HIMARS (USMC) RDTE":1.285,"HIMARS (USMC) Procurement":0.671,"GMLRS (Army) RDTE":26.95,"GMLRS (Army) Procurement":519.758,"MLRS (Army) RDTE":31.914,"MLRS (Army) Procurement":54.737,"MRC RDTE":0,"MRC Procurement":0,"PrSM RDTE":0,"PrSM Procurement":0,"ATACMS RDTE":9.158,"ATACMS Procurement":210.962,"NMESIS RDTE":0,"NMESIS  (USMC) Procurement":0,"OPF RDTE":0,"OPF Procurement":0,"LRF RDTE":0,"LRF Procurement":0},"2018":{"Fires Total RDTE":149.411,"Fires Total Procurement":2221.485,"HIMARS TOTAL RDTE":9.352,"HIMARS TOTAL PROCUREMENT":313.168,"HIMARS (Army) RDTE":5.638,"HIMARS (Army) Procurement":307.116,"HIMARS (USMC) RDTE":3.714,"HIMARS (USMC) Procurement":6.053,"GMLRS (Army) RDTE":116.98,"GMLRS (Army) Procurement":1275.236,"MLRS (Army) RDTE":7.176,"MLRS (Army) Procurement":214.472,"MRC RDTE":0,"MRC Procurement":0,"PrSM RDTE":0,"PrSM Procurement":0,"ATACMS RDTE":15.903,"ATACMS Procurement":418.608,"NMESIS RDTE":0,"NMESIS  (USMC) Procurement":0,"OPF RDTE":0,"OPF Procurement":0,"LRF RDTE":0,"LRF Procurement":0},"2019":{"Fires Total RDTE":216.762,"Fires Total Procurement":2588.968,"HIMARS TOTAL RDTE":32.825,"HIMARS TOTAL PROCUREMENT":331.609,"HIMARS (Army) RDTE":6.148,"HIMARS (Army) Procurement":218.58,"HIMARS (USMC) RDTE":26.678,"HIMARS (USMC) Procurement":113.029,"GMLRS (Army) RDTE":138.548,"GMLRS (Army) Procurement":1175.876,"MLRS (Army) RDTE":4.62,"MLRS (Army) Procurement":602.654,"MRC RDTE":0,"MRC Procurement":0,"PrSM RDTE":0,"PrSM Procurement":0,"ATACMS RDTE":29.046,"ATACMS Procurement":478.828,"NMESIS RDTE":11.722,"NMESIS  (USMC) Procurement":0,"OPF RDTE":0,"OPF Procurement":0,"LRF RDTE":0,"LRF Procurement":0},"2020":{"Fires Total RDTE":248.606,"Fires Total Procurement":2399.586,"HIMARS TOTAL RDTE":12.794,"HIMARS TOTAL PROCUREMENT":115.439,"HIMARS (Army) RDTE":11.367,"HIMARS (Army) Procurement":14.527,"HIMARS (USMC) RDTE":1.427,"HIMARS (USMC) Procurement":100.912,"GMLRS (Army) RDTE":120.259,"GMLRS (Army) Procurement":1375.025,"MLRS (Army) RDTE":7.465,"MLRS (Army) Procurement":465.617,"MRC RDTE":5.687,"MRC Procurement":0,"PrSM RDTE":0,"PrSM Procurement":0,"ATACMS RDTE":30.155,"ATACMS Procurement":443.504,"NMESIS RDTE":49.338,"NMESIS  (USMC) Procurement":0,"OPF RDTE":22.909,"OPF Procurement":0,"LRF RDTE":0,"LRF Procurement":0},"2021":{"Fires Total RDTE":423.032,"Fires Total Procurement":2161.312,"HIMARS TOTAL RDTE":6.162,"HIMARS TOTAL PROCUREMENT":107.075,"HIMARS (Army) RDTE":5.609,"HIMARS (Army) Procurement":58.421,"HIMARS (USMC) RDTE":0.554,"HIMARS (USMC) Procurement":48.654,"GMLRS (Army) RDTE":73.697,"GMLRS (Army) Procurement":1176.249,"MLRS (Army) RDTE":79.211,"MLRS (Army) Procurement":571.747,"MRC RDTE":100.148,"MRC Procurement":0,"PrSM RDTE":14.656,"PrSM Procurement":66.87,"ATACMS RDTE":22.934,"ATACMS Procurement":239.371,"NMESIS RDTE":32.05,"NMESIS  (USMC) Procurement":0,"OPF RDTE":32.366,"OPF Procurement":0,"LRF RDTE":61.809,"LRF Procurement":0},"2022":{"Fires Total RDTE":812.797,"Fires Total Procurement":2689.611,"HIMARS TOTAL RDTE":8.217,"HIMARS TOTAL PROCUREMENT":673.469,"HIMARS (Army) RDTE":7.681,"HIMARS (Army) Procurement":651.821,"HIMARS (USMC) RDTE":0.536,"HIMARS (USMC) Procurement":21.648,"GMLRS (Army) RDTE":38.34,"GMLRS (Army) Procurement":1295.916,"MLRS (Army) RDTE":5.204,"MLRS (Army) Procurement":325.813,"MRC RDTE":305.142,"MRC Procurement":0,"PrSM RDTE":211.873,"PrSM Procurement":178.385,"ATACMS RDTE":0,"ATACMS Procurement":0,"NMESIS RDTE":107.245,"NMESIS  (USMC) Procurement":112.945,"OPF RDTE":44.397,"OPF Procurement":0,"LRF RDTE":92.38,"LRF Procurement":103.082},"2023":{"Fires Total RDTE":841.022,"Fires Total Procurement":3794.628,"HIMARS TOTAL RDTE":8.888,"HIMARS TOTAL PROCUREMENT":739.365,"HIMARS (Army) RDTE":8.377,"HIMARS (Army) Procurement":723.188,"HIMARS (USMC) RDTE":0.511,"HIMARS (USMC) Procurement":16.177,"GMLRS (Army) RDTE":38.697,"GMLRS (Army) Procurement":2273.681,"MLRS (Army) RDTE":10.286,"MLRS (Army) Procurement":232.55,"MRC RDTE":403.24,"MRC Procurement":0,"PrSM RDTE":277.2,"PrSM Procurement":180.543,"ATACMS RDTE":0,"ATACMS Procurement":0,"NMESIS RDTE":43.465,"NMESIS  (USMC) Procurement":323.634,"OPF RDTE":22.452,"OPF Procurement":0,"LRF RDTE":36.794,"LRF Procurement":44.855},"2024":{"Fires Total RDTE":794.705,"Fires Total Procurement":3608.916,"HIMARS TOTAL RDTE":4.699,"HIMARS TOTAL PROCUREMENT":280.639,"HIMARS (Army) RDTE":4.168,"HIMARS (Army) Procurement":269.851,"HIMARS (USMC) RDTE":0.531,"HIMARS (USMC) Procurement":10.788,"GMLRS (Army) RDTE":72.379,"GMLRS (Army) Procurement":1427.784,"MLRS (Army) RDTE":30.169,"MLRS (Army) Procurement":182.324,"MRC RDTE":286.684,"MRC Procurement":173.12,"PrSM RDTE":302.026,"PrSM Procurement":1070.763,"ATACMS RDTE":0,"ATACMS Procurement":12.568,"NMESIS RDTE":34.15,"NMESIS  (USMC) Procurement":365.888,"OPF RDTE":34.356,"OPF Procurement":0,"LRF RDTE":30.243,"LRF Procurement":95.829},"2025":{"Fires Total RDTE":552.014,"Fires Total Procurement":2764.835,"HIMARS TOTAL RDTE":4.719,"HIMARS TOTAL PROCUREMENT":134.781,"HIMARS (Army) RDTE":4.241,"HIMARS (Army) Procurement":128.968,"HIMARS (USMC) RDTE":0.478,"HIMARS (USMC) Procurement":5.813,"GMLRS (Army) RDTE":20.59,"GMLRS (Army) Procurement":1198.264,"MLRS (Army) RDTE":17.084,"MLRS (Army) Procurement":216.069,"MRC RDTE":182.823,"MRC Procurement":233.037,"PrSM RDTE":211.91,"PrSM Procurement":457.509,"ATACMS RDTE":0,"ATACMS Procurement":113.28,"NMESIS RDTE":50.916,"NMESIS  (USMC) Procurement":226.266,"OPF RDTE":33.88,"OPF Procurement":0,"LRF RDTE":30.092,"LRF Procurement":185.629},"2026":{"Fires Total RDTE":618.301,"Fires Total Procurement":2264.094,"HIMARS TOTAL RDTE":7.445,"HIMARS TOTAL PROCUREMENT":129.974,"HIMARS (Army) RDTE":6.888,"HIMARS (Army) Procurement":115.508,"HIMARS (USMC) RDTE":0.557,"HIMARS (USMC) Procurement":14.466,"GMLRS (Army) RDTE":33.307,"GMLRS (Army) Procurement":1168.227,"MLRS (Army) RDTE":36.731,"MLRS (Army) Procurement":275.809,"MRC RDTE":418.705,"MRC Procurement":82.407,"PrSM RDTE":75.732,"PrSM Procurement":160.846,"ATACMS RDTE":0,"ATACMS Procurement":0,"NMESIS RDTE":29.004,"NMESIS  (USMC) Procurement":372.072,"OPF RDTE":17.377,"OPF Procurement":74.759,"LRF RDTE":0,"LRF Procurement":0}}},"hypersonics":{"columns":["Hypersonics Total RDTE","Hypersonics Total Procurement","HAWC RDTE","HAWC Procurement","MOHAWC RDTE","MOHAWC Procurement","ARRW RDTE","ARRW Procurement","HACM RDTE","HACM Procurement","LRHW RDTE","LRHW Procurement","CPS RDTE","CPS Procurement","HALO RDTE","HALO Procurement"],"data":{"2012":{"Hypersonics Total RDTE":0,"Hypersonics Total Procurement":0,"HAWC RDTE":0,"HAWC Procurement":0,"MOHAWC RDTE":0,"MOHAWC Procurement":0,"ARRW RDTE":0,"ARRW Procurement":0,"HACM RDTE":0,"HACM Procurement":0,"LRHW RDTE":0,"LRHW Procurement":0,"CPS RDTE":0,"CPS Procurement":0,"HALO RDTE":0,"HALO Procurement":0},"2013":{"Hypersonics Total RDTE":0,"Hypersonics Total Procurement":0,"HAWC RDTE":0,"HAWC Procurement":0,"MOHAWC RDTE":0,"MOHAWC Procurement":0,"ARRW RDTE":0,"ARRW Procurement":0,"HACM RDTE":0,"HACM Procurement":0,"LRHW RDTE":0,"LRHW Procurement":0,"CPS RDTE":0,"CPS Procurement":0,"HALO RDTE":0,"HALO Procurement":0},"2014":{"Hypersonics Total RDTE":20.28,"Hypersonics Total Procurement":0,"HAWC RDTE":20.28,"HAWC Procurement":0,"MOHAWC RDTE":0,"MOHAWC Procurement":0,"ARRW RDTE":0,"ARRW Procurement":0,"HACM RDTE":0,"HACM Procurement":0,"LRHW RDTE":0,"LRHW Procurement":0,"CPS RDTE":0,"CPS Procurement":0,"HALO RDTE":0,"HALO Procurement":0},"2015":{"Hypersonics Total RDTE":7.246,"Hypersonics Total Procurement":0,"HAWC RDTE":7.246,"HAWC Procurement":0,"MOHAWC RDTE":0,"MOHAWC Procurement":0,"ARRW RDTE":0,"ARRW Procurement":0,"HACM RDTE":0,"HACM Procurement":0,"LRHW RDTE":0,"LRHW Procurement":0,"CPS RDTE":0,"CPS Procurement":0,"HALO RDTE":0,"HALO Procurement":0},"2016":{"Hypersonics Total RDTE":17.512,"Hypersonics Total Procurement":0,"HAWC RDTE":17.512,"HAWC Procurement":0,"MOHAWC RDTE":0,"MOHAWC Procurement":0,"ARRW RDTE":0,"ARRW Procurement":0,"HACM RDTE":0,"HACM Procurement":0,"LRHW RDTE":0,"LRHW Procurement":0,"CPS RDTE":0,"CPS Procurement":0,"HALO RDTE":0,"HALO Procurement":0},"2017":{"Hypersonics Total RDTE":62.937,"Hypersonics Total Procurement":0,"HAWC RDTE":62.937,"HAWC Procurement":0,"MOHAWC RDTE":0,"MOHAWC Procurement":0,"ARRW RDTE":0,"ARRW Procurement":0,"HACM RDTE":0,"HACM Procurement":0,"LRHW RDTE":0,"LRHW Procurement":0,"CPS RDTE":0,"CPS Procurement":0,"HALO RDTE":0,"HALO Procurement":0},"2018":{"Hypersonics Total RDTE":37.374,"Hypersonics Total Procurement":0,"HAWC RDTE":37.374,"HAWC Procurement":0,"MOHAWC RDTE":0,"MOHAWC Procurement":0,"ARRW RDTE":0,"ARRW Procurement":0,"HACM RDTE":0,"HACM Procurement":0,"LRHW RDTE":0,"LRHW Procurement":0,"CPS RDTE":0,"CPS Procurement":0,"HALO RDTE":0,"HALO Procurement":0},"2019":{"Hypersonics Total RDTE":298.786,"Hypersonics Total Procurement":0,"HAWC RDTE":25.15,"HAWC Procurement":0,"MOHAWC RDTE":0,"MOHAWC Procurement":0,"ARRW RDTE":260.438,"ARRW Procurement":0,"HACM RDTE":0,"HACM Procurement":0,"LRHW RDTE":0,"LRHW Procurement":0,"CPS RDTE":13.198,"CPS Procurement":0,"HALO RDTE":0,"HALO Procurement":0},"2020":{"Hypersonics Total RDTE":1426.992,"Hypersonics Total Procurement":0,"HAWC RDTE":23.606,"HAWC Procurement":0,"MOHAWC RDTE":0,"MOHAWC Procurement":0,"ARRW RDTE":339.265,"ARRW Procurement":0,"HACM RDTE":0,"HACM Procurement":0,"LRHW RDTE":468.113,"LRHW Procurement":0,"CPS RDTE":596.008,"CPS Procurement":0,"HALO RDTE":0,"HALO Procurement":0},"2021":{"Hypersonics Total RDTE":2267.052,"Hypersonics Total Procurement":0,"HAWC RDTE":35.103,"HAWC Procurement":0,"MOHAWC RDTE":0,"MOHAWC Procurement":0,"ARRW RDTE":425.629,"ARRW Procurement":0,"HACM RDTE":0,"HACM Procurement":0,"LRHW RDTE":956.765,"LRHW Procurement":0,"CPS RDTE":849.556,"CPS Procurement":0,"HALO RDTE":0,"HALO Procurement":0},"2022":{"Hypersonics Total RDTE":2390.646,"Hypersonics Total Procurement":21.261,"HAWC RDTE":15.38,"HAWC Procurement":0,"MOHAWC RDTE":0,"MOHAWC Procurement":0,"ARRW RDTE":334.552,"ARRW Procurement":0,"HACM RDTE":199.684,"HACM Procurement":0,"LRHW RDTE":448.268,"LRHW Procurement":0,"CPS RDTE":1392.763,"CPS Procurement":21.261,"HALO RDTE":0,"HALO Procurement":0},"2023":{"Hypersonics Total RDTE":2949.283,"Hypersonics Total Procurement":516.823,"HAWC RDTE":0,"HAWC Procurement":0,"MOHAWC RDTE":62.946,"MOHAWC Procurement":0,"ARRW RDTE":117.515,"ARRW Procurement":0,"HACM RDTE":406.342,"HACM Procurement":0,"LRHW RDTE":883.957,"LRHW Procurement":260.294,"CPS RDTE":1324.243,"CPS Procurement":256.528,"HALO RDTE":154.281,"HALO Procurement":0},"2024":{"Hypersonics Total RDTE":2571.251,"Hypersonics Total Procurement":222.566,"HAWC RDTE":0,"HAWC Procurement":0,"MOHAWC RDTE":30.665,"MOHAWC Procurement":0,"ARRW RDTE":28.522,"ARRW Procurement":0,"HACM RDTE":340.722,"HACM Procurement":0,"LRHW RDTE":994.958,"LRHW Procurement":64.178,"CPS RDTE":1099.918,"CPS Procurement":158.388,"HALO RDTE":76.466,"HALO Procurement":0},"2025":{"Hypersonics Total RDTE":1857.05,"Hypersonics Total Procurement":935.301,"HAWC RDTE":0,"HAWC Procurement":0,"MOHAWC RDTE":0,"MOHAWC Procurement":0,"ARRW RDTE":0,"ARRW Procurement":0,"HACM RDTE":466.729,"HACM Procurement":0,"LRHW RDTE":469.775,"LRHW Procurement":669.178,"CPS RDTE":903.927,"CPS Procurement":266.123,"HALO RDTE":16.619,"HALO Procurement":0},"2026":{"Hypersonics Total RDTE":2218.761,"Hypersonics Total Procurement":838.615,"HAWC RDTE":0,"HAWC Procurement":0,"MOHAWC RDTE":20,"MOHAWC Procurement":0,"ARRW RDTE":0,"ARRW Procurement":387.055,"HACM RDTE":802.81,"HACM Procurement":0,"LRHW RDTE":538.027,"LRHW Procurement":353.415,"CPS RDTE":798.337,"CPS Procurement":98.145,"HALO RDTE":59.587,"HALO Procurement":0}}},"shipbuilding":{"columns":["Shipbuilding Total RDTE","Shipbuilding Total Procurement","Ike CVN RDTE","Ike CVN Procurement","Ford CVN RDTE","Ford CVN Procurement","NImitz CVN RDTE","Nimitz CVN Procurement","FFG(x) RDTE","FFG(x) Procurement","DDG(x) RDTE","DDG(x) Procurement","Zumwalts RDTE","Zumwalts Procurement","Burke DDGE RDTE","Burke DDG Procurement","VA SSN RDTE","VA SSN Procurement","Ohio SSBN/GN RDTE","Ohio SSBN/GN Procurement","Columbia RDTE","Columbia Procurement","SSN(x) RDTE","SSN(x) Procurement","LSM RDTE","LSM Procurement","LSD/LHA RDTE","LSD/LHA Procurement","Littoral Combat Ship RDTE","Littoral Combat Ship Procurement","LPD-17 RDTE","LPD-17 Procurement"],"data":{"2012":{"Shipbuilding Total RDTE":2028.134,"Shipbuilding Total Procurement":18831.866,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":27.812,"Ford CVN Procurement":767.996,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":0,"FFG(x) Procurement":0,"DDG(x) RDTE":0,"DDG(x) Procurement":0,"Zumwalts RDTE":341.79,"Zumwalts Procurement":704.181,"Burke DDGE RDTE":7.581,"Burke DDG Procurement":2881.229,"VA SSN RDTE":149.312,"VA SSN Procurement":6482.143,"Ohio SSBN/GN RDTE":24.109,"Ohio SSBN/GN Procurement":1.163,"Columbia RDTE":1041.619,"Columbia Procurement":0,"SSN(x) RDTE":0,"SSN(x) Procurement":0,"LSM RDTE":0,"LSM Procurement":0,"LSD/LHA RDTE":29.336,"LSD/LHA Procurement":2767.442,"Littoral Combat Ship RDTE":406.575,"Littoral Combat Ship Procurement":2429.54,"LPD-17 RDTE":0,"LPD-17 Procurement":2798.173},"2013":{"Shipbuilding Total RDTE":944.269,"Shipbuilding Total Procurement":17093.088,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":16.479,"Ford CVN Procurement":670.307,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":0,"FFG(x) Procurement":0,"DDG(x) RDTE":0,"DDG(x) Procurement":0,"Zumwalts RDTE":163.256,"Zumwalts Procurement":912.355,"Burke DDGE RDTE":12.497,"Burke DDG Procurement":6139.249,"VA SSN RDTE":109.649,"VA SSN Procurement":6329.829,"Ohio SSBN/GN RDTE":19.834,"Ohio SSBN/GN Procurement":11.586,"Columbia RDTE":583.437,"Columbia Procurement":0,"SSN(x) RDTE":0,"SSN(x) Procurement":0,"LSM RDTE":0,"LSM Procurement":0,"LSD/LHA RDTE":33.929,"LSD/LHA Procurement":213.652,"Littoral Combat Ship RDTE":5.189,"Littoral Combat Ship Procurement":2374.061,"LPD-17 RDTE":0,"LPD-17 Procurement":442.048},"2014":{"Shipbuilding Total RDTE":1934.036,"Shipbuilding Total Procurement":16318.268,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":20.303,"Ford CVN Procurement":2025.969,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":0,"FFG(x) Procurement":0,"DDG(x) RDTE":0,"DDG(x) Procurement":0,"Zumwalts RDTE":252.942,"Zumwalts Procurement":311.76,"Burke DDGE RDTE":14.623,"Burke DDG Procurement":2805.571,"VA SSN RDTE":81.178,"VA SSN Procurement":8695.237,"Ohio SSBN/GN RDTE":29.262,"Ohio SSBN/GN Procurement":16.465,"Columbia RDTE":1014.188,"Columbia Procurement":0,"SSN(x) RDTE":0,"SSN(x) Procurement":0,"LSM RDTE":0,"LSM Procurement":0,"LSD/LHA RDTE":38.368,"LSD/LHA Procurement":50.727,"Littoral Combat Ship RDTE":483.171,"Littoral Combat Ship Procurement":2412.54,"LPD-17 RDTE":0,"LPD-17 Procurement":0},"2015":{"Shipbuilding Total RDTE":1977.245,"Shipbuilding Total Procurement":18249.51,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":89.852,"Ford CVN Procurement":2493.278,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":0,"FFG(x) Procurement":0,"DDG(x) RDTE":0,"DDG(x) Procurement":0,"Zumwalts RDTE":259.535,"Zumwalts Procurement":610.396,"Burke DDGE RDTE":10.553,"Burke DDG Procurement":3873.351,"VA SSN RDTE":113.025,"VA SSN Procurement":7724.609,"Ohio SSBN/GN RDTE":21.126,"Ohio SSBN/GN Procurement":15.05,"Columbia RDTE":1097.858,"Columbia Procurement":0,"SSN(x) RDTE":0,"SSN(x) Procurement":0,"LSM RDTE":0,"LSM Procurement":0,"LSD/LHA RDTE":9.375,"LSD/LHA Procurement":38.534,"Littoral Combat Ship RDTE":333.071,"Littoral Combat Ship Procurement":2098.132,"LPD-17 RDTE":42.848,"LPD-17 Procurement":1396.159},"2016":{"Shipbuilding Total RDTE":2199.728,"Shipbuilding Total Procurement":19530.617,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":147.307,"Ford CVN Procurement":3321.665,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":0,"FFG(x) Procurement":0,"DDG(x) RDTE":0,"DDG(x) Procurement":0,"Zumwalts RDTE":131.955,"Zumwalts Procurement":563.301,"Burke DDGE RDTE":2.913,"Burke DDG Procurement":5468.755,"VA SSN RDTE":195.151,"VA SSN Procurement":6912.152,"Ohio SSBN/GN RDTE":0,"Ohio SSBN/GN Procurement":12.645,"Columbia RDTE":1229.45,"Columbia Procurement":0,"SSN(x) RDTE":0,"SSN(x) Procurement":0,"LSM RDTE":0,"LSM Procurement":0,"LSD/LHA RDTE":10.8,"LSD/LHA Procurement":619.37,"Littoral Combat Ship RDTE":386.948,"Littoral Combat Ship Procurement":1838.147,"LPD-17 RDTE":95.203,"LPD-17 Procurement":794.583},"2017":{"Shipbuilding Total RDTE":1646.109,"Shipbuilding Total Procurement":22756.25,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":150.965,"Ford CVN Procurement":3339.139,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":105.633,"FFG(x) Procurement":0,"DDG(x) RDTE":0,"DDG(x) Procurement":0,"Zumwalts RDTE":57.453,"Zumwalts Procurement":345.482,"Burke DDGE RDTE":0,"Burke DDG Procurement":5161.918,"VA SSN RDTE":162.598,"VA SSN Procurement":6407.602,"Ohio SSBN/GN RDTE":0,"Ohio SSBN/GN Procurement":8.623,"Columbia RDTE":866.07,"Columbia Procurement":982.886,"SSN(x) RDTE":0,"SSN(x) Procurement":0,"LSM RDTE":0,"LSM Procurement":0,"LSD/LHA RDTE":12.061,"LSD/LHA Procurement":2085.542,"Littoral Combat Ship RDTE":259.887,"Littoral Combat Ship Procurement":2097.241,"LPD-17 RDTE":31.443,"LPD-17 Procurement":2327.816},"2018":{"Shipbuilding Total RDTE":1839.296,"Shipbuilding Total Procurement":22455.527,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":168.215,"Ford CVN Procurement":5149.118,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":171.49,"FFG(x) Procurement":0,"DDG(x) RDTE":0,"DDG(x) Procurement":0,"Zumwalts RDTE":167.764,"Zumwalts Procurement":269.158,"Burke DDGE RDTE":0,"Burke DDG Procurement":5075.594,"VA SSN RDTE":146.863,"VA SSN Procurement":6762.077,"Ohio SSBN/GN RDTE":10.219,"Ohio SSBN/GN Procurement":7.214,"Columbia RDTE":966.269,"Columbia Procurement":1069.164,"SSN(x) RDTE":0,"SSN(x) Procurement":0,"LSM RDTE":0,"LSM Procurement":0,"LSD/LHA RDTE":10.135,"LSD/LHA Procurement":2146.004,"Littoral Combat Ship RDTE":186.593,"Littoral Combat Ship Procurement":1977.199,"LPD-17 RDTE":11.749,"LPD-17 Procurement":0},"2019":{"Shipbuilding Total RDTE":1533.276,"Shipbuilding Total Procurement":24881.445,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":158.526,"Ford CVN Procurement":1896.313,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":146.302,"FFG(x) Procurement":0,"DDG(x) RDTE":0,"DDG(x) Procurement":0,"Zumwalts RDTE":179.02,"Zumwalts Procurement":326.621,"Burke DDGE RDTE":0,"Burke DDG Procurement":7692.791,"VA SSN RDTE":212.883,"VA SSN Procurement":8603.038,"Ohio SSBN/GN RDTE":9.91,"Ohio SSBN/GN Procurement":29.061,"Columbia RDTE":644.867,"Columbia Procurement":3825.217,"SSN(x) RDTE":0,"SSN(x) Procurement":0,"LSM RDTE":0,"LSM Procurement":0,"LSD/LHA RDTE":8.32,"LSD/LHA Procurement":490.059,"Littoral Combat Ship RDTE":166.779,"Littoral Combat Ship Procurement":2018.346,"LPD-17 RDTE":6.67,"LPD-17 Procurement":0},"2020":{"Shipbuilding Total RDTE":1500.087,"Shipbuilding Total Procurement":23700.811,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":174.7,"Ford CVN Procurement":2649.249,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":67.485,"FFG(x) Procurement":1490.954,"DDG(x) RDTE":28.944,"DDG(x) Procurement":0,"Zumwalts RDTE":201.969,"Zumwalts Procurement":181.478,"Burke DDGE RDTE":0,"Burke DDG Procurement":7418.002,"VA SSN RDTE":366.8,"VA SSN Procurement":9699.441,"Ohio SSBN/GN RDTE":10.809,"Ohio SSBN/GN Procurement":32.827,"Columbia RDTE":488.056,"Columbia Procurement":2119.082,"SSN(x) RDTE":0,"SSN(x) Procurement":0,"LSM RDTE":0,"LSM Procurement":0,"LSD/LHA RDTE":2.631,"LSD/LHA Procurement":93.485,"Littoral Combat Ship RDTE":144.444,"Littoral Combat Ship Procurement":16.292,"LPD-17 RDTE":14.249,"LPD-17 Procurement":0},"2021":{"Shipbuilding Total RDTE":1343.087,"Shipbuilding Total Procurement":21427.964,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":173.039,"Ford CVN Procurement":2941.715,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":90.898,"FFG(x) Procurement":1175.098,"DDG(x) RDTE":22.097,"DDG(x) Procurement":0,"Zumwalts RDTE":250.228,"Zumwalts Procurement":87.263,"Burke DDGE RDTE":5.907,"Burke DDG Procurement":4350.08,"VA SSN RDTE":265.244,"VA SSN Procurement":7561.259,"Ohio SSBN/GN RDTE":12.665,"Ohio SSBN/GN Procurement":46.66,"Columbia RDTE":350.612,"Columbia Procurement":4599.642,"SSN(x) RDTE":1.125,"SSN(x) Procurement":0,"LSM RDTE":22.769,"LSM Procurement":0,"LSD/LHA RDTE":4.513,"LSD/LHA Procurement":632.127,"Littoral Combat Ship RDTE":132.618,"Littoral Combat Ship Procurement":0,"LPD-17 RDTE":11.373,"LPD-17 Procurement":34.12},"2022":{"Shipbuilding Total RDTE":1523.248,"Shipbuilding Total Procurement":21362.108,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":174.222,"Ford CVN Procurement":2835.739,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":106.442,"FFG(x) Procurement":1171.373,"DDG(x) RDTE":39.646,"DDG(x) Procurement":0,"Zumwalts RDTE":122.043,"Zumwalts Procurement":60.772,"Burke DDGE RDTE":6.51,"Burke DDG Procurement":4700.319,"VA SSN RDTE":508.587,"VA SSN Procurement":6807.312,"Ohio SSBN/GN RDTE":12.073,"Ohio SSBN/GN Procurement":15.924,"Columbia RDTE":327.944,"Columbia Procurement":5129.368,"SSN(x) RDTE":31.68,"SSN(x) Procurement":0,"LSM RDTE":13.755,"LSM Procurement":0,"LSD/LHA RDTE":7.934,"LSD/LHA Procurement":201.938,"Littoral Combat Ship RDTE":168.795,"Littoral Combat Ship Procurement":48.169,"LPD-17 RDTE":3.618,"LPD-17 Procurement":391.193},"2023":{"Shipbuilding Total RDTE":1680.651,"Shipbuilding Total Procurement":30772.616,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":164.75,"Ford CVN Procurement":3180.773,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":111.455,"FFG(x) Procurement":1508.639,"DDG(x) RDTE":198.775,"DDG(x) Procurement":0,"Zumwalts RDTE":184.566,"Zumwalts Procurement":168.658,"Burke DDGE RDTE":6.205,"Burke DDG Procurement":8992.503,"VA SSN RDTE":318.704,"VA SSN Procurement":7167.735,"Ohio SSBN/GN RDTE":11.091,"Ohio SSBN/GN Procurement":35.655,"Columbia RDTE":402.322,"Columbia Procurement":6116.504,"SSN(x) RDTE":138.594,"SSN(x) Procurement":0,"LSM RDTE":11.607,"LSM Procurement":0,"LSD/LHA RDTE":12.786,"LSD/LHA Procurement":1495.218,"Littoral Combat Ship RDTE":100.041,"Littoral Combat Ship Procurement":80.472,"LPD-17 RDTE":19.755,"LPD-17 Procurement":2026.458},"2024":{"Shipbuilding Total RDTE":1598.886,"Shipbuilding Total Procurement":33103.533,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":115.09,"Ford CVN Procurement":2583.241,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":99.745,"FFG(x) Procurement":2230.046,"DDG(x) RDTE":184.696,"DDG(x) Procurement":0,"Zumwalts RDTE":220.548,"Zumwalts Procurement":401.953,"Burke DDGE RDTE":20.548,"Burke DDG Procurement":6501.665,"VA SSN RDTE":237.941,"VA SSN Procurement":10883.3,"Ohio SSBN/GN RDTE":12.576,"Ohio SSBN/GN Procurement":40.896,"Columbia RDTE":280.405,"Columbia Procurement":7954.792,"SSN(x) RDTE":320.397,"SSN(x) Procurement":0,"LSM RDTE":12.38,"LSM Procurement":0,"LSD/LHA RDTE":19.719,"LSD/LHA Procurement":1973.532,"Littoral Combat Ship RDTE":53.185,"Littoral Combat Ship Procurement":23.489,"LPD-17 RDTE":21.656,"LPD-17 Procurement":510.621},"2025":{"Shipbuilding Total RDTE":1422.314,"Shipbuilding Total Procurement":35880.201,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":96.67,"Ford CVN Procurement":2034.05,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":105.482,"FFG(x) Procurement":633.2,"DDG(x) RDTE":102.798,"DDG(x) Procurement":0,"Zumwalts RDTE":224.86,"Zumwalts Procurement":61.9,"Burke DDGE RDTE":14.059,"Burke DDG Procurement":8268.63,"VA SSN RDTE":273.848,"VA SSN Procurement":13320.211,"Ohio SSBN/GN RDTE":12.815,"Ohio SSBN/GN Procurement":64.53,"Columbia RDTE":192.631,"Columbia Procurement":9580.774,"SSN(x) RDTE":333.788,"SSN(x) Procurement":0,"LSM RDTE":5.988,"LSM Procurement":29.668,"LSD/LHA RDTE":11.675,"LSD/LHA Procurement":258.117,"Littoral Combat Ship RDTE":37.933,"Littoral Combat Ship Procurement":48,"LPD-17 RDTE":9.767,"LPD-17 Procurement":1581.121},"2026":{"Shipbuilding Total RDTE":1429.418,"Shipbuilding Total Procurement":17316.405,"Ike CVN RDTE":0,"Ike CVN Procurement":0,"Ford CVN RDTE":112.704,"Ford CVN Procurement":3431.67,"NImitz CVN RDTE":0,"Nimitz CVN Procurement":0,"FFG(x) RDTE":84.199,"FFG(x) Procurement":0,"DDG(x) RDTE":133.456,"DDG(x) Procurement":0,"Zumwalts RDTE":58.817,"Zumwalts Procurement":52.738,"Burke DDGE RDTE":25.152,"Burke DDG Procurement":10.773,"VA SSN RDTE":247.293,"VA SSN Procurement":4672.552,"Ohio SSBN/GN RDTE":12.654,"Ohio SSBN/GN Procurement":61.428,"Columbia RDTE":273.265,"Columbia Procurement":8994.594,"SSN(x) RDTE":365.987,"SSN(x) Procurement":0,"LSM RDTE":12.113,"LSM Procurement":0,"LSD/LHA RDTE":27.608,"LSD/LHA Procurement":86.884,"Littoral Combat Ship RDTE":49.461,"Littoral Combat Ship Procurement":5.766,"LPD-17 RDTE":26.709,"LPD-17 Procurement":0}}},"space":{"columns":["Space Modernization Total RDTE","Space Modernization Total Procurement","NSSL RDTE","NSSL Procurement","SDA RDTE","SDA Procurement","RSLP RDTE","RSLP Procurement","GPS III RDTE","GPS III Procurement","AFWET RDTE","AFWET Procurement","WGS RDTE","WGS Procurement","PTS RDTE","PTS Procurement","NG OPIR RDTE","NG OPIR Procurement","SBIRS RDTE","SBIRS Procurement","ESS RDTE","ESS Procurement","AEHF RDTE","AEHF Procurement","Resilient MW/MT LEO RDTE","Resilient MS/MT LEO Procurement","Resilient MW/MT MEO RDTE","Resilient MS/MT MEO Procurement"],"data":{"2012":{"Space Modernization Total RDTE":1126.192,"Space Modernization Total Procurement":0,"NSSL RDTE":19.268,"NSSL Procurement":0,"SDA RDTE":0,"SDA Procurement":0,"RSLP RDTE":0,"RSLP Procurement":0,"GPS III RDTE":1090.398,"GPS III Procurement":0,"AFWET RDTE":0,"AFWET Procurement":0,"WGS RDTE":16.526,"WGS Procurement":0,"PTS RDTE":0,"PTS Procurement":0,"NG OPIR RDTE":0,"NG OPIR Procurement":0,"SBIRS RDTE":0,"SBIRS Procurement":0,"ESS RDTE":0,"ESS Procurement":0,"AEHF RDTE":0,"AEHF Procurement":0,"Resilient MW/MT LEO RDTE":0,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":0,"Resilient MS/MT MEO Procurement":0},"2013":{"Space Modernization Total RDTE":853.598,"Space Modernization Total Procurement":0,"NSSL RDTE":40.461,"NSSL Procurement":0,"SDA RDTE":0,"SDA Procurement":0,"RSLP RDTE":0,"RSLP Procurement":0,"GPS III RDTE":799.035,"GPS III Procurement":0,"AFWET RDTE":0,"AFWET Procurement":0,"WGS RDTE":14.102,"WGS Procurement":0,"PTS RDTE":0,"PTS Procurement":0,"NG OPIR RDTE":0,"NG OPIR Procurement":0,"SBIRS RDTE":0,"SBIRS Procurement":0,"ESS RDTE":0,"ESS Procurement":0,"AEHF RDTE":0,"AEHF Procurement":0,"Resilient MW/MT LEO RDTE":0,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":0,"Resilient MS/MT MEO Procurement":0},"2014":{"Space Modernization Total RDTE":785.105,"Space Modernization Total Procurement":0,"NSSL RDTE":25.925,"NSSL Procurement":0,"SDA RDTE":0,"SDA Procurement":0,"RSLP RDTE":0,"RSLP Procurement":0,"GPS III RDTE":743.604,"GPS III Procurement":0,"AFWET RDTE":0,"AFWET Procurement":0,"WGS RDTE":15.576,"WGS Procurement":0,"PTS RDTE":0,"PTS Procurement":0,"NG OPIR RDTE":0,"NG OPIR Procurement":0,"SBIRS RDTE":0,"SBIRS Procurement":0,"ESS RDTE":0,"ESS Procurement":0,"AEHF RDTE":0,"AEHF Procurement":0,"Resilient MW/MT LEO RDTE":0,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":0,"Resilient MS/MT MEO Procurement":0},"2015":{"Space Modernization Total RDTE":1045.375,"Space Modernization Total Procurement":0,"NSSL RDTE":297.233,"NSSL Procurement":0,"SDA RDTE":0,"SDA Procurement":0,"RSLP RDTE":0,"RSLP Procurement":0,"GPS III RDTE":710.797,"GPS III Procurement":0,"AFWET RDTE":0,"AFWET Procurement":0,"WGS RDTE":37.345,"WGS Procurement":0,"PTS RDTE":0,"PTS Procurement":0,"NG OPIR RDTE":0,"NG OPIR Procurement":0,"SBIRS RDTE":0,"SBIRS Procurement":0,"ESS RDTE":0,"ESS Procurement":0,"AEHF RDTE":0,"AEHF Procurement":0,"Resilient MW/MT LEO RDTE":0,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":0,"Resilient MS/MT MEO Procurement":0},"2016":{"Space Modernization Total RDTE":1709.183,"Space Modernization Total Procurement":2685.841,"NSSL RDTE":628.513,"NSSL Procurement":1625.847,"SDA RDTE":0,"SDA Procurement":0,"RSLP RDTE":0,"RSLP Procurement":0,"GPS III RDTE":637.727,"GPS III Procurement":257.824,"AFWET RDTE":0,"AFWET Procurement":0,"WGS RDTE":64.8,"WGS Procurement":96.798,"PTS RDTE":0,"PTS Procurement":0,"NG OPIR RDTE":0,"NG OPIR Procurement":0,"SBIRS RDTE":378.142,"SBIRS Procurement":705.372,"ESS RDTE":0,"ESS Procurement":0,"AEHF RDTE":0,"AEHF Procurement":0,"Resilient MW/MT LEO RDTE":0,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":0,"Resilient MS/MT MEO Procurement":0},"2017":{"Space Modernization Total RDTE":1845.032,"Space Modernization Total Procurement":4096.733,"NSSL RDTE":484.882,"NSSL Procurement":2676.819,"SDA RDTE":0,"SDA Procurement":0,"RSLP RDTE":13.858,"RSLP Procurement":0,"GPS III RDTE":689.687,"GPS III Procurement":43.191,"AFWET RDTE":0,"AFWET Procurement":42.535,"WGS RDTE":93.962,"WGS Procurement":62.004,"PTS RDTE":25.175,"PTS Procurement":0,"NG OPIR RDTE":0,"NG OPIR Procurement":0,"SBIRS RDTE":205.933,"SBIRS Procurement":451.454,"ESS RDTE":0,"ESS Procurement":0,"AEHF RDTE":331.536,"AEHF Procurement":820.73,"Resilient MW/MT LEO RDTE":0,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":0,"Resilient MS/MT MEO Procurement":0},"2018":{"Space Modernization Total RDTE":2337.515,"Space Modernization Total Procurement":3927.159,"NSSL RDTE":475.741,"NSSL Procurement":1727.907,"SDA RDTE":0,"SDA Procurement":0,"RSLP RDTE":41.14,"RSLP Procurement":0,"GPS III RDTE":904.484,"GPS III Procurement":104.285,"AFWET RDTE":0,"AFWET Procurement":35.689,"WGS RDTE":8.141,"WGS Procurement":837.686,"PTS RDTE":135.611,"PTS Procurement":0,"NG OPIR RDTE":547.523,"NG OPIR Procurement":0,"SBIRS RDTE":148.978,"SBIRS Procurement":1152.534,"ESS RDTE":19.276,"ESS Procurement":0,"AEHF RDTE":56.62,"AEHF Procurement":69.057,"Resilient MW/MT LEO RDTE":0,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":0,"Resilient MS/MT MEO Procurement":0},"2019":{"Space Modernization Total RDTE":3014.596,"Space Modernization Total Procurement":2034.29,"NSSL RDTE":523.23,"NSSL Procurement":1690.847,"SDA RDTE":0,"SDA Procurement":0,"RSLP RDTE":26.747,"RSLP Procurement":57.388,"GPS III RDTE":1270.819,"GPS III Procurement":83.638,"AFWET RDTE":0,"AFWET Procurement":13.243,"WGS RDTE":4.68,"WGS Procurement":14.593,"PTS RDTE":165.139,"PTS Procurement":0,"NG OPIR RDTE":899.132,"NG OPIR Procurement":0,"SBIRS RDTE":71.752,"SBIRS Procurement":130.662,"ESS RDTE":6.96,"ESS Procurement":0,"AEHF RDTE":46.137,"AEHF Procurement":43.92,"Resilient MW/MT LEO RDTE":0,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":0,"Resilient MS/MT MEO Procurement":0},"2020":{"Space Modernization Total RDTE":4016.526,"Space Modernization Total Procurement":2256.04,"NSSL RDTE":491.84,"NSSL Procurement":1440.283,"SDA RDTE":112.95,"SDA Procurement":0,"RSLP RDTE":18.521,"RSLP Procurement":13.352,"GPS III RDTE":1084.161,"GPS III Procurement":494.379,"AFWET RDTE":0,"AFWET Procurement":12.913,"WGS RDTE":2.2,"WGS Procurement":0,"PTS RDTE":347.065,"PTS Procurement":0,"NG OPIR RDTE":1744.102,"NG OPIR Procurement":0,"SBIRS RDTE":27.05,"SBIRS Procurement":264.113,"ESS RDTE":163.516,"ESS Procurement":0,"AEHF RDTE":25.12,"AEHF Procurement":31.001,"Resilient MW/MT LEO RDTE":0,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":0,"Resilient MS/MT MEO Procurement":0},"2021":{"Space Modernization Total RDTE":5014.175,"Space Modernization Total Procurement":2043.672,"NSSL RDTE":605.907,"NSSL Procurement":1111.773,"SDA RDTE":303.644,"SDA Procurement":0,"RSLP RDTE":20.132,"RSLP Procurement":53.27,"GPS III RDTE":849.334,"GPS III Procurement":689.487,"AFWET RDTE":0,"AFWET Procurement":12.583,"WGS RDTE":0,"WGS Procurement":5.579,"PTS RDTE":368.498,"PTS Procurement":5.041,"NG OPIR RDTE":2635.971,"NG OPIR Procurement":0,"SBIRS RDTE":16.093,"SBIRS Procurement":162.788,"ESS RDTE":78.446,"ESS Procurement":0,"AEHF RDTE":136.15,"AEHF Procurement":3.15,"Resilient MW/MT LEO RDTE":0,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":0,"Resilient MS/MT MEO Procurement":0},"2022":{"Space Modernization Total RDTE":5628.407,"Space Modernization Total Procurement":2767.075,"NSSL RDTE":211.85,"NSSL Procurement":1382.312,"SDA RDTE":1495.078,"SDA Procurement":103.146,"RSLP RDTE":18.991,"RSLP Procurement":32.674,"GPS III RDTE":688.372,"GPS III Procurement":987.467,"AFWET RDTE":0,"AFWET Procurement":11.174,"WGS RDTE":0,"WGS Procurement":62.002,"PTS RDTE":386.702,"PTS Procurement":22.376,"NG OPIR RDTE":2539.821,"NG OPIR Procurement":0,"SBIRS RDTE":0,"SBIRS Procurement":165.925,"ESS RDTE":180.509,"ESS Procurement":0,"AEHF RDTE":107.083,"AEHF Procurement":0,"Resilient MW/MT LEO RDTE":0,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":0,"Resilient MS/MT MEO Procurement":0},"2023":{"Space Modernization Total RDTE":8182.187,"Space Modernization Total Procurement":3477.002,"NSSL RDTE":235.44,"NSSL Procurement":1070.067,"SDA RDTE":1480.041,"SDA Procurement":892.02,"RSLP RDTE":35.295,"RSLP Procurement":40.874,"GPS III RDTE":574.922,"GPS III Procurement":752.117,"AFWET RDTE":0,"AFWET Procurement":12.49,"WGS RDTE":48.907,"WGS Procurement":484.475,"PTS RDTE":369.832,"PTS Procurement":68.589,"NG OPIR RDTE":3544.124,"NG OPIR Procurement":0,"SBIRS RDTE":0,"SBIRS Procurement":155.232,"ESS RDTE":515.663,"ESS Procurement":0,"AEHF RDTE":124.431,"AEHF Procurement":1.137,"Resilient MW/MT LEO RDTE":824.948,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":428.585,"Resilient MS/MT MEO Procurement":0},"2024":{"Space Modernization Total RDTE":8602.977,"Space Modernization Total Procurement":3130.515,"NSSL RDTE":160.45,"NSSL Procurement":2141.686,"SDA RDTE":2486.743,"SDA Procurement":540.715,"RSLP RDTE":43.52,"RSLP Procurement":73.281,"GPS III RDTE":487.367,"GPS III Procurement":157.902,"AFWET RDTE":0,"AFWET Procurement":21.414,"WGS RDTE":35.13,"WGS Procurement":0,"PTS RDTE":228.362,"PTS Procurement":68.28,"NG OPIR RDTE":2280.408,"NG OPIR Procurement":0,"SBIRS RDTE":0,"SBIRS Procurement":127.235,"ESS RDTE":484.128,"ESS Procurement":0,"AEHF RDTE":167.596,"AEHF Procurement":0,"Resilient MW/MT LEO RDTE":1514.077,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":715.195,"Resilient MS/MT MEO Procurement":0},"2025":{"Space Modernization Total RDTE":8488.21,"Space Modernization Total Procurement":2905.267,"NSSL RDTE":103.392,"NSSL Procurement":1769.486,"SDA RDTE":2096.601,"SDA Procurement":357.178,"RSLP RDTE":35.134,"RSLP Procurement":0,"GPS III RDTE":512.47,"GPS III Procurement":701.97,"AFWET RDTE":0,"AFWET Procurement":3.402,"WGS RDTE":0,"WGS Procurement":10.02,"PTS RDTE":339.079,"PTS Procurement":63.211,"NG OPIR RDTE":1919.551,"NG OPIR Procurement":0,"SBIRS RDTE":0,"SBIRS Procurement":0,"ESS RDTE":918.581,"ESS Procurement":0,"AEHF RDTE":109.232,"AEHF Procurement":0,"Resilient MW/MT LEO RDTE":1697.821,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":756.349,"Resilient MS/MT MEO Procurement":0},"2026":{"Space Modernization Total RDTE":7309.229,"Space Modernization Total Procurement":2369.848,"NSSL RDTE":6.595,"NSSL Procurement":1466.963,"SDA RDTE":1767.959,"SDA Procurement":648.446,"RSLP RDTE":19.857,"RSLP Procurement":0,"GPS III RDTE":369.733,"GPS III Procurement":139.218,"AFWET RDTE":0,"AFWET Procurement":12.301,"WGS RDTE":29.609,"WGS Procurement":0,"PTS RDTE":360.806,"PTS Procurement":29.949,"NG OPIR RDTE":980.024,"NG OPIR Procurement":0,"SBIRS RDTE":0,"SBIRS Procurement":7.975,"ESS RDTE":1229.929,"ESS Procurement":64.996,"AEHF RDTE":101.015,"AEHF Procurement":0,"Resilient MW/MT LEO RDTE":1757.354,"Resilient MS/MT LEO Procurement":0,"Resilient MW/MT MEO RDTE":686.348,"Resilient MS/MT MEO Procurement":0}}},"rdte_proc_coeff":{"1948":{"score":0.135,"norm_score":-0.378,"rolling5_score":null},"1949":{"score":0.149,"norm_score":-0.365,"rolling5_score":null},"1950":{"score":0.132,"norm_score":-0.381,"rolling5_score":null},"1951":{"score":0.054,"norm_score":-0.459,"rolling5_score":null},"1952":{"score":0.064,"norm_score":-0.45,"rolling5_score":0.107},"1953":{"score":0.128,"norm_score":-0.385,"rolling5_score":0.105},"1954":{"score":0.347,"norm_score":-0.167,"rolling5_score":0.145},"1955":{"score":0.294,"norm_score":-0.22,"rolling5_score":0.177},"1956":{"score":0.299,"norm_score":-0.215,"rolling5_score":0.226},"1957":{"score":0.358,"norm_score":-0.155,"rolling5_score":0.285},"1958":{"score":0.305,"norm_score":-0.208,"rolling5_score":0.321},"1959":{"score":0.392,"norm_score":-0.121,"rolling5_score":0.33},"1960":{"score":0.492,"norm_score":-0.022,"rolling5_score":0.369},"1961":{"score":0.447,"norm_score":-0.066,"rolling5_score":0.399},"1962":{"score":0.387,"norm_score":-0.126,"rolling5_score":0.405},"1963":{"score":0.439,"norm_score":-0.075,"rolling5_score":0.431},"1964":{"score":0.469,"norm_score":-0.044,"rolling5_score":0.447},"1965":{"score":0.456,"norm_score":-0.058,"rolling5_score":0.44},"1966":{"score":0.313,"norm_score":-0.201,"rolling5_score":0.413},"1967":{"score":0.31,"norm_score":-0.203,"rolling5_score":0.397},"1968":{"score":0.322,"norm_score":-0.191,"rolling5_score":0.374},"1969":{"score":0.347,"norm_score":-0.166,"rolling5_score":0.35},"1970":{"score":0.386,"norm_score":-0.127,"rolling5_score":0.336},"1971":{"score":0.41,"norm_score":-0.103,"rolling5_score":0.355},"1972":{"score":0.41,"norm_score":-0.103,"rolling5_score":0.375},"1973":{"score":0.441,"norm_score":-0.073,"rolling5_score":0.399},"1974":{"score":0.47,"norm_score":-0.043,"rolling5_score":0.424},"1975":{"score":0.499,"norm_score":-0.014,"rolling5_score":0.446},"1976":{"score":0.453,"norm_score":-0.06,"rolling5_score":0.455},"1977":{"score":0.391,"norm_score":-0.123,"rolling5_score":0.451},"1978":{"score":0.384,"norm_score":-0.13,"rolling5_score":0.44},"1979":{"score":0.395,"norm_score":-0.119,"rolling5_score":0.425},"1980":{"score":0.385,"norm_score":-0.129,"rolling5_score":0.402},"1981":{"score":0.352,"norm_score":-0.161,"rolling5_score":0.381},"1982":{"score":0.317,"norm_score":-0.196,"rolling5_score":0.367},"1983":{"score":0.297,"norm_score":-0.216,"rolling5_score":0.349},"1984":{"score":0.322,"norm_score":-0.191,"rolling5_score":0.335},"1985":{"score":0.34,"norm_score":-0.174,"rolling5_score":0.326},"1986":{"score":0.383,"norm_score":-0.13,"rolling5_score":0.332},"1987":{"score":0.429,"norm_score":-0.084,"rolling5_score":0.354},"1988":{"score":0.449,"norm_score":-0.064,"rolling5_score":0.385},"1989":{"score":0.47,"norm_score":-0.044,"rolling5_score":0.414},"1990":{"score":0.449,"norm_score":-0.065,"rolling5_score":0.436},"1991":{"score":0.486,"norm_score":-0.028,"rolling5_score":0.457},"1992":{"score":0.612,"norm_score":0.098,"rolling5_score":0.493},"1993":{"score":0.703,"norm_score":0.189,"rolling5_score":0.544},"1994":{"score":0.789,"norm_score":0.275,"rolling5_score":0.608},"1995":{"score":0.799,"norm_score":0.285,"rolling5_score":0.678},"1996":{"score":0.809,"norm_score":0.295,"rolling5_score":0.742},"1997":{"score":0.845,"norm_score":0.332,"rolling5_score":0.789},"1998":{"score":0.828,"norm_score":0.315,"rolling5_score":0.814},"1999":{"score":0.751,"norm_score":0.237,"rolling5_score":0.806},"2000":{"score":0.698,"norm_score":0.185,"rolling5_score":0.786},"2001":{"score":0.663,"norm_score":0.15,"rolling5_score":0.757},"2002":{"score":0.768,"norm_score":0.254,"rolling5_score":0.742},"2003":{"score":0.733,"norm_score":0.219,"rolling5_score":0.723},"2004":{"score":0.774,"norm_score":0.26,"rolling5_score":0.727},"2005":{"score":0.703,"norm_score":0.19,"rolling5_score":0.728},"2006":{"score":0.69,"norm_score":0.177,"rolling5_score":0.734},"2007":{"score":0.577,"norm_score":0.064,"rolling5_score":0.696},"2008":{"score":0.482,"norm_score":-0.031,"rolling5_score":0.645},"2009":{"score":0.598,"norm_score":0.085,"rolling5_score":0.61},"2010":{"score":0.594,"norm_score":0.08,"rolling5_score":0.588},"2011":{"score":0.579,"norm_score":0.065,"rolling5_score":0.566},"2012":{"score":0.609,"norm_score":0.095,"rolling5_score":0.572},"2013":{"score":0.621,"norm_score":0.107,"rolling5_score":0.6},"2014":{"score":0.63,"norm_score":0.116,"rolling5_score":0.606},"2015":{"score":0.616,"norm_score":0.102,"rolling5_score":0.611},"2016":{"score":0.589,"norm_score":0.076,"rolling5_score":0.613},"2017":{"score":0.594,"norm_score":0.08,"rolling5_score":0.61},"2018":{"score":0.622,"norm_score":0.108,"rolling5_score":0.61},"2019":{"score":0.648,"norm_score":0.134,"rolling5_score":0.614},"2020":{"score":0.736,"norm_score":0.223,"rolling5_score":0.638},"2021":{"score":0.75,"norm_score":0.236,"rolling5_score":0.67},"2022":{"score":0.768,"norm_score":0.255,"rolling5_score":0.705},"2023":{"score":0.773,"norm_score":0.259,"rolling5_score":0.735},"2024":{"score":0.731,"norm_score":0.217,"rolling5_score":0.752}}};
+
+// ─────────────────────────────────────────────
+// ERA DEFINITIONS
+// ─────────────────────────────────────────────
+const ERAS = [
+  { label: 'Carter-Reagan Modernization', start: 1978, end: 1985, color: 'rgba(74,144,217,0.08)', border: 'rgba(74,144,217,0.3)' },
+  { label: 'Post-Cold War Peace Dividend', start: 1991, end: 2001, color: 'rgba(155,114,207,0.08)', border: 'rgba(155,114,207,0.3)' },
+  { label: 'Global War on Terror',         start: 2001, end: 2012, color: 'rgba(232,168,56,0.08)',  border: 'rgba(232,168,56,0.3)' },
+  { label: 'Great Power Competition',      start: 2012, end: 2026, color: 'rgba(91,196,160,0.08)', border: 'rgba(91,196,160,0.3)' },
+];
+
+// ─────────────────────────────────────────────
+// SERIES DEFINITIONS PER MODE
+// ─────────────────────────────────────────────
+const SERIES_DEFS = {
+  topline: [
+    { key: 'proc',    label: 'Procurement',  color: '#4a90d9' },
+    { key: 'rdte',    label: 'RDT&E',        color: '#e05c5c' },
+    { key: 'milpers', label: 'Mil Personnel',color: '#5bc4a0' },
+    { key: 'o&m',     label: 'O&M',          color: '#e8a838' },
+  ],
+  service: [
+    { key: 'proc',    label: 'Procurement',  color: '#4a90d9' },
+    { key: 'rdte',    label: 'RDT&E',        color: '#e05c5c' },
+    { key: 'milpers', label: 'Mil Personnel',color: '#5bc4a0' },
+    { key: 'o&m',     label: 'O&M',          color: '#e8a838' },
+  ],
+  capability: [
+    { key: 'RDTE_TOTAL',  label: 'RDTE (Total)',  color: '#e05c5c' },
+    { key: 'PROC_TOTAL',  label: 'Procurement (Total)', color: '#4a90d9' },
+  ],
+  rdte_coeff: [
+    { key: 'score',         label: 'Annual Ratio',       color: '#e05c5c' },
+    { key: 'rolling5_score',label: '5-Year Rolling Avg', color: '#4a90d9' },
+  ],
+};
+
+// Capability total column name mapping
+const CAP_TOTALS = {
+  tacair:       { rdte: 'Tactical Aircraft Total RDTE',         proc: 'Tactical Aircraft Total Procurement' },
+  fires:        { rdte: 'Fires Total RDTE',                     proc: 'Fires Total Procurement' },
+  hypersonics:  { rdte: 'Hypersonics Total RDTE',               proc: 'Hypersonics Total Procurement' },
+  shipbuilding: { rdte: 'Shipbuilding Total RDTE',               proc: 'Shipbuilding Total Procurement' },
+  space:        { rdte: 'Space Modernization Total RDTE',        proc: 'Space Modernization Total Procurement' },
+};
+
+// Programs for each capability area (pairs: rdte col, proc col)
+function getCapPrograms(cap) {
+  const cols = RAW[cap].columns;
+  // Find pairs that are not the totals
+  const totalRdte = CAP_TOTALS[cap].rdte;
+  const totalProc = CAP_TOTALS[cap].proc;
+  const programs = [];
+  for (let i = 0; i < cols.length; i += 2) {
+    const r = cols[i], p = cols[i+1];
+    if (!r || !p) continue;
+    if (r === totalRdte || p === totalProc) continue;
+    // Derive display name from RDTE col
+    const name = r.replace(' RDTE', '').replace(' (all)','').replace(' TOTAL RDTE','').trim();
+    programs.push({ name, rdte: r, proc: p });
+  }
+  return programs;
+}
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let chartInstance = null;
+let displayMode = 'abs';   // 'abs' | 'pct'
+let showEras = true;
+let activeSeries = new Set();
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  onModeChange();
+});
+
+function onModeChange() {
+  const mode = document.getElementById('sel-mode').value;
+  document.getElementById('service-sel-wrap').style.display = mode === 'service' ? 'block' : 'none';
+  document.getElementById('cap-sel-wrap').style.display = mode === 'capability' ? 'block' : 'none';
+  document.getElementById('era-toggle-wrap').style.display = mode === 'rdte_coeff' ? 'none' : 'block';
+
+  // FY range defaults
+  const fyFrom = document.getElementById('fy-from');
+  const fyTo = document.getElementById('fy-to');
+  if (mode === 'capability' || mode === 'rdte_coeff') {
+    fyFrom.min = mode === 'rdte_coeff' ? 1948 : 2012;
+    fyFrom.value = mode === 'rdte_coeff' ? 1970 : 2012;
+  } else {
+    fyFrom.min = 1948;
+    fyFrom.value = 1970;
+  }
+  fyTo.value = 2026;
+
+  if (mode === 'capability') onCapChange();
+  else buildSeriesButtons(mode);
+  render();
+}
+
+function onCapChange() {
+  const cap = document.getElementById('sel-cap').value;
+  const progSel = document.getElementById('sel-program');
+  progSel.innerHTML = '<option value="">— Total only —</option>';
+  getCapPrograms(cap).forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.name;
+    opt.textContent = p.name;
+    progSel.appendChild(opt);
+  });
+  buildSeriesButtons('capability');
+  render();
+}
+
+function buildSeriesButtons(mode) {
+  const defs = SERIES_DEFS[mode] || [];
+  const grid = document.getElementById('series-grid');
+  grid.innerHTML = '';
+  activeSeries = new Set(defs.map(d => d.key));
+
+  defs.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'series-btn active';
+    btn.dataset.key = d.key;
+    btn.style.setProperty('--c', d.color);
+    btn.style.borderColor = d.color + '60';
+    btn.style.background = d.color + '22';
+    btn.innerHTML = `<span class="dot" style="background:${d.color}"></span>${d.label}`;
+    btn.onclick = () => toggleSeries(btn, d.key);
+    grid.appendChild(btn);
+  });
+}
+
+function toggleSeries(btn, key) {
+  if (activeSeries.has(key)) {
+    activeSeries.delete(key);
+    btn.classList.remove('active');
+    btn.style.background = 'transparent';
+    btn.style.borderColor = 'var(--border)';
+  } else {
+    activeSeries.add(key);
+    btn.classList.add('active');
+    const color = btn.querySelector('.dot').style.background;
+    btn.style.background = color + '22';
+    btn.style.borderColor = color + '60';
+  }
+  render();
+}
+
+function setDisplay(mode) {
+  displayMode = mode;
+  document.getElementById('btn-abs').classList.toggle('active', mode === 'abs');
+  document.getElementById('btn-pct').classList.toggle('active', mode === 'pct');
+  render();
+}
+
+function setEras(show) {
+  showEras = show;
+  document.getElementById('btn-era-on').classList.toggle('active', show);
+  document.getElementById('btn-era-off').classList.toggle('active', !show);
+  render();
+}
+
+// ─────────────────────────────────────────────
+// DATA EXTRACTION
+// ─────────────────────────────────────────────
+function getChartData() {
+  const mode = document.getElementById('sel-mode').value;
+  const fyFrom = parseInt(document.getElementById('fy-from').value);
+  const fyTo = parseInt(document.getElementById('fy-to').value);
+
+  let sourceData, seriesDefs, title, subtitle;
+
+  if (mode === 'topline') {
+    sourceData = RAW.topline;
+    seriesDefs = SERIES_DEFS.topline;
+    title = 'Department of War — Topline Spending';
+    subtitle = 'All titles, FY2026 constant dollars';
+  } else if (mode === 'service') {
+    const svc = document.getElementById('sel-service').value;
+    sourceData = RAW[svc];
+    seriesDefs = SERIES_DEFS.service;
+    const names = { army: 'Department of the Army', navy: 'Department of the Navy', af: 'Department of the Air Force' };
+    title = names[svc];
+    subtitle = 'By title, FY2026 constant dollars';
+  } else if (mode === 'rdte_coeff') {
+    sourceData = RAW.rdte_proc_coeff;
+    seriesDefs = SERIES_DEFS.rdte_coeff;
+    title = 'RDTE:Procurement Ratio';
+    subtitle = 'Higher = more RDTE-biased relative to procurement';
+  } else {
+    // capability
+    const cap = document.getElementById('sel-cap').value;
+    const prog = document.getElementById('sel-program').value;
+    const capData = RAW[cap].data;
+    const capTotals = CAP_TOTALS[cap];
+
+    if (!prog) {
+      // totals only
+      sourceData = {};
+      Object.entries(capData).forEach(([fy, row]) => {
+        sourceData[fy] = {
+          RDTE_TOTAL: row[capTotals.rdte],
+          PROC_TOTAL: row[capTotals.proc],
+        };
+      });
+      seriesDefs = SERIES_DEFS.capability;
+    } else {
+      // specific program
+      const programs = getCapPrograms(cap);
+      const p = programs.find(x => x.name === prog);
+      sourceData = {};
+      Object.entries(capData).forEach(([fy, row]) => {
+        sourceData[fy] = {
+          RDTE_TOTAL: row[p.rdte],
+          PROC_TOTAL: row[p.proc],
+        };
+      });
+      seriesDefs = SERIES_DEFS.capability;
+    }
+    const capNames = { tacair: 'Tactical Aircraft', fires: 'Ground-Based Fires', hypersonics: 'Hypersonic Weapons', shipbuilding: 'Shipbuilding', space: 'Space Modernization' };
+    title = capNames[cap] + (prog ? ` — ${prog}` : ' (Total)');
+    subtitle = 'RDTE & Procurement, FY2026 constant dollars';
+  }
+
+  // Build labels and datasets
+  const fys = Object.keys(sourceData)
+    .map(Number)
+    .filter(y => y >= fyFrom && y <= fyTo)
+    .sort((a,b) => a - b);
+
+  // For pct mode we need topline total
+  const toplineTotal = {};
+  if (displayMode === 'pct') {
+    Object.entries(RAW.topline).forEach(([fy, row]) => {
+      toplineTotal[parseInt(fy)] = row.milpers + row['o&m'] + row.proc + row.rdte + (row.milcon || 0);
+    });
+  }
+
+  const datasets = seriesDefs
+    .filter(d => activeSeries.has(d.key))
+    .map(d => ({
+      label: d.label,
+      color: d.color,
+      data: fys.map(fy => {
+        const row = sourceData[fy];
+        if (!row) return null;
+        let v = row[d.key];
+        if (v === null || v === undefined) return null;
+        if (displayMode === 'pct' && mode !== 'rdte_coeff') {
+          const tot = toplineTotal[fy];
+          return tot ? parseFloat(((v / tot) * 100).toFixed(2)) : null;
+        }
+        return parseFloat(v.toFixed(1));
+      })
+    }));
+
+  return { labels: fys, datasets, title, subtitle };
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function render() {
+  document.getElementById('results').classList.add('visible');
+  const { labels, datasets, title, subtitle } = getChartData();
+  const mode = document.getElementById('sel-mode').value;
+
+  document.getElementById('res-title').textContent = subtitle;
+  document.getElementById('res-name').textContent = title;
+  document.getElementById('res-meta').textContent = `FY${labels[0] || '—'} – FY${labels[labels.length-1] || '—'}`;
+
+  renderChart(labels, datasets, mode);
+  renderEraLegend();
+  renderTable(labels, datasets);
+}
+
+function renderChart(labels, datasets, mode) {
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+
+  const isCoeff = mode === 'rdte_coeff';
+  const yLabel = isCoeff ? 'Ratio' : (displayMode === 'pct' ? '% of Topline' : '$M (FY2026 constant)');
+
+  // Build era annotation plugins
+  const eraAnnotations = (showEras && !isCoeff) ? ERAS.map(era => ({
+    type: 'box',
+    xMin: era.start - 0.5,
+    xMax: era.end + 0.5,
+    backgroundColor: era.color,
+    borderColor: era.border,
+    borderWidth: 1,
+    label: { display: false }
+  })) : [];
+
+  const ctx = document.getElementById('myChart').getContext('2d');
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: datasets.map(d => ({
+        label: d.label,
+        data: d.data,
+        borderColor: d.color,
+        backgroundColor: d.color + '18',
+        borderWidth: 2,
+        pointRadius: labels.length > 40 ? 0 : 3,
+        pointHoverRadius: 5,
+        tension: 0.2,
+        fill: false,
+        spanGaps: true,
+      }))
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#6b7a99',
+            font: { family: 'IBM Plex Mono', size: 10 },
+            boxWidth: 14, boxHeight: 3, padding: 16,
+            usePointStyle: true, pointStyle: 'line',
+          }
+        },
+        tooltip: {
+          backgroundColor: '#1e2535',
+          borderColor: '#2a3348',
+          borderWidth: 1,
+          titleColor: '#d4dae8',
+          bodyColor: '#d4dae8',
+          titleFont: { family: 'IBM Plex Mono', size: 11 },
+          bodyFont: { family: 'IBM Plex Mono', size: 11 },
+          callbacks: {
+            title: items => `FY${items[0].label}`,
+            label: ctx => {
+              const v = ctx.raw;
+              if (v === null) return null;
+              if (isCoeff) return ` ${ctx.dataset.label}: ${v.toFixed(3)}`;
+              if (displayMode === 'pct') return ` ${ctx.dataset.label}: ${v.toFixed(1)}%`;
+              return ` ${ctx.dataset.label}: $${v.toLocaleString()}M`;
+            }
+          }
+        },
+      },
+      scales: {
+        x: {
+          ticks: { color: '#6b7a99', font: { family: 'IBM Plex Mono', size: 10 }, maxTicksLimit: 15 },
+          grid: { color: '#1e2535' }
+        },
+        y: {
+          ticks: {
+            color: '#6b7a99',
+            font: { family: 'IBM Plex Mono', size: 10 },
+            callback: v => isCoeff ? v.toFixed(2) : (displayMode === 'pct' ? v.toFixed(1) + '%' : '$' + (v>=1000 ? (v/1000).toFixed(0)+'B' : v.toFixed(0)+'M'))
+          },
+          grid: { color: '#2a3348' },
+          title: { display: true, text: yLabel, color: '#6b7a99', font: { family: 'IBM Plex Mono', size: 10 } }
+        }
+      }
+    },
+    plugins: eraAnnotations.length ? [{
+      id: 'eraBoxes',
+      beforeDatasetsDraw(chart) {
+        const { ctx, chartArea: { left, right, top, bottom }, scales: { x, y } } = chart;
+        eraAnnotations.forEach(ann => {
+          const x1 = x.getPixelForValue(ann.xMin);
+          const x2 = x.getPixelForValue(ann.xMax);
+          ctx.save();
+          ctx.fillStyle = ann.backgroundColor;
+          ctx.fillRect(Math.max(left, x1), top, Math.min(right, x2) - Math.max(left, x1), bottom - top);
+          ctx.strokeStyle = ann.borderColor;
+          ctx.lineWidth = 1;
+          if (x1 >= left) { ctx.beginPath(); ctx.moveTo(x1, top); ctx.lineTo(x1, bottom); ctx.stroke(); }
+          if (x2 <= right) { ctx.beginPath(); ctx.moveTo(x2, top); ctx.lineTo(x2, bottom); ctx.stroke(); }
+          ctx.restore();
+        });
+      }
+    }] : []
+  });
+}
+
+function renderEraLegend() {
+  const wrap = document.getElementById('era-legend-wrap');
+  const mode = document.getElementById('sel-mode').value;
+  if (!showEras || mode === 'rdte_coeff') { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = ERAS.map(e =>
+    `<div class="era-item"><div class="era-swatch" style="background:${e.border}"></div><span>${e.label} (${e.start}–${e.end})</span></div>`
+  ).join('');
+}
+
+function renderTable(labels, datasets) {
+  const head = document.getElementById('table-head');
+  const body = document.getElementById('table-body');
+  const mode = document.getElementById('sel-mode').value;
+  const isCoeff = mode === 'rdte_coeff';
+
+  head.innerHTML = '';
+  body.innerHTML = '';
+
+  // Header
+  const thFY = document.createElement('th');
+  thFY.textContent = 'FY';
+  thFY.style.textAlign = 'left';
+  head.appendChild(thFY);
+  datasets.forEach(d => {
+    const th = document.createElement('th');
+    th.textContent = d.label;
+    head.appendChild(th);
+  });
+
+  // Rows — show all, newest first
+  [...labels].reverse().forEach((fy, idx) => {
+    const tr = document.createElement('tr');
+    const tdFY = document.createElement('td');
+    tdFY.textContent = fy;
+    tr.appendChild(tdFY);
+    datasets.forEach(d => {
+      const td = document.createElement('td');
+      const v = d.data[labels.length - 1 - idx];
+      if (v === null || v === undefined) {
+        td.textContent = '—';
+        td.className = 'null-val';
+      } else if (isCoeff) {
+        td.textContent = v.toFixed(3);
+      } else if (displayMode === 'pct') {
+        td.textContent = v.toFixed(1) + '%';
+      } else {
+        td.textContent = '$' + v.toLocaleString() + 'M';
+      }
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+}
+</script>
+</body>
+</html>

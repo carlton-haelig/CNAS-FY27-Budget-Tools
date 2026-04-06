@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DoW Procurement Budget Comparison</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0e1117;
+    --surface: #161b27;
+    --surface2: #1e2535;
+    --border: #2a3348;
+    --accent: #4a90d9;
+    --accent2: #e8a838;
+    --accent3: #5bc4a0;
+    --text: #d4dae8;
+    --text-muted: #6b7a99;
+    --red: #e05c5c;
+    --green: #5bc4a0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    background: var(--surface);
+  }
+
+  header h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  header span {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 272px 1fr;
+    min-height: calc(100vh - 53px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    padding: 20px 0;
+    overflow-y: auto;
+  }
+
+  .sidebar-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 18px 8px;
+    display: block;
+  }
+
+  .selector-group { padding: 0 14px 14px; }
+
+  select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    padding: 8px 10px;
+    border-radius: 3px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%236b7a99'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+    margin-bottom: 6px;
+  }
+  select:focus { outline: none; border-color: var(--accent); }
+  select:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  /* FY toggle buttons */
+  .fy-grid { padding: 0 14px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+
+  .fy-btn {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 11px;
+    border-radius: 4px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #fff;
+    background: transparent;
+    opacity: 0.38;
+    transition: opacity 0.15s, border-color 0.15s;
+    text-align: left;
+    user-select: none;
+    line-height: 1;
+  }
+
+  .fy-btn.active { opacity: 1; }
+
+  .fy-btn .dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Per-column colors: background + border when active */
+  .fy-btn[data-col="fy25_base"]  { --c: #4a90d9; }
+  .fy-btn[data-col="fy26_base"]  { --c: #5bc4a0; }
+  .fy-btn[data-col="fy26_rec"]   { --c: #e8a838; }
+  .fy-btn[data-col="fy26_total"] { --c: #9b72cf; }
+  .fy-btn[data-col="fy27_base"]  { --c: #e05c5c; }
+  .fy-btn[data-col="fy27_rec"]   { --c: #e07cb0; }
+  .fy-btn[data-col="fy27_total"] { --c: #c07840; }
+
+  .fy-btn { border-color: color-mix(in srgb, var(--c) 40%, transparent); }
+  .fy-btn.active { border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
+  .fy-btn .dot { background: var(--c); }
+
+  /* MAIN */
+  .main { padding: 28px 32px; overflow-y: auto; }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    gap: 10px;
+  }
+
+  .empty-state svg { opacity: 0.2; }
+
+  /* RESULTS */
+  .results { display: none; }
+  .results.visible { display: block; }
+
+  .result-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .result-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .result-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  /* Chart toggle */
+  .chart-toggle {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    align-self: flex-start;
+  }
+
+  .chart-toggle button {
+    background: var(--surface2);
+    border: none;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .chart-toggle button.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* Chart */
+  .chart-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 24px;
+    position: relative;
+    height: 340px;
+  }
+
+  /* Table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead tr {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 10px 16px;
+    text-align: right;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  th:first-child { text-align: left; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  td {
+    padding: 10px 16px;
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  td:first-child {
+    text-align: left;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  td.row-group {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--surface2);
+    padding: 6px 16px;
+  }
+
+  td.null-val { color: var(--text-muted); }
+
+  td.delta-pos { color: var(--green); }
+  td.delta-neg { color: var(--red); }
+
+  .note {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    border-left: 2px solid var(--border);
+    padding-left: 10px;
+    margin-top: 8px;
+  }
+
+  /* Tom Select dark theme */
+  .ts-wrapper { margin-bottom: 0; }
+  .ts-control {
+    background: var(--surface2) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 3px !important;
+    color: var(--text) !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+    font-size: 13px !important;
+    padding: 7px 10px !important;
+    box-shadow: none !important;
+    min-height: unset !important;
+  }
+  .ts-control input { color: var(--text) !important; font-size: 13px !important; font-family: 'IBM Plex Sans', sans-serif !important; }
+  .ts-control input::placeholder { color: var(--text-muted) !important; }
+  .ts-dropdown {
+    background: var(--surface2) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 3px !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+    font-size: 13px !important;
+    color: var(--text) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6) !important;
+  }
+  .ts-dropdown .option { padding: 7px 14px !important; color: var(--text) !important; cursor: pointer; }
+  .ts-dropdown .option.active,
+  .ts-dropdown .option:hover { background: var(--accent) !important; color: #fff !important; }
+  .ts-dropdown .optgroup-header {
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 10px !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    color: var(--text-muted) !important;
+    padding: 8px 14px 4px !important;
+    background: var(--surface) !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+  .ts-dropdown .no-results { color: var(--text-muted) !important; padding: 8px 14px !important; font-size: 12px !important; }
+  .ts-wrapper.single .ts-control:after { border-top-color: var(--text-muted) !important; }
+  .ts-wrapper.single.input-active .ts-control:after { border-bottom-color: var(--text-muted) !important; }
+  .quick-jump-wrap { padding: 0 14px 14px; }
+  .quick-jump-clear {
+    margin-top: 5px;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-decoration: underline;
+    display: none;
+  }
+  .quick-jump-clear.visible { display: block; }
+</style>
+</head>
+<style>
+  .app-nav {
+    background: #0a0d14;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 44px;
+    gap: 4px;
+  }
+  .app-nav .nav-brand {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-right: 20px;
+    white-space: nowrap;
+  }
+  .app-nav a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--text-muted);
+    padding: 0 14px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .app-nav a:hover { color: var(--text); }
+  .app-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .layout { min-height: calc(100vh - 44px - 53px); }
+</style>
+
+<body>
+
+<nav class="app-nav">
+  <span class="nav-brand">DoW Budget Suite</span>
+  <a href="index.html">Home</a>
+  <a href="defense_budget_tool.html" class="active">P-1 Comparison</a>
+  <a href="historical_budget_tool.html">Historical Trends</a>
+</nav>
+
+<header>
+  <h1>DoW Procurement Budget Comparison</h1>
+  <span>P-1 Exhibit · FY2025–FY2027 · Dollars in Thousands</span>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <span class="sidebar-label">Quick Jump</span>
+    <div class="quick-jump-wrap">
+      <select id="quick-jump" placeholder="Search programs..."></select>
+      <span class="quick-jump-clear" id="quick-jump-clear" onclick="clearQuickJump()">✕ Clear selection</span>
+    </div>
+
+    <hr class="divider">
+
+    <span class="sidebar-label">Category</span>
+    <div class="selector-group">
+      <select id="sel-level1" onchange="onLevel1Change()">
+        <option value="">— Select component —</option>
+        <option value="dow">Department of War (Grand Total)</option>
+        <option value="army">Department of the Army</option>
+        <option value="navy">Department of the Navy</option>
+        <option value="af">Department of the Air Force</option>
+        <option value="dw">Defense-Wide</option>
+      </select>
+
+      <select id="sel-level2" disabled onchange="onLevel2Change()">
+        <option value="">— Select appropriation —</option>
+      </select>
+
+      <select id="sel-level3" disabled onchange="onLevel3Change()">
+        <option value="">— Select program —</option>
+      </select>
+    </div>
+
+    <hr class="divider">
+
+    <span class="sidebar-label">Fiscal Years</span>
+    <div class="fy-grid">
+      <button class="fy-btn active" data-col="fy25_base"  onclick="toggleCol(this)"><span class="dot"></span>FY25</button>
+      <button class="fy-btn active" data-col="fy26_base"  onclick="toggleCol(this)"><span class="dot"></span>FY26 Disc.</button>
+      <button class="fy-btn active" data-col="fy26_rec"   onclick="toggleCol(this)"><span class="dot"></span>FY26 Mand.</button>
+      <button class="fy-btn active" data-col="fy26_total" onclick="toggleCol(this)"><span class="dot"></span>FY26 Total</button>
+      <button class="fy-btn active" data-col="fy27_base"  onclick="toggleCol(this)"><span class="dot"></span>FY27 Disc.</button>
+      <button class="fy-btn active" data-col="fy27_rec"   onclick="toggleCol(this)"><span class="dot"></span>FY27 Mand.</button>
+      <button class="fy-btn active" data-col="fy27_total" onclick="toggleCol(this)"><span class="dot"></span>FY27 Total</button>
+    </div>
+
+    <hr class="divider">
+
+    <span class="sidebar-label">Discretionary vs. Mandatory Display</span>
+    <div class="selector-group">
+      <div class="chart-toggle" style="width:100%">
+        <button id="btn-grouped" class="active" style="flex:1" onclick="setChartType('grouped')">Grouped</button>
+        <button id="btn-stacked" style="flex:1" onclick="setChartType('stacked')">Stacked</button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="empty-state" id="empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+      </svg>
+      <span>Select a category to begin</span>
+    </div>
+
+    <div class="results" id="results">
+      <div class="result-header">
+        <div>
+          <div class="result-title" id="res-title"></div>
+          <div class="result-name" id="res-name"></div>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <canvas id="myChart"></canvas>
+      </div>
+
+      <div class="table-wrap">
+        <table id="data-table">
+          <thead><tr id="table-head"></tr></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+
+      <div class="note" id="data-note" style="display:none"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// All dollar values in $thousands. null = not applicable.
+// Structure: { fy25_base, fy26_base, fy26_rec, fy26_total, fy27_base, fy27_rec, fy27_total }
+// qty: same keys, units vary by program (noted in qtyUnit field)
+// ─────────────────────────────────────────────
+
+const DATA = {
+
+  // ── DEPARTMENT OF WAR ────────────────────────
+  dow: {
+    label: 'Grand Total — Department of War',
+    breadcrumb: 'Department of War',
+    data: { fy25_base:186510870, fy26_base:168279764, fy26_rec:55552276, fy26_total:223832040, fy27_base:257591400, fy27_rec:155504385, fy27_total:413095785 }
+  },
+
+  // ── ARMY ─────────────────────────────────────
+  army: {
+    label: 'Total — Department of the Army',
+    breadcrumb: 'Department of the Army',
+    data: { fy25_base:32308141, fy26_base:28120250, fy26_rec:2590768, fy26_total:30711018, fy27_base:35984971, fy27_rec:24483244, fy27_total:60468215 }
+  },
+  'army-aircraft': {
+    label: 'Aircraft Procurement, Army',
+    breadcrumb: 'Army → Aircraft Procurement',
+    data: { fy25_base:3535071, fy26_base:3625324, fy26_rec:440130, fy26_total:4065454, fy27_base:1933769, fy27_rec:null, fy27_total:1933769 }
+  },
+  'army-missile': {
+    label: 'Missile Procurement, Army',
+    breadcrumb: 'Army → Missile Procurement',
+    data: { fy25_base:7456184, fy26_base:7287263, fy26_rec:672598, fy26_total:7959861, fy27_base:12130430, fy27_rec:24483244, fy27_total:36613674 },
+    note: '* FY27 mandatory corrected to $24.483B per DoW errata.'
+  },
+  'army-wtcv': {
+    label: 'Procurement of Weapons & Tracked Combat Vehicles, Army',
+    breadcrumb: 'Army → Weapons & Tracked Combat Vehicles',
+    data: { fy25_base:5905253, fy26_base:3005021, fy26_rec:480000, fy26_total:3485021, fy27_base:3728159, fy27_rec:null, fy27_total:3728159 }
+  },
+  'army-ammo': {
+    label: 'Procurement of Ammunition, Army',
+    breadcrumb: 'Army → Ammunition',
+    data: { fy25_base:4502155, fy26_base:4576705, fy26_rec:357000, fy26_total:4933705, fy27_base:5469588, fy27_rec:null, fy27_total:5469588 }
+  },
+  'army-other': {
+    label: 'Other Procurement, Army',
+    breadcrumb: 'Army → Other Procurement',
+    data: { fy25_base:10137471, fy26_base:9412655, fy26_rec:641040, fy26_total:10053695, fy27_base:12667053, fy27_rec:null, fy27_total:12667053 }
+  },
+  'army-chem': {
+    label: 'Chemical Agents & Munitions Destruction, Defense',
+    breadcrumb: 'Army → Chemical Agents & Munitions Destruction',
+    data: { fy25_base:772007, fy26_base:213282, fy26_rec:null, fy26_total:213282, fy27_base:55972, fy27_rec:null, fy27_total:55972 }
+  },
+
+  // Army programs
+  'uh60': {
+    label: 'UH-60 Blackhawk (new procurement)',
+    breadcrumb: 'Army → Aircraft → UH-60 Blackhawk',
+    qtyUnit: 'aircraft (MYP)',
+    data: { fy25_base:769054, fy26_base:913060, fy26_rec:null, fy26_total:913060, fy27_base:39257, fy27_rec:null, fy27_total:39257 },
+    qty:  { fy25_base:26, fy26_base:29, fy26_rec:null, fy26_total:29, fy27_base:1, fy27_rec:null, fy27_total:1 }
+  },
+  'ch47': {
+    label: 'CH-47 Chinook (new procurement)',
+    breadcrumb: 'Army → Aircraft → CH-47 Chinook',
+    qtyUnit: 'aircraft (MYP)',
+    data: { fy25_base:699698, fy26_base:628798, fy26_rec:null, fy26_total:628798, fy27_base:210645, fy27_rec:null, fy27_total:210645 },
+    qty:  { fy25_base:11, fy26_base:11, fy26_rec:null, fy26_total:11, fy27_base:5, fy27_rec:null, fy27_total:5 }
+  },
+  'ah64': {
+    label: 'AH-64 Apache (new procurement)',
+    breadcrumb: 'Army → Aircraft → AH-64 Apache',
+    qtyUnit: 'aircraft (remanufacture)',
+    data: { fy25_base:557399, fy26_base:361669, fy26_rec:null, fy26_total:361669, fy27_base:1552, fy27_rec:null, fy27_total:1552 },
+    qty:  { fy25_base:31, fy26_base:7, fy26_rec:null, fy26_total:7, fy27_base:null, fy27_rec:null, fy27_total:null }
+  },
+  'prsm': {
+    label: 'Precision Strike Missile (PrSM)',
+    breadcrumb: 'Army → Missiles → PrSM',
+    qtyUnit: 'missiles',
+    data: { fy25_base:491497, fy26_base:268726, fy26_rec:277816, fy26_total:546542, fy27_base:1226526, fy27_rec:692000, fy27_total:1918526 },
+    qty:  { fy25_base:338, fy26_base:108, fy26_rec:null, fy26_total:108, fy27_base:454, fy27_rec:1134, fy27_total:1588 }
+  },
+  'himars': {
+    label: 'HIMARS (new systems)',
+    breadcrumb: 'Army → Missiles → HIMARS',
+    qtyUnit: 'launchers',
+    data: { fy25_base:175539, fy26_base:61503, fy26_rec:null, fy26_total:61503, fy27_base:745682, fy27_rec:null, fy27_total:745682 },
+    qty:  { fy25_base:18, fy26_base:6, fy26_rec:null, fy26_total:6, fy27_base:96, fy27_rec:null, fy27_total:96 }
+  },
+  'lrhw': {
+    label: 'Long-Range Hypersonic Weapon (LRHW / Dark Eagle)',
+    breadcrumb: 'Army → Missiles → LRHW',
+    qtyUnit: null,
+    data: { fy25_base:669178, fy26_base:347845, fy26_rec:113932, fy26_total:461777, fy27_base:301777, fy27_rec:null, fy27_total:301777 }
+  },
+  'mrc': {
+    label: 'Mid-Range Capability (MRC)',
+    breadcrumb: 'Army → Missiles → Mid-Range Capability',
+    qtyUnit: null,
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:370351, fy27_rec:2331282, fy27_total:2701633 }
+  },
+  'thaad-int': {
+    label: 'THAAD Interceptors (Army)',
+    breadcrumb: 'Army → Missiles → THAAD Interceptors',
+    qtyUnit: 'interceptors',
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:907162, fy27_rec:10528043, fy27_total:11435205 },
+    qty:  { fy25_base:27, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:null, fy27_rec:830, fy27_total:857 },
+    note: 'Army Missile Procurement (page 22). Interceptor buy only; THAAD system procurement is under MDA/Defense-Wide.'
+  },
+  'mse-army': {
+    label: 'PAC-3 MSE Missile (Army)',
+    breadcrumb: 'Army → Missiles → PAC-3 MSE',
+    qtyUnit: 'missiles',
+    data: { fy25_base:1031060, fy26_base:1571905, fy26_rec:200000, fy26_total:1771905, fy27_base:1297528, fy27_rec:10931919, fy27_total:12229447 },
+    qty:  { fy25_base:194, fy26_base:310, fy26_rec:47, fy26_total:357, fy27_base:244, fy27_rec:2554, fy27_total:2798 }
+  },
+  'mshorad': {
+    label: 'M-SHORAD',
+    breadcrumb: 'Army → Missiles → M-SHORAD',
+    qtyUnit: null,
+    data: { fy25_base:69091, fy26_base:631114, fy26_rec:80850, fy26_total:711964, fy27_base:712690, fy27_rec:null, fy27_total:712690 }
+  },
+  'ibcs': {
+    label: 'IAMD Battle Command System (IBCS)',
+    breadcrumb: 'Army → Other Procurement → IBCS',
+    data: { fy25_base:368317, fy26_base:525863, fy26_rec:null, fy26_total:525863, fy27_base:1052868, fy27_rec:null, fy27_total:1052868 }
+  },
+  'ifpc': {
+    label: 'Indirect Fire Protection Capability (IFPC) Inc 2-I',
+    breadcrumb: 'Army → Missiles → IFPC Inc 2-I',
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:1626004, fy27_rec:null, fy27_total:1626004 }
+  },
+  'cuas-army': {
+    label: 'Counter Small UAS Interceptor (Army)',
+    breadcrumb: 'Army → Missiles → C-sUAS Interceptor',
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:null, fy27_rec:null, fy27_total:null },
+    note: 'Line item present in FY27 request but no funding reported ($0).'
+  },
+
+  // ── NAVY ──────────────────────────────────────
+  navy: {
+    label: 'Total — Department of the Navy',
+    breadcrumb: 'Department of the Navy',
+    data: { fy25_base:83524387, fy26_base:69953674, fy26_rec:33400185, fy26_total:103353859, fy27_base:126006432, fy27_rec:24017834, fy27_total:150024266 }
+  },
+  'navy-aircraft': {
+    label: 'Aircraft Procurement, Navy',
+    breadcrumb: 'Navy → Aircraft Procurement',
+    data: { fy25_base:15914495, fy26_base:17239853, fy26_rec:509000, fy26_total:17748853, fy27_base:26947023, fy27_rec:7453730, fy27_total:34400753 }
+  },
+  'navy-weapons': {
+    label: 'Weapons Procurement, Navy',
+    breadcrumb: 'Navy → Weapons Procurement',
+    data: { fy25_base:7107701, fy26_base:6086954, fy26_rec:4063652, fy26_total:10150606, fy27_base:11769111, fy27_rec:10850204, fy27_total:22619315 }
+  },
+  'navy-ammo': {
+    label: 'Procurement of Ammunition, Navy & Marine Corps',
+    breadcrumb: 'Navy → Ammunition',
+    data: { fy25_base:1877446, fy26_base:1098630, fy26_rec:247000, fy26_total:1345630, fy27_base:1958597, fy27_rec:null, fy27_total:1958597 }
+  },
+  'navy-scn': {
+    label: 'Shipbuilding & Conversion, Navy',
+    breadcrumb: 'Navy → Shipbuilding & Conversion',
+    data: { fy25_base:29442178, fy26_base:27151616, fy26_rec:17930426, fy26_total:45082042, fy27_base:60176117, fy27_rec:5648900, fy27_total:65825017 }
+  },
+  'navy-other': {
+    label: 'Other Procurement, Navy',
+    breadcrumb: 'Navy → Other Procurement',
+    data: { fy25_base:15817464, fy26_base:14693978, fy26_rec:5802107, fy26_total:20496085, fy27_base:18866679, fy27_rec:50000, fy27_total:18916679 }
+  },
+  'usmc': {
+    label: 'Procurement, Marine Corps',
+    breadcrumb: 'Navy → Marine Corps Procurement',
+    data: { fy25_base:3784329, fy26_base:3682643, fy26_rec:311000, fy26_total:3993643, fy27_base:6288905, fy27_rec:15000, fy27_total:6303905 }
+  },
+
+  // Navy programs
+  'f35b': {
+    label: 'F-35B (STOVL) — Navy/USMC',
+    breadcrumb: 'Navy → Aircraft → F-35B',
+    qtyUnit: 'aircraft',
+    data: { fy25_base:2130050, fy26_base:1940880, fy26_rec:null, fy26_total:1940880, fy27_base:180848, fy27_rec:1935380, fy27_total:2116228 },
+    qty:  { fy25_base:13, fy26_base:11, fy26_rec:null, fy26_total:11, fy27_base:null, fy27_rec:10, fy27_total:10 }
+  },
+  'f35c': {
+    label: 'F-35C (CV) — Navy',
+    breadcrumb: 'Navy → Aircraft → F-35C',
+    qtyUnit: 'aircraft',
+    data: { fy25_base:2473555, fy26_base:2096525, fy26_rec:null, fy26_total:2096525, fy27_base:1372163, fy27_rec:3926560, fy27_total:5298723 },
+    qty:  { fy25_base:17, fy26_base:12, fy26_rec:null, fy26_total:12, fy27_base:8, fy27_rec:29, fy27_total:37 }
+  },
+  'fa18ef': {
+    label: 'F/A-18E/F Super Hornet',
+    breadcrumb: 'Navy → Aircraft → F/A-18E/F',
+    qtyUnit: null,
+    data: { fy25_base:28554, fy26_base:29506, fy26_rec:null, fy26_total:29506, fy27_base:49088, fy27_rec:null, fy27_total:49088 },
+    note: 'No new-buy quantity; funding is sustainment/support only.'
+  },
+  'ch53k': {
+    label: 'CH-53K King Stallion',
+    breadcrumb: 'Navy → Aircraft → CH-53K',
+    qtyUnit: 'aircraft',
+    data: { fy25_base:2611848, fy26_base:2268610, fy26_rec:null, fy26_total:2268610, fy27_base:3398601, fy27_rec:null, fy27_total:3398601 },
+    qty:  { fy25_base:18, fy26_base:14, fy26_rec:null, fy26_total:14, fy27_base:22, fy27_rec:null, fy27_total:22 }
+  },
+  'e2d': {
+    label: 'E-2D Advanced Hawkeye',
+    breadcrumb: 'Navy → Aircraft → E-2D',
+    qtyUnit: 'aircraft',
+    data: { fy25_base:95219, fy26_base:1100800, fy26_rec:null, fy26_total:1100800, fy27_base:2075025, fy27_rec:null, fy27_total:2075025 },
+    qty:  { fy25_base:null, fy26_base:3, fy26_rec:null, fy26_total:3, fy27_base:6, fy27_rec:null, fy27_total:6 }
+  },
+  'p8a': {
+    label: 'P-8A Poseidon',
+    breadcrumb: 'Navy → Aircraft → P-8A',
+    qtyUnit: 'aircraft',
+    data: { fy25_base:12424, fy26_base:13631, fy26_rec:null, fy26_total:13631, fy27_base:4227350, fy27_rec:null, fy27_total:4227350 },
+    qty:  { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:12, fy27_rec:null, fy27_total:12 }
+  },
+  'kc130j-navy': {
+    label: 'KC-130J (Navy/USMC)',
+    breadcrumb: 'Navy → Aircraft → KC-130J',
+    qtyUnit: 'aircraft',
+    data: { fy25_base:294406, fy26_base:518017, fy26_rec:145000, fy26_total:663017, fy27_base:1601906, fy27_rec:1190000, fy27_total:2791906 },
+    qty:  { fy25_base:2, fy26_base:4, fy26_rec:1, fy26_total:5, fy27_base:11, fy27_rec:7, fy27_total:18 }
+  },
+  'mq25': {
+    label: 'MQ-25 Stingray',
+    breadcrumb: 'Navy → Aircraft → MQ-25',
+    qtyUnit: 'aircraft',
+    data: { fy25_base:61979, fy26_base:387686, fy26_rec:100000, fy26_total:487686, fy27_base:823368, fy27_rec:null, fy27_total:823368 },
+    qty:  { fy25_base:null, fy26_base:3, fy26_rec:null, fy26_total:3, fy27_base:3, fy27_rec:null, fy27_total:3 }
+  },
+  'columbia': {
+    label: 'Columbia Class Submarine',
+    breadcrumb: 'Navy → Shipbuilding → Columbia Class',
+    qtyUnit: 'hulls',
+    data: { fy25_base:null, fy26_base:10744317, fy26_rec:null, fy26_total:10744317, fy27_base:10486369, fy27_rec:null, fy27_total:10486369 },
+    qty:  { fy25_base:null, fy26_base:1, fy26_rec:null, fy26_total:1, fy27_base:1, fy27_rec:null, fy27_total:1 },
+    note: 'Values shown are gross; advance procurement offsets apply. FY25 funded under National Sea-Based Deterrence Fund (omitted per scope).'
+  },
+  'virginia': {
+    label: 'Virginia Class Submarine',
+    breadcrumb: 'Navy → Shipbuilding → Virginia Class',
+    qtyUnit: 'hulls',
+    data: { fy25_base:9500534, fy26_base:5389109, fy26_rec:4600000, fy26_total:9989109, fy27_base:11437036, fy27_rec:null, fy27_total:11437036 },
+    qty:  { fy25_base:1, fy26_base:1, fy26_rec:1, fy26_total:2, fy27_base:2, fy27_rec:null, fy27_total:2 }
+  },
+  'cvn81': {
+    label: 'CVN-81 (Carrier Replacement Program)',
+    breadcrumb: 'Navy → Shipbuilding → CVN-81',
+    qtyUnit: null,
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:null, fy27_rec:null, fy27_total:null },
+    note: 'CVN-81 line present in document but no funding reported in visible columns. May be classified or advance procurement only.'
+  },
+  'ddg51': {
+    label: 'DDG-51 Arleigh Burke Destroyer',
+    breadcrumb: 'Navy → Shipbuilding → DDG-51',
+    qtyUnit: 'hulls',
+    data: { fy25_base:7858814, fy26_base:306125, fy26_rec:5400000, fy26_total:5706125, fy27_base:4256914, fy27_rec:314000, fy27_total:4570914 },
+    qty:  { fy25_base:3, fy26_base:null, fy26_rec:2, fy26_total:2, fy27_base:1, fy27_rec:null, fy27_total:1 }
+  },
+  'ffg': {
+    label: 'FFG-Frigate (Constellation Class)',
+    breadcrumb: 'Navy → Shipbuilding → FFG-Frigate',
+    qtyUnit: 'hulls',
+    data: { fy25_base:null, fy26_base:100000, fy26_rec:null, fy26_total:100000, fy27_base:null, fy27_rec:null, fy27_total:null },
+    note: 'Only advance procurement funding shown; no new-start hull qty reported.'
+  },
+  'lpd17': {
+    label: 'LPD-17 San Antonio Class',
+    breadcrumb: 'Navy → Shipbuilding → LPD-17',
+    qtyUnit: 'hulls',
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:null, fy27_rec:null, fy27_total:null },
+    qty:  { fy25_base:1, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:1, fy27_rec:null, fy27_total:1 },
+    note: 'LPD-17 line present; funding appears in prior-year completion costs. No new-start funding in displayed columns.'
+  },
+  'mls': {
+    label: 'Medium Landing Ship',
+    breadcrumb: 'Navy → Shipbuilding → Medium Landing Ship',
+    qtyUnit: 'hulls',
+    data: { fy25_base:29668, fy26_base:800000, fy26_rec:1963941, fy26_total:2763941, fy27_base:null, fy27_rec:1887500, fy27_total:1887500 },
+    qty:  { fy25_base:null, fy26_base:2, fy26_rec:8, fy26_total:10, fy27_base:null, fy27_rec:6, fy27_total:6 }
+  },
+  'sub-tender': {
+    label: 'Submarine Tender',
+    breadcrumb: 'Navy → Shipbuilding → Submarine Tender',
+    qtyUnit: 'hulls',
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:4444000, fy27_rec:null, fy27_total:4444000 },
+    qty:  { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:2, fy27_rec:null, fy27_total:2 }
+  },
+  'cps': {
+    label: 'Conventional Prompt Strike (CPS)',
+    breadcrumb: 'Navy → Weapons → CPS',
+    qtyUnit: 'missiles',
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:750387, fy27_rec:null, fy27_total:750387 },
+    qty:  { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:12, fy27_rec:null, fy27_total:12 }
+  },
+  'tomahawk': {
+    label: 'Tomahawk',
+    breadcrumb: 'Navy → Weapons → Tomahawk',
+    qtyUnit: 'missiles',
+    data: { fy25_base:95940, fy26_base:7193, fy26_rec:250421, fy26_total:257614, fy27_base:1015106, fy27_rec:1993803, fy27_total:3008909 },
+    qty:  { fy25_base:20, fy26_base:null, fy26_rec:55, fy26_total:55, fy27_base:58, fy27_rec:727, fy27_total:785 }
+  },
+  'lrasm-navy': {
+    label: 'LRASM (Navy)',
+    breadcrumb: 'Navy → Weapons → LRASM',
+    qtyUnit: 'missiles',
+    data: { fy25_base:597530, fy26_base:656724, fy26_rec:350000, fy26_total:1006724, fy27_base:670456, fy27_rec:236389, fy27_total:906845 },
+    qty:  { fy25_base:164, fy26_base:136, fy26_rec:64, fy26_total:200, fy27_base:129, fy27_rec:48, fy27_total:177 }
+  },
+  'sm': {
+    label: 'Standard Missile (SM-2/6)',
+    breadcrumb: 'Navy → Weapons → Standard Missile',
+    qtyUnit: 'missiles',
+    data: { fy25_base:788223, fy26_base:470278, fy26_rec:1048000, fy26_total:1518278, fy27_base:733159, fy27_rec:3599221, fy27_total:4332380 },
+    qty:  { fy25_base:102, fy26_base:55, fy26_rec:111, fy26_total:166, fy27_base:106, fy27_rec:434, fy27_total:540 }
+  },
+  'essm': {
+    label: 'ESSM (Evolved Sea Sparrow)',
+    breadcrumb: 'Navy → Weapons → ESSM',
+    qtyUnit: 'missiles',
+    data: { fy25_base:624821, fy26_base:503381, fy26_rec:null, fy26_total:503381, fy27_base:521006, fy27_rec:null, fy27_total:521006 },
+    qty:  { fy25_base:374, fy26_base:305, fy26_rec:null, fy26_total:305, fy27_base:290, fy27_rec:null, fy27_total:290 }
+  },
+  'aargm-er': {
+    label: 'AARGM-ER',
+    breadcrumb: 'Navy → Weapons → AARGM-ER',
+    qtyUnit: 'missiles',
+    data: { fy25_base:226486, fy26_base:227817, fy26_rec:null, fy26_total:227817, fy27_base:24304, fy27_rec:null, fy27_total:24304 },
+    qty:  { fy25_base:157, fy26_base:99, fy26_rec:null, fy26_total:99, fy27_base:20, fy27_rec:null, fy27_total:20 }
+  },
+  'nsm': {
+    label: 'Naval Strike Missile (NSM)',
+    breadcrumb: 'Navy → Weapons → NSM',
+    qtyUnit: 'missiles',
+    data: { fy25_base:33695, fy26_base:36075, fy26_rec:null, fy26_total:36075, fy27_base:79801, fy27_rec:null, fy27_total:79801 },
+    qty:  { fy25_base:10, fy26_base:16, fy26_rec:null, fy26_total:16, fy27_base:32, fy27_rec:null, fy27_total:32 }
+  },
+  'amraam-navy': {
+    label: 'AMRAAM (Navy)',
+    breadcrumb: 'Navy → Weapons → AMRAAM',
+    qtyUnit: 'missiles',
+    data: { fy25_base:207093, fy26_base:69913, fy26_rec:null, fy26_total:69913, fy27_base:167439, fy27_rec:636846, fy27_total:804285 },
+    qty:  { fy25_base:155, fy26_base:41, fy26_rec:null, fy26_total:41, fy27_base:106, fy27_rec:388, fy27_total:494 }
+  },
+  'jatm-navy': {
+    label: 'JATM / AIM-260 (Navy)',
+    breadcrumb: 'Navy → Weapons → JATM',
+    qtyUnit: null,
+    data: { fy25_base:null, fy26_base:301858, fy26_rec:null, fy26_total:301858, fy27_base:557806, fy27_rec:716275, fy27_total:1274081 },
+    note: 'Quantity not reported in unclassified P-1.'
+  },
+  'mse-navy': {
+    label: 'PAC-3 MSE Missile (Navy)',
+    breadcrumb: 'Navy → Weapons → PAC-3 MSE',
+    qtyUnit: 'missiles',
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:97835, fy27_rec:1632988, fy27_total:1730823 },
+    qty:  { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:23, fy27_rec:382, fy27_total:405 }
+  },
+  'csuas-navy': {
+    label: 'C-SUAS System (Navy)',
+    breadcrumb: 'Navy → Other Procurement → C-SUAS',
+    data: { fy25_base:543711, fy26_base:335568, fy26_rec:260440, fy26_total:596008, fy27_base:994127, fy27_rec:null, fy27_total:994127 }
+  },
+
+  // ── AIR FORCE ─────────────────────────────────
+  af: {
+    label: 'Total — Department of the Air Force',
+    breadcrumb: 'Department of the Air Force',
+    data: { fy25_base:61127825, fy26_base:61343424, fy26_rec:13314321, fy26_total:74657745, fy27_base:83551842, fy27_rec:17659220, fy27_total:101211062 }
+  },
+  'af-aircraft': {
+    label: 'Aircraft Procurement, Air Force',
+    breadcrumb: 'Air Force → Aircraft Procurement',
+    data: { fy25_base:19792490, fy26_base:19964954, fy26_rec:10171671, fy26_total:30136625, fy27_base:26985236, fy27_rec:3655951, fy27_total:30641187 }
+  },
+  'af-missile': {
+    label: 'Missile Procurement, Air Force',
+    breadcrumb: 'Air Force → Missile Procurement',
+    data: { fy25_base:5313624, fy26_base:3963961, fy26_rec:2340000, fy26_total:6303961, fy27_base:6811174, fy27_rec:4566669, fy27_total:11377843 }
+  },
+  'af-ammo': {
+    label: 'Procurement of Ammunition, Air Force',
+    breadcrumb: 'Air Force → Ammunition',
+    data: { fy25_base:1020204, fy26_base:773327, fy26_rec:96000, fy26_total:869327, fy27_base:910116, fy27_rec:null, fy27_total:910116 }
+  },
+  'space': {
+    label: 'Procurement, Space Force',
+    breadcrumb: 'Air Force → Space Force Procurement',
+    data: { fy25_base:3966003, fy26_base:4036035, fy26_rec:258350, fy26_total:4294385, fy27_base:9645353, fy27_rec:9436600, fy27_total:19081953 }
+  },
+  'af-other': {
+    label: 'Other Procurement, Air Force',
+    breadcrumb: 'Air Force → Other Procurement',
+    data: { fy25_base:31035504, fy26_base:32605147, fy26_rec:448300, fy26_total:33053447, fy27_base:39199963, fy27_rec:null, fy27_total:39199963 }
+  },
+
+  // AF programs
+  'b21': {
+    label: 'B-21 Raider',
+    breadcrumb: 'Air Force → Aircraft → B-21 Raider',
+    qtyUnit: null,
+    data: { fy25_base:2586868, fy26_base:2691616, fy26_rec:4500000, fy26_total:7191616, fy27_base:3092615, fy27_rec:null, fy27_total:3092615 },
+    note: 'Quantity classified.'
+  },
+  'f35-af': {
+    label: 'F-35A (Air Force)',
+    breadcrumb: 'Air Force → Aircraft → F-35A',
+    qtyUnit: 'aircraft',
+    data: { fy25_base:4808515, fy26_base:4323677, fy26_rec:null, fy26_total:4323677, fy27_base:2942679, fy27_rec:2338058, fy27_total:5280737 },
+    qty:  { fy25_base:40, fy26_base:24, fy26_rec:null, fy26_total:24, fy27_base:24, fy27_rec:14, fy27_total:38 }
+  },
+  'f15ex': {
+    label: 'F-15EX Eagle II',
+    breadcrumb: 'Air Force → Aircraft → F-15EX',
+    qtyUnit: 'aircraft',
+    data: { fy25_base:2036472, fy26_base:115000, fy26_rec:2806792, fy26_total:2921792, fy27_base:2656716, fy27_rec:null, fy27_total:2656716 },
+    qty:  { fy25_base:18, fy26_base:1, fy26_rec:21, fy26_total:22, fy27_base:24, fy27_rec:null, fy27_total:24 }
+  },
+  'kc46': {
+    label: 'KC-46A Pegasus',
+    breadcrumb: 'Air Force → Aircraft → KC-46A',
+    qtyUnit: 'aircraft',
+    data: { fy25_base:2779618, fy26_base:2749974, fy26_rec:null, fy26_total:2749974, fy27_base:3520530, fy27_rec:null, fy27_total:3520530 },
+    qty:  { fy25_base:15, fy26_base:15, fy26_rec:null, fy26_total:15, fy27_base:15, fy27_rec:null, fy27_total:15 }
+  },
+  'c130j-af': {
+    label: 'C-130J Super Hercules (Air Force)',
+    breadcrumb: 'Air Force → Aircraft → C-130J',
+    qtyUnit: 'aircraft',
+    data: { fy25_base:414005, fy26_base:1191000, fy26_rec:287060, fy26_total:1478060, fy27_base:636680, fy27_rec:null, fy27_total:636680 },
+    qty:  { fy25_base:1, fy26_base:7, fy26_rec:1, fy26_total:8, fy27_base:null, fy27_rec:null, fy27_total:null }
+  },
+  't7a': {
+    label: 'T-7A Red Hawk',
+    breadcrumb: 'Air Force → Aircraft → T-7A',
+    qtyUnit: 'aircraft',
+    data: { fy25_base:20780, fy26_base:362083, fy26_rec:null, fy26_total:362083, fy27_base:529464, fy27_rec:null, fy27_total:529464 },
+    qty:  { fy25_base:null, fy26_base:14, fy26_rec:null, fy26_total:14, fy27_base:23, fy27_rec:null, fy27_total:23 }
+  },
+  'cca': {
+    label: 'Collaborative Combat Aircraft (CCA)',
+    breadcrumb: 'Air Force → Aircraft → CCA',
+    qtyUnit: null,
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:996528, fy27_rec:null, fy27_total:996528 },
+    note: 'New program; no quantity reported in FY27 request.'
+  },
+  'lrso': {
+    label: 'Long Range Stand-Off Weapon (LRSO)',
+    breadcrumb: 'Air Force → Missiles → LRSO',
+    qtyUnit: null,
+    data: { fy25_base:70335, fy26_base:131372, fy26_rec:null, fy26_total:131372, fy27_base:506047, fy27_rec:null, fy27_total:506047 },
+    note: 'Quantity classified.'
+  },
+  'jassm': {
+    label: 'JASSM (Joint Air-to-Surface Standoff Missile)',
+    breadcrumb: 'Air Force → Missiles → JASSM',
+    qtyUnit: 'missiles',
+    data: { fy25_base:970051, fy26_base:328081, fy26_rec:490000, fy26_total:818081, fy27_base:967866, fy27_rec:1029448, fy27_total:1997314 },
+    qty:  { fy25_base:577, fy26_base:144, fy26_rec:237, fy26_total:381, fy27_base:491, fy27_rec:330, fy27_total:821 }
+  },
+  'lrasm-af': {
+    label: 'LRASM (Air Force)',
+    breadcrumb: 'Air Force → Missiles → LRASM',
+    qtyUnit: 'missiles',
+    data: { fy25_base:564109, fy26_base:294401, fy26_rec:112000, fy26_total:406401, fy27_base:500916, fy27_rec:236389, fy27_total:737305 },
+    qty:  { fy25_base:172, fy26_base:93, fy26_rec:21, fy26_total:114, fy27_base:111, fy27_rec:45, fy27_total:156 }
+  },
+  'hacm': {
+    label: 'Hypersonic Attack Cruise Missile (HACM)',
+    breadcrumb: 'Air Force → Missiles → HACM',
+    qtyUnit: null,
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:403974, fy27_rec:null, fy27_total:403974 },
+    note: 'New program; no quantity reported in FY27 request.'
+  },
+  'amraam-af': {
+    label: 'AMRAAM (Air Force)',
+    breadcrumb: 'Air Force → Missiles → AMRAAM',
+    qtyUnit: 'missiles',
+    data: { fy25_base:584391, fy26_base:382125, fy26_rec:298600, fy26_total:680725, fy27_base:115856, fy27_rec:1944956, fy27_total:2060812 },
+    qty:  { fy25_base:411, fy26_base:237, fy26_rec:186, fy26_total:423, fy27_base:38, fy27_rec:1279, fy27_total:1317 }
+  },
+  'aim9x': {
+    label: 'AIM-9X Sidewinder (Air Force)',
+    breadcrumb: 'Air Force → Missiles → AIM-9X',
+    qtyUnit: 'missiles',
+    data: { fy25_base:306159, fy26_base:100352, fy26_rec:null, fy26_total:100352, fy27_base:419238, fy27_rec:null, fy27_total:419238 },
+    qty:  { fy25_base:579, fy26_base:173, fy26_rec:null, fy26_total:173, fy27_base:648, fy27_rec:null, fy27_total:648 }
+  },
+  'jatm-af': {
+    label: 'JATM / AIM-260 (Air Force)',
+    breadcrumb: 'Air Force → Missiles → JATM',
+    qtyUnit: null,
+    data: { fy25_base:null, fy26_base:593593, fy26_rec:null, fy26_total:593593, fy27_base:608743, fy27_rec:1055876, fy27_total:1664619 },
+    note: 'Quantity not reported in unclassified P-1.'
+  },
+  'siaw': {
+    label: 'Stand-In Attack Weapon (SIAW)',
+    breadcrumb: 'Air Force → Missiles → SIAW',
+    qtyUnit: 'missiles',
+    data: { fy25_base:152646, fy26_base:152646, fy26_rec:null, fy26_total:152646, fy27_base:401607, fy27_rec:null, fy27_total:401607 },
+    qty:  { fy25_base:null, fy26_base:75, fy26_rec:null, fy26_total:75, fy27_base:155, fy27_rec:null, fy27_total:155 }
+  },
+  'famm': {
+    label: 'Family of Affordable Mass Missiles (FAMM)',
+    breadcrumb: 'Air Force → Missiles → FAMM',
+    qtyUnit: 'missiles',
+    data: { fy25_base:null, fy26_base:null, fy26_rec:335000, fy26_total:335000, fy27_base:55000, fy27_rec:300000, fy27_total:355000 },
+    qty:  { fy25_base:null, fy26_base:null, fy26_rec:1000, fy26_total:1000, fy27_base:1000, fy27_rec:1000, fy27_total:2000 }
+  },
+
+  // ── DEFENSE-WIDE ──────────────────────────────
+  dw: {
+    label: 'Total — Defense-Wide',
+    breadcrumb: 'Defense-Wide',
+    data: { fy25_base:9550517, fy26_base:8862416, fy26_rec:6247002, fy26_total:15109418, fy27_base:12048155, fy27_rec:89344087, fy27_total:101392242 }
+  },
+  'dw-proc': {
+    label: 'Procurement, Defense-Wide',
+    breadcrumb: 'Defense-Wide → Procurement',
+    data: { fy25_base:7912456, fy26_base:7642723, fy26_rec:3897002, fy26_total:11539725, fy27_base:10354868, fy27_rec:39389949, fy27_total:49744817 },
+    note: '* FY27 mandatory corrected to $39.390B per DoW errata.'
+  },
+  'ngre': {
+    label: 'National Guard & Reserve Equipment',
+    breadcrumb: 'Defense-Wide → NGRE',
+    data: { fy25_base:850000, fy26_base:800000, fy26_rec:null, fy26_total:800000, fy27_base:1000000, fy27_rec:null, fy27_total:1000000 }
+  },
+  'dpa': {
+    label: 'Defense Production Act Purchases',
+    breadcrumb: 'Defense-Wide → Defense Production Act',
+    data: { fy25_base:495829, fy26_base:321923, fy26_rec:1000000, fy26_total:1321923, fy27_base:477287, fy27_rec:29954138, fy27_total:30431425 }
+  },
+  'dscc': {
+    label: 'Defense Strategic Capital Credit Program',
+    breadcrumb: 'Defense-Wide → Strategic Capital Credit',
+    data: { fy25_base:288249, fy26_base:97770, fy26_rec:1350000, fy26_total:1447770, fy27_base:216000, fy27_rec:20000000, fy27_total:20216000 }
+  },
+
+  // MDA programs
+  'thaad-sys': {
+    label: 'THAAD System (MDA)',
+    breadcrumb: 'Defense-Wide → MDA → THAAD System',
+    qtyUnit: 'fire units',
+    data: { fy25_base:955199, fy26_base:823125, fy26_rec:null, fy26_total:823125, fy27_base:null, fy27_rec:null, fy27_total:null },
+    qty:  { fy25_base:62, fy26_base:55, fy26_rec:null, fy26_total:55, fy27_base:null, fy27_rec:null, fy27_total:null },
+    note: 'THAAD system (radar, launchers, C2) under MDA/Defense-Wide. FY27 shows $0 discretionary; no mandatory request.'
+  },
+  'aegis-bmd': {
+    label: 'Aegis BMD (MDA)',
+    breadcrumb: 'Defense-Wide → MDA → Aegis BMD',
+    qtyUnit: 'system installations',
+    data: { fy25_base:695180, fy26_base:475000, fy26_rec:350000, fy26_total:825000, fy27_base:null, fy27_rec:1245759, fy27_total:1245759 },
+    qty:  { fy25_base:29, fy26_base:26, fy26_rec:16, fy26_total:42, fy27_base:null, fy27_rec:78, fy27_total:78 }
+  },
+  'sm3': {
+    label: 'SM-3 IIA (MDA)',
+    breadcrumb: 'Defense-Wide → MDA → SM-3 IIA',
+    qtyUnit: 'interceptors',
+    data: { fy25_base:406370, fy26_base:444835, fy26_rec:65000, fy26_total:509835, fy27_base:778964, fy27_rec:3439640, fy27_total:4218604 },
+    qty:  { fy25_base:12, fy26_base:12, fy26_rec:null, fy26_total:12, fy27_base:22, fy27_rec:114, fy27_total:136 }
+  },
+  'iron-dome': {
+    label: 'Iron Dome (MDA)',
+    breadcrumb: 'Defense-Wide → MDA → Iron Dome',
+    qtyUnit: 'batteries',
+    data: { fy25_base:110000, fy26_base:60000, fy26_rec:null, fy26_total:60000, fy27_base:20000, fy27_rec:null, fy27_total:20000 },
+    qty:  { fy25_base:1, fy26_base:1, fy26_rec:null, fy26_total:1, fy27_base:1, fy27_rec:null, fy27_total:1 }
+  },
+  'arrow3': {
+    label: 'Arrow 3 (MDA)',
+    breadcrumb: 'Defense-Wide → MDA → Arrow 3',
+    qtyUnit: 'batteries',
+    data: { fy25_base:50000, fy26_base:100000, fy26_rec:null, fy26_total:100000, fy27_base:150000, fy27_rec:null, fy27_total:150000 },
+    qty:  { fy25_base:1, fy26_base:1, fy26_rec:null, fy26_total:1, fy27_base:1, fy27_rec:null, fy27_total:1 }
+  },
+  'guam': {
+    label: 'Defense of Guam (MDA)',
+    breadcrumb: 'Defense-Wide → MDA → Defense of Guam',
+    data: { fy25_base:22602, fy26_base:11351, fy26_rec:56500, fy26_total:67851, fy27_base:null, fy27_rec:null, fy27_total:null }
+  },
+  'csuas-dw': {
+    label: 'C-SUAS (Defense-Wide)',
+    breadcrumb: 'Defense-Wide → C-SUAS',
+    data: { fy25_base:null, fy26_base:null, fy26_rec:732000, fy26_total:732000, fy27_base:800000, fy27_rec:null, fy27_total:800000 }
+  },
+
+  // ── CROSS-SERVICE ─────────────────────────────
+  'f35-total': {
+    label: 'F-35 — All Variants (Total)',
+    breadcrumb: 'Cross-Service → Total F-35',
+    data: {
+      // FY25: F-35C (2473555) + F-35B (2130050) + F-35A (4808515)
+      fy25_base: 2473555+2130050+4808515,
+      // FY26: C(2096525) + B(1940880) + A(4323677)
+      fy26_base: 2096525+1940880+4323677,
+      fy26_rec: null,
+      fy26_total: 2096525+1940880+4323677,
+      // FY27 base: C(1372163) + B(180848) + A(2942679)
+      fy27_base: 1372163+180848+2942679,
+      // FY27 rec: C(3926560) + B(1935380) + A(2338058)
+      fy27_rec: 3926560+1935380+2338058,
+      // FY27 total: C(5298723) + B(2116228) + A(5280737)
+      fy27_total: 5298723+2116228+5280737
+    },
+    note: 'Includes F-35A (USAF), F-35B (USMC), F-35C (USN) new-buy procurement lines only. Excludes modifications and spares.'
+  }
+};
+
+// ─────────────────────────────────────────────
+// HIERARCHY
+// ─────────────────────────────────────────────
+
+const HIERARCHY = {
+  dow: { label: 'Department of War (Grand Total)', level2: [] },
+  army: {
+    label: 'Department of the Army',
+    level2: [
+      { value: 'army', label: 'Total — Army' },
+      { value: 'army-aircraft', label: 'Aircraft Procurement', programs: [
+        { value: 'uh60', label: 'UH-60 Blackhawk' },
+        { value: 'ch47', label: 'CH-47 Chinook' },
+        { value: 'ah64', label: 'AH-64 Apache' },
+      ]},
+      { value: 'army-missile', label: 'Missile Procurement', programs: [
+        { value: 'prsm', label: 'Precision Strike Missile (PrSM)' },
+        { value: 'himars', label: 'HIMARS' },
+        { value: 'lrhw', label: 'Long-Range Hypersonic Weapon (LRHW)' },
+        { value: 'mrc', label: 'Mid-Range Capability (MRC)' },
+        { value: 'thaad-int', label: 'THAAD Interceptors' },
+        { value: 'mse-army', label: 'PAC-3 MSE (Army)' },
+        { value: 'mshorad', label: 'M-SHORAD' },
+        { value: 'ifpc', label: 'IFPC Inc 2-I' },
+        { value: 'cuas-army', label: 'C-sUAS Interceptor' },
+      ]},
+      { value: 'army-wtcv', label: 'Weapons & Tracked Combat Vehicles', programs: [] },
+      { value: 'army-ammo', label: 'Ammunition, Army', programs: [] },
+      { value: 'army-other', label: 'Other Procurement, Army', programs: [
+        { value: 'ibcs', label: 'IAMD Battle Command System (IBCS)' },
+      ]},
+      { value: 'army-chem', label: 'Chemical Agents & Munitions Destruction', programs: [] },
+    ]
+  },
+  navy: {
+    label: 'Department of the Navy',
+    level2: [
+      { value: 'navy', label: 'Total — Navy' },
+      { value: 'navy-aircraft', label: 'Aircraft Procurement, Navy', programs: [
+        { value: 'f35b', label: 'F-35B (STOVL)' },
+        { value: 'f35c', label: 'F-35C (CV)' },
+        { value: 'fa18ef', label: 'F/A-18E/F Super Hornet' },
+        { value: 'ch53k', label: 'CH-53K King Stallion' },
+        { value: 'e2d', label: 'E-2D Advanced Hawkeye' },
+        { value: 'p8a', label: 'P-8A Poseidon' },
+        { value: 'kc130j-navy', label: 'KC-130J (Navy/USMC)' },
+        { value: 'mq25', label: 'MQ-25 Stingray' },
+      ]},
+      { value: 'navy-weapons', label: 'Weapons Procurement, Navy', programs: [
+        { value: 'cps', label: 'Conventional Prompt Strike (CPS)' },
+        { value: 'tomahawk', label: 'Tomahawk' },
+        { value: 'lrasm-navy', label: 'LRASM (Navy)' },
+        { value: 'sm', label: 'Standard Missile (SM-2/6)' },
+        { value: 'essm', label: 'ESSM' },
+        { value: 'aargm-er', label: 'AARGM-ER' },
+        { value: 'nsm', label: 'Naval Strike Missile (NSM)' },
+        { value: 'amraam-navy', label: 'AMRAAM (Navy)' },
+        { value: 'jatm-navy', label: 'JATM / AIM-260 (Navy)' },
+        { value: 'mse-navy', label: 'PAC-3 MSE (Navy)' },
+      ]},
+      { value: 'navy-ammo', label: 'Ammunition, Navy & USMC', programs: [] },
+      { value: 'navy-scn', label: 'Shipbuilding & Conversion, Navy', programs: [
+        { value: 'columbia', label: 'Columbia Class Submarine' },
+        { value: 'virginia', label: 'Virginia Class Submarine' },
+        { value: 'cvn81', label: 'CVN-81' },
+        { value: 'ddg51', label: 'DDG-51 Arleigh Burke' },
+        { value: 'ffg', label: 'FFG-Frigate (Constellation)' },
+        { value: 'lpd17', label: 'LPD-17 San Antonio' },
+        { value: 'mls', label: 'Medium Landing Ship' },
+        { value: 'sub-tender', label: 'Submarine Tender' },
+      ]},
+      { value: 'navy-other', label: 'Other Procurement, Navy', programs: [
+        { value: 'csuas-navy', label: 'C-SUAS System (Navy)' },
+      ]},
+      { value: 'usmc', label: 'Procurement, Marine Corps', programs: [] },
+    ]
+  },
+  af: {
+    label: 'Department of the Air Force',
+    level2: [
+      { value: 'af', label: 'Total — Air Force' },
+      { value: 'af-aircraft', label: 'Aircraft Procurement, Air Force', programs: [
+        { value: 'b21', label: 'B-21 Raider' },
+        { value: 'f35-af', label: 'F-35A (Air Force)' },
+        { value: 'f15ex', label: 'F-15EX Eagle II' },
+        { value: 'kc46', label: 'KC-46A Pegasus' },
+        { value: 'c130j-af', label: 'C-130J (Air Force)' },
+        { value: 't7a', label: 'T-7A Red Hawk' },
+        { value: 'cca', label: 'Collaborative Combat Aircraft (CCA)' },
+        { value: 'f35-total', label: '⊕ Total F-35 (All Variants)' },
+      ]},
+      { value: 'af-missile', label: 'Missile Procurement, Air Force', programs: [
+        { value: 'lrso', label: 'Long Range Stand-Off (LRSO)' },
+        { value: 'jassm', label: 'JASSM' },
+        { value: 'lrasm-af', label: 'LRASM (Air Force)' },
+        { value: 'hacm', label: 'Hypersonic Attack Cruise Missile (HACM)' },
+        { value: 'amraam-af', label: 'AMRAAM (Air Force)' },
+        { value: 'aim9x', label: 'AIM-9X Sidewinder' },
+        { value: 'jatm-af', label: 'JATM / AIM-260 (Air Force)' },
+        { value: 'siaw', label: 'Stand-In Attack Weapon (SIAW)' },
+        { value: 'famm', label: 'Family of Affordable Mass Missiles (FAMM)' },
+      ]},
+      { value: 'af-ammo', label: 'Ammunition, Air Force', programs: [] },
+      { value: 'space', label: 'Procurement, Space Force', programs: [] },
+      { value: 'af-other', label: 'Other Procurement, Air Force', programs: [] },
+    ]
+  },
+  dw: {
+    label: 'Defense-Wide',
+    level2: [
+      { value: 'dw', label: 'Total — Defense-Wide' },
+      { value: 'dw-proc', label: 'Procurement, Defense-Wide', programs: [
+        { value: 'thaad-sys', label: 'THAAD System (MDA)' },
+        { value: 'aegis-bmd', label: 'Aegis BMD (MDA)' },
+        { value: 'sm3', label: 'SM-3 IIA (MDA)' },
+        { value: 'iron-dome', label: 'Iron Dome (MDA)' },
+        { value: 'arrow3', label: 'Arrow 3 (MDA)' },
+        { value: 'guam', label: 'Defense of Guam (MDA)' },
+        { value: 'csuas-dw', label: 'C-SUAS (Defense-Wide)' },
+      ]},
+      { value: 'ngre', label: 'National Guard & Reserve Equipment', programs: [] },
+      { value: 'dpa', label: 'Defense Production Act Purchases', programs: [] },
+      { value: 'dscc', label: 'Defense Strategic Capital Credit Program', programs: [] },
+    ]
+  }
+};
+
+// ─────────────────────────────────────────────
+// COLUMN DEFINITIONS
+// ─────────────────────────────────────────────
+
+const ALL_COLS = [
+  { key: 'fy25_base',  label: 'FY25',        fy: 'FY25', type: 'base'  },
+  { key: 'fy26_base',  label: 'FY26 Disc.',  fy: 'FY26', type: 'base'  },
+  { key: 'fy26_rec',   label: 'FY26 Mand.',  fy: 'FY26', type: 'rec'   },
+  { key: 'fy26_total', label: 'FY26 Total',  fy: 'FY26', type: 'total' },
+  { key: 'fy27_base',  label: 'FY27 Disc.',  fy: 'FY27', type: 'base'  },
+  { key: 'fy27_rec',   label: 'FY27 Mand.',  fy: 'FY27', type: 'rec'   },
+  { key: 'fy27_total', label: 'FY27 Total',  fy: 'FY27', type: 'total' },
+];
+
+// Colors for chart bars
+const COL_COLORS = {
+  fy25_base:  '#4a90d9',
+  fy26_base:  '#5bc4a0',
+  fy26_rec:   '#e8a838',
+  fy26_total: '#9b72cf',
+  fy27_base:  '#e05c5c',
+  fy27_rec:   '#e07cb0',
+  fy27_total: '#c07840',
+};
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+
+let chartType = 'grouped';
+let chartInstance = null;
+let currentKey = null;
+
+// ─────────────────────────────────────────────
+// SELECTORS
+// ─────────────────────────────────────────────
+
+function onLevel1Change() {
+  const v = document.getElementById('sel-level1').value;
+  const l2 = document.getElementById('sel-level2');
+  const l3 = document.getElementById('sel-level3');
+
+  l2.innerHTML = '<option value="">— Select appropriation —</option>';
+  l3.innerHTML = '<option value="">— Select program —</option>';
+  l3.disabled = true;
+
+  if (!v) { l2.disabled = true; render(); return; }
+
+  if (v === 'dow') {
+    l2.disabled = true;
+    currentKey = 'dow';
+    render();
+    return;
+  }
+
+  const node = HIERARCHY[v];
+  node.level2.forEach(item => {
+    const opt = document.createElement('option');
+    opt.value = item.value;
+    opt.textContent = item.label;
+    l2.appendChild(opt);
+  });
+  l2.disabled = false;
+  currentKey = null;
+  render();
+}
+
+function onLevel2Change() {
+  const v2 = document.getElementById('sel-level2').value;
+  const l1 = document.getElementById('sel-level1').value;
+  const l3 = document.getElementById('sel-level3');
+
+  l3.innerHTML = '<option value="">— Select program —</option>';
+  l3.disabled = true;
+
+  if (!v2) { currentKey = null; render(); return; }
+
+  currentKey = v2;
+
+  // Find programs
+  const node = HIERARCHY[l1];
+  const l2item = node.level2.find(x => x.value === v2);
+  if (l2item && l2item.programs && l2item.programs.length > 0) {
+    l2item.programs.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.value;
+      opt.textContent = p.label;
+      l3.appendChild(opt);
+    });
+    l3.disabled = false;
+  }
+
+  render();
+}
+
+function onLevel3Change() {
+  const v = document.getElementById('sel-level3').value;
+  if (v) { currentKey = v; } else {
+    currentKey = document.getElementById('sel-level2').value || null;
+  }
+  render();
+}
+
+// ─────────────────────────────────────────────
+// CHART TYPE
+// ─────────────────────────────────────────────
+
+function setChartType(t) {
+  chartType = t;
+  document.getElementById('btn-grouped').classList.toggle('active', t === 'grouped');
+  document.getElementById('btn-stacked').classList.toggle('active', t === 'stacked');
+  render();
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+
+function fmt(v) {
+  if (v === null || v === undefined) return '—';
+  return '$' + v.toLocaleString();
+}
+
+function fmtB(v) {
+  if (v === null || v === undefined) return '—';
+  return '$' + (v / 1000000).toFixed(2) + 'B';
+}
+
+function toggleCol(btn) {
+  btn.classList.toggle('active');
+  render();
+}
+
+function getActiveCols() {
+  const active = new Set(
+    [...document.querySelectorAll('.fy-btn.active')].map(b => b.dataset.col)
+  );
+  return ALL_COLS.filter(c => active.has(c.key));
+}
+
+function render() {
+  const empty = document.getElementById('empty-state');
+  const results = document.getElementById('results');
+
+  if (!currentKey || !DATA[currentKey]) {
+    empty.style.display = 'flex';
+    results.classList.remove('visible');
+    return;
+  }
+
+  empty.style.display = 'none';
+  results.classList.add('visible');
+
+  const entry = DATA[currentKey];
+  const cols = getActiveCols();
+
+  // Header
+  document.getElementById('res-title').textContent = entry.breadcrumb;
+  document.getElementById('res-name').textContent = entry.label;
+
+  // Note
+  const noteEl = document.getElementById('data-note');
+  if (entry.note) { noteEl.textContent = entry.note; noteEl.style.display = 'block'; }
+  else { noteEl.style.display = 'none'; }
+
+  renderChart(entry, cols);
+  renderTable(entry, cols);
+}
+
+function renderChart(entry, cols) {
+  const ctx = document.getElementById('myChart');
+
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+
+  if (cols.length === 0) return;
+
+  const labels = cols.map(c => c.label);
+  const values = cols.map(c => entry.data[c.key]);
+
+  if (chartType === 'grouped') {
+    // One dataset per column (simple bar)
+    const datasets = cols.map(c => ({
+      label: c.label,
+      data: [entry.data[c.key]],
+      backgroundColor: COL_COLORS[c.key],
+      borderColor: 'transparent',
+      borderRadius: 2,
+    }));
+
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: [''], datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: '#6b7a99',
+              font: { family: 'IBM Plex Mono', size: 10 },
+              boxWidth: 12, boxHeight: 12, padding: 16
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.dataset.label}: ${fmtB(ctx.raw)}`
+            },
+            backgroundColor: '#1e2535',
+            borderColor: '#2a3348',
+            borderWidth: 1,
+            titleColor: '#d4dae8',
+            bodyColor: '#d4dae8',
+            bodyFont: { family: 'IBM Plex Mono', size: 11 },
+          }
+        },
+        scales: {
+          x: { ticks: { color: '#6b7a99', font: { family: 'IBM Plex Mono', size: 10 } }, grid: { color: '#2a3348' } },
+          y: {
+            ticks: {
+              color: '#6b7a99',
+              font: { family: 'IBM Plex Mono', size: 10 },
+              callback: v => '$' + (v/1e6).toFixed(0) + 'M'
+            },
+            grid: { color: '#2a3348' }
+          }
+        }
+      }
+    });
+
+  } else {
+    // Stacked: group by FY, stack base/rec/total
+    const fys = ['FY25', 'FY26', 'FY27'];
+    const typeMap = { base: { label: 'Base (Discretionary)', colors: ['#4a90d9','#5bc4a0','#e8a838'] },
+                      rec:  { label: 'Reconciliation (Mandatory)', colors: ['#7ab8e8','#9bd4bf','#f0c878'] },
+                      total:{ label: 'Total', colors: ['#2a5a99','#2a7a5c','#b07010'] } };
+    const types = [...new Set(cols.map(c => c.type))];
+
+    const datasets = types.map((t, ti) => ({
+      label: typeMap[t].label,
+      data: fys.map(fy => {
+        const col = cols.find(c => c.fy === fy && c.type === t);
+        return col ? entry.data[col.key] : null;
+      }),
+      backgroundColor: typeMap[t].colors,
+      borderColor: 'transparent',
+      borderRadius: 2,
+      stack: t === 'total' ? 'total' : 'breakdown',
+    }));
+
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: fys, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: '#6b7a99',
+              font: { family: 'IBM Plex Mono', size: 10 },
+              boxWidth: 12, boxHeight: 12, padding: 16
+            }
+          },
+          tooltip: {
+            callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmtB(ctx.raw)}` },
+            backgroundColor: '#1e2535', borderColor: '#2a3348', borderWidth: 1,
+            titleColor: '#d4dae8', bodyColor: '#d4dae8',
+            bodyFont: { family: 'IBM Plex Mono', size: 11 }
+          }
+        },
+        scales: {
+          x: { stacked: true, ticks: { color: '#6b7a99', font: { family: 'IBM Plex Mono', size: 11 } }, grid: { color: '#2a3348' } },
+          y: {
+            stacked: true,
+            ticks: { color: '#6b7a99', font: { family: 'IBM Plex Mono', size: 10 }, callback: v => '$' + (v/1e6).toFixed(0) + 'M' },
+            grid: { color: '#2a3348' }
+          }
+        }
+      }
+    });
+  }
+}
+
+function renderTable(entry, cols) {
+  const head = document.getElementById('table-head');
+  const body = document.getElementById('table-body');
+
+  head.innerHTML = '';
+  body.innerHTML = '';
+
+  // Header
+  const thLabel = document.createElement('th');
+  thLabel.textContent = 'Metric';
+  thLabel.style.textAlign = 'left';
+  head.appendChild(thLabel);
+  cols.forEach(c => {
+    const th = document.createElement('th');
+    th.textContent = c.label;
+    head.appendChild(th);
+  });
+  // Delta col (FY26 Total → FY27 Total or best available)
+  const hasFY26 = cols.find(c => c.key === 'fy26_total' || c.key === 'fy26_base');
+  const hasFY27 = cols.find(c => c.key === 'fy27_total' || c.key === 'fy27_base');
+  let deltaCol = null;
+  if (hasFY26 && hasFY27) {
+    deltaCol = document.createElement('th');
+    const fromKey = cols.find(c => c.key === 'fy26_total') ? 'fy26_total' : 'fy26_base';
+    const toKey   = cols.find(c => c.key === 'fy27_total') ? 'fy27_total' : 'fy27_base';
+    deltaCol._fromKey = fromKey;
+    deltaCol._toKey   = toKey;
+    deltaCol.textContent = 'Δ FY26→27';
+    head.appendChild(deltaCol);
+  }
+
+  // Rows
+  const rows = [
+    { label: 'Value ($000s)', key: 'raw' },
+    { label: 'Value ($B)',    key: 'billions' },
+  ];
+
+  // Add qty row if data exists
+  if (entry.qty) {
+    rows.push({ label: `Qty${entry.qtyUnit ? ' (' + entry.qtyUnit + ')' : ''}`, key: 'qty' });
+  }
+
+  rows.forEach(row => {
+    const tr = document.createElement('tr');
+    const td0 = document.createElement('td');
+    td0.textContent = row.label;
+    tr.appendChild(td0);
+
+    cols.forEach(c => {
+      const td = document.createElement('td');
+      let v;
+      if (row.key === 'qty') {
+        v = entry.qty ? entry.qty[c.key] : null;
+        if (v === null || v === undefined) { td.textContent = '—'; td.className = 'null-val'; }
+        else { td.textContent = v.toLocaleString(); }
+      } else {
+        v = entry.data[c.key];
+        if (v === null || v === undefined) { td.textContent = '—'; td.className = 'null-val'; }
+        else { td.textContent = row.key === 'raw' ? fmt(v) : fmtB(v); }
+      }
+      tr.appendChild(td);
+    });
+
+    // Delta
+    if (deltaCol) {
+      const td = document.createElement('td');
+      if (row.key === 'qty') {
+        // qty delta
+        const from = entry.qty ? entry.qty[deltaCol._fromKey] : null;
+        const to   = entry.qty ? entry.qty[deltaCol._toKey]   : null;
+        if (from !== null && from !== undefined && to !== null && to !== undefined) {
+          const delta = to - from;
+          td.textContent = (delta >= 0 ? '+' : '') + delta.toLocaleString();
+          td.className = delta >= 0 ? 'delta-pos' : 'delta-neg';
+        } else { td.textContent = '—'; td.className = 'null-val'; }
+      } else {
+        const from = entry.data[deltaCol._fromKey];
+        const to   = entry.data[deltaCol._toKey];
+        if (from !== null && from !== undefined && to !== null && to !== undefined) {
+          const delta = to - from;
+          const pct   = ((delta / from) * 100).toFixed(1);
+          td.textContent = row.key === 'raw'
+            ? (delta >= 0 ? '+' : '') + fmt(delta)
+            : (delta >= 0 ? '+' : '') + fmtB(delta) + ` (${pct}%)`;
+          td.className = delta >= 0 ? 'delta-pos' : 'delta-neg';
+        } else { td.textContent = '—'; td.className = 'null-val'; }
+      }
+      tr.appendChild(td);
+    }
+
+    body.appendChild(tr);
+  });
+}
+
+// ─────────────────────────────────────────────
+// QUICK JUMP — Tom Select
+// ─────────────────────────────────────────────
+
+// Build flat option list with optgroups from hierarchy + DATA
+function buildQuickJumpOptions() {
+  const groups = [];
+
+  // Helper to push a group
+  function addGroup(label, items) {
+    if (items.length) groups.push({ label, items });
+  }
+
+  // Department of War (top-level only)
+  addGroup('Department of War', [
+    { value: 'dow', text: 'Grand Total — Department of War' }
+  ]);
+
+  // Each service: service total + appropriations + programs
+  const services = [
+    { key: 'army', label: 'Army' },
+    { key: 'navy', label: 'Navy' },
+    { key: 'af',   label: 'Air Force' },
+    { key: 'dw',   label: 'Defense-Wide' },
+  ];
+
+  services.forEach(({ key, label }) => {
+    const items = [];
+    const node = HIERARCHY[key];
+    // Service total
+    if (DATA[key]) items.push({ value: key, text: DATA[key].label });
+    // Appropriations + programs
+    node.level2.forEach(l2 => {
+      if (DATA[l2.value]) items.push({ value: l2.value, text: DATA[l2.value].label });
+      if (l2.programs) {
+        l2.programs.forEach(p => {
+          if (DATA[p.value]) items.push({ value: p.value, text: DATA[p.value].label });
+        });
+      }
+    });
+    addGroup(label, items);
+  });
+
+  return groups;
+}
+
+var tomSelect = null;
+
+function initQuickJump() {
+  if (tomSelect) { tomSelect.destroy(); tomSelect = null; }
+  const groups = buildQuickJumpOptions();
+
+  // Build flat options + optgroups arrays for Tom Select config
+  const tsOptions = [];
+  const tsOptgroups = [];
+
+  groups.forEach(g => {
+    tsOptgroups.push({ value: g.label, label: g.label });
+    g.items.forEach(item => {
+      tsOptions.push({ value: item.value, text: item.text, optgroup: g.label });
+    });
+  });
+
+  tomSelect = new TomSelect('#quick-jump', {
+    options: tsOptions,
+    optgroups: tsOptgroups,
+    optgroupField: 'optgroup',
+    labelField: 'text',
+    valueField: 'value',
+    searchField: ['text'],
+    placeholder: 'Search all programs…',
+    allowEmptyOption: false,
+    maxOptions: 200,
+    onChange(val) {
+      if (!val) return;
+      jumpToKey(val);
+      document.getElementById('quick-jump-clear').classList.add('visible');
+    }
+  });
+}
+
+function jumpToKey(key) {
+  if (!DATA[key]) return;
+
+  // Figure out which level1/level2/level3 this key belongs to
+  let l1val = null, l2val = null, l3val = null;
+
+  // Is it a top-level service or DoW?
+  if (key === 'dow') { l1val = 'dow'; }
+  else if (key === 'army') { l1val = 'army'; l2val = 'army'; }
+  else if (key === 'navy') { l1val = 'navy'; l2val = 'navy'; }
+  else if (key === 'af')   { l1val = 'af';   l2val = 'af'; }
+  else if (key === 'dw')   { l1val = 'dw';   l2val = 'dw'; }
+  else {
+    // Search hierarchy for key
+    const services = ['army','navy','af','dw'];
+    outer: for (const svc of services) {
+      for (const l2 of HIERARCHY[svc].level2) {
+        if (l2.value === key) { l1val = svc; l2val = key; break outer; }
+        if (l2.programs) {
+          for (const p of l2.programs) {
+            if (p.value === key) { l1val = svc; l2val = l2.value; l3val = key; break outer; }
+          }
+        }
+      }
+    }
+  }
+
+  if (!l1val) return;
+
+  // Set level1
+  const s1 = document.getElementById('sel-level1');
+  s1.value = l1val;
+  onLevel1Change();
+
+  // Set level2
+  if (l2val) {
+    const s2 = document.getElementById('sel-level2');
+    s2.value = l2val;
+    onLevel2Change();
+  }
+
+  // Set level3
+  if (l3val) {
+    const s3 = document.getElementById('sel-level3');
+    s3.value = l3val;
+    onLevel3Change();
+  }
+}
+
+function clearQuickJump() {
+  if (tomSelect) tomSelect.clear();
+  document.getElementById('quick-jump-clear').classList.remove('visible');
+}
+
+// Init on load
+document.addEventListener('DOMContentLoaded', initQuickJump);
+</script>
+</body>
+</html>

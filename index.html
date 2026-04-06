@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DoW Budget Suite · CNAS Defense Program</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0e1117;
+    --surface: #161b27;
+    --surface2: #1e2535;
+    --border: #2a3348;
+    --accent: #4a90d9;
+    --text: #d4dae8;
+    --text-muted: #6b7a99;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* NAV */
+  .app-nav {
+    background: #0a0d14;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 44px;
+    gap: 4px;
+  }
+  .app-nav .nav-brand {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-right: 20px;
+  }
+  .app-nav a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--text-muted);
+    padding: 0 14px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .app-nav a:hover { color: var(--text); }
+  .app-nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    padding: 72px 48px 48px;
+    max-width: 860px;
+  }
+
+  .hero-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .hero p {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 600px;
+  }
+
+  /* TOOLS GRID */
+  .tools-section {
+    padding: 0 48px 72px;
+    flex: 1;
+  }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+  }
+
+  .tool-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 28px 28px 24px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color 0.15s, background 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--card-accent, var(--accent));
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .tool-card:hover {
+    border-color: var(--card-accent, var(--accent));
+    background: var(--surface2);
+  }
+
+  .tool-card:hover::before { opacity: 1; }
+
+  .tool-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--card-accent, var(--accent)) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--card-accent, var(--accent)) 30%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tool-icon svg { opacity: 0.85; }
+
+  .tool-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .tool-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .tool-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .tool-cta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--card-accent, var(--accent));
+    margin-top: 4px;
+  }
+
+  /* DATA NOTES */
+  .notes-section {
+    padding: 0 48px 48px;
+  }
+
+  .notes-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .note-item {}
+
+  .note-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+
+  .note-value {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 16px 48px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<nav class="app-nav">
+  <span class="nav-brand">DoW Budget Suite</span>
+  <a href="index.html" class="active">Home</a>
+  <a href="defense_budget_tool.html">P-1 Comparison</a>
+  <a href="historical_budget_tool.html">Historical Trends</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">CNAS Defense Program · Internal Research Tool</div>
+  <h1>Department of War<br>Budget Analysis Suite</h1>
+  <p>Tools for analyzing DoW procurement and investment trends, from FY1948 historical topline data through the FY2027 President's Budget request. Built on P-1 exhibit data and DoD Green Book TOA figures.</p>
+</section>
+
+<section class="tools-section">
+  <div class="section-label">Tools</div>
+  <div class="tools-grid">
+
+    <a href="defense_budget_tool.html" class="tool-card" style="--card-accent: #4a90d9">
+      <div class="tool-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4a90d9" stroke-width="1.8">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+        </svg>
+      </div>
+      <div class="tool-name">P-1 Procurement Comparison</div>
+      <div class="tool-desc">Compare procurement funding across FY2025 enacted, FY2026 enacted (discretionary + mandatory), and FY2027 request. Drill from service totals down to individual program lines with quantity data.</div>
+      <div class="tool-meta">
+        <span class="tag">FY2025–FY2027</span>
+        <span class="tag">Program Level</span>
+        <span class="tag">Quantities</span>
+        <span class="tag">Base + Reconciliation</span>
+      </div>
+      <div class="tool-cta">
+        Open tool
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+
+    <a href="historical_budget_tool.html" class="tool-card" style="--card-accent: #e05c5c">
+      <div class="tool-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e05c5c" stroke-width="1.8">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <div class="tool-name">Historical Budget Trends</div>
+      <div class="tool-desc">Long-run RDTE and procurement trends from FY1970 to FY2026, in FY2026 constant dollars. View by topline, service, or capability area. Includes the RDTE:Procurement ratio tracker used in <em>Stuck in the Cul-de-Sac</em>.</div>
+      <div class="tool-meta">
+        <span class="tag">FY1970–FY2026</span>
+        <span class="tag">Constant Dollars</span>
+        <span class="tag">RDTE vs. Procurement</span>
+        <span class="tag">Era Bands</span>
+      </div>
+      <div class="tool-cta">
+        Open tool
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<section class="notes-section">
+  <div class="section-label">Data Sources &amp; Notes</div>
+  <div class="notes-box">
+    <div class="note-item">
+      <div class="note-label">P-1 Source</div>
+      <div class="note-value">DoW Procurement Programs (P-1) Exhibit, FY2027 President's Budget, April 2026</div>
+    </div>
+    <div class="note-item">
+      <div class="note-label">Historical Source</div>
+      <div class="note-value">DoD Green Book (National Defense Budget Estimates), Table 6-1 TOA by title; FY2025 Green Book deflators</div>
+    </div>
+    <div class="note-item">
+      <div class="note-label">Constant Dollar Base</div>
+      <div class="note-value">FY2026 constant dollars. FY2025 and FY2026 deflators are equivalent per DoD methodology (FY2026 deflators not released at time of data collection)</div>
+    </div>
+    <div class="note-item">
+      <div class="note-label">Capability Area Data</div>
+      <div class="note-value">Program-level RDTE and procurement from J-Books, FY2012–FY2026. Methodology per <em>Stuck in the Cul-de-Sac</em> (CNAS, October 2025)</div>
+    </div>
+    <div class="note-item">
+      <div class="note-label">P-1 Dollar Units</div>
+      <div class="note-value">Dollars in thousands (as reported in P-1 exhibit). Not inflation-adjusted.</div>
+    </div>
+    <div class="note-item">
+      <div class="note-label">Last Updated</div>
+      <div class="note-value">April 2026 · FY2027 President's Budget cycle</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>CNAS Defense Program · Internal Use Only</span>
+  <span>Data current as of April 2026</span>
+</footer>
+
+</body>
+</html>
