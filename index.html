@@ -473,8 +473,9 @@
 <script>
 // ─────────────────────────────────────────────
 // DATA
-// All values in $thousands. null = not applicable.
+// All dollar values in $thousands. null = not applicable.
 // Structure: { fy25_base, fy26_base, fy26_rec, fy26_total, fy27_base, fy27_rec, fy27_total }
+// qty: same keys, units vary by program (noted in qtyUnit field)
 // ─────────────────────────────────────────────
 
 const DATA = {
@@ -528,52 +529,69 @@ const DATA = {
   'uh60': {
     label: 'UH-60 Blackhawk (new procurement)',
     breadcrumb: 'Army → Aircraft → UH-60 Blackhawk',
-    data: { fy25_base:769054, fy26_base:913060, fy26_rec:null, fy26_total:913060, fy27_base:39257, fy27_rec:null, fy27_total:39257 }
+    qtyUnit: 'aircraft (MYP)',
+    data: { fy25_base:769054, fy26_base:913060, fy26_rec:null, fy26_total:913060, fy27_base:39257, fy27_rec:null, fy27_total:39257 },
+    qty:  { fy25_base:26, fy26_base:29, fy26_rec:null, fy26_total:29, fy27_base:1, fy27_rec:null, fy27_total:1 }
   },
   'ch47': {
     label: 'CH-47 Chinook (new procurement)',
     breadcrumb: 'Army → Aircraft → CH-47 Chinook',
-    data: { fy25_base:699698, fy26_base:628798, fy26_rec:null, fy26_total:628798, fy27_base:210645, fy27_rec:null, fy27_total:210645 }
+    qtyUnit: 'aircraft (MYP)',
+    data: { fy25_base:699698, fy26_base:628798, fy26_rec:null, fy26_total:628798, fy27_base:210645, fy27_rec:null, fy27_total:210645 },
+    qty:  { fy25_base:11, fy26_base:11, fy26_rec:null, fy26_total:11, fy27_base:5, fy27_rec:null, fy27_total:5 }
   },
   'ah64': {
     label: 'AH-64 Apache (new procurement)',
     breadcrumb: 'Army → Aircraft → AH-64 Apache',
-    data: { fy25_base:557399, fy26_base:361669, fy26_rec:null, fy26_total:361669, fy27_base:1552, fy27_rec:null, fy27_total:1552 }
+    qtyUnit: 'aircraft (remanufacture)',
+    data: { fy25_base:557399, fy26_base:361669, fy26_rec:null, fy26_total:361669, fy27_base:1552, fy27_rec:null, fy27_total:1552 },
+    qty:  { fy25_base:31, fy26_base:7, fy26_rec:null, fy26_total:7, fy27_base:null, fy27_rec:null, fy27_total:null }
   },
   'prsm': {
     label: 'Precision Strike Missile (PrSM)',
     breadcrumb: 'Army → Missiles → PrSM',
-    data: { fy25_base:491497, fy26_base:268726, fy26_rec:277816, fy26_total:546542, fy27_base:1226526, fy27_rec:692000, fy27_total:1918526 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:491497, fy26_base:268726, fy26_rec:277816, fy26_total:546542, fy27_base:1226526, fy27_rec:692000, fy27_total:1918526 },
+    qty:  { fy25_base:338, fy26_base:108, fy26_rec:null, fy26_total:108, fy27_base:454, fy27_rec:1134, fy27_total:1588 }
   },
   'himars': {
     label: 'HIMARS (new systems)',
     breadcrumb: 'Army → Missiles → HIMARS',
-    data: { fy25_base:175539, fy26_base:61503, fy26_rec:null, fy26_total:61503, fy27_base:745682, fy27_rec:null, fy27_total:745682 }
+    qtyUnit: 'launchers',
+    data: { fy25_base:175539, fy26_base:61503, fy26_rec:null, fy26_total:61503, fy27_base:745682, fy27_rec:null, fy27_total:745682 },
+    qty:  { fy25_base:18, fy26_base:6, fy26_rec:null, fy26_total:6, fy27_base:96, fy27_rec:null, fy27_total:96 }
   },
   'lrhw': {
     label: 'Long-Range Hypersonic Weapon (LRHW / Dark Eagle)',
     breadcrumb: 'Army → Missiles → LRHW',
+    qtyUnit: null,
     data: { fy25_base:669178, fy26_base:347845, fy26_rec:113932, fy26_total:461777, fy27_base:301777, fy27_rec:null, fy27_total:301777 }
   },
   'mrc': {
     label: 'Mid-Range Capability (MRC)',
     breadcrumb: 'Army → Missiles → Mid-Range Capability',
+    qtyUnit: null,
     data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:370351, fy27_rec:2331282, fy27_total:2701633 }
   },
   'thaad-int': {
     label: 'THAAD Interceptors (Army)',
     breadcrumb: 'Army → Missiles → THAAD Interceptors',
+    qtyUnit: 'interceptors',
     data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:907162, fy27_rec:10528043, fy27_total:11435205 },
+    qty:  { fy25_base:27, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:null, fy27_rec:830, fy27_total:857 },
     note: 'Army Missile Procurement (page 22). Interceptor buy only; THAAD system procurement is under MDA/Defense-Wide.'
   },
   'mse-army': {
     label: 'PAC-3 MSE Missile (Army)',
     breadcrumb: 'Army → Missiles → PAC-3 MSE',
-    data: { fy25_base:1031060, fy26_base:1571905, fy26_rec:200000, fy26_total:1771905, fy27_base:1297528, fy27_rec:10931919, fy27_total:12229447 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:1031060, fy26_base:1571905, fy26_rec:200000, fy26_total:1771905, fy27_base:1297528, fy27_rec:10931919, fy27_total:12229447 },
+    qty:  { fy25_base:194, fy26_base:310, fy26_rec:47, fy26_total:357, fy27_base:244, fy27_rec:2554, fy27_total:2798 }
   },
   'mshorad': {
     label: 'M-SHORAD',
     breadcrumb: 'Army → Missiles → M-SHORAD',
+    qtyUnit: null,
     data: { fy25_base:69091, fy26_base:631114, fy26_rec:80850, fy26_total:711964, fy27_base:712690, fy27_rec:null, fy27_total:712690 }
   },
   'ibcs': {
@@ -634,135 +652,186 @@ const DATA = {
   'f35b': {
     label: 'F-35B (STOVL) — Navy/USMC',
     breadcrumb: 'Navy → Aircraft → F-35B',
-    data: { fy25_base:2130050, fy26_base:1940880, fy26_rec:null, fy26_total:1940880, fy27_base:180848, fy27_rec:1935380, fy27_total:2116228 }
+    qtyUnit: 'aircraft',
+    data: { fy25_base:2130050, fy26_base:1940880, fy26_rec:null, fy26_total:1940880, fy27_base:180848, fy27_rec:1935380, fy27_total:2116228 },
+    qty:  { fy25_base:13, fy26_base:11, fy26_rec:null, fy26_total:11, fy27_base:null, fy27_rec:10, fy27_total:10 }
   },
   'f35c': {
     label: 'F-35C (CV) — Navy',
     breadcrumb: 'Navy → Aircraft → F-35C',
-    data: { fy25_base:2473555, fy26_base:2096525, fy26_rec:null, fy26_total:2096525, fy27_base:1372163, fy27_rec:3926560, fy27_total:5298723 }
+    qtyUnit: 'aircraft',
+    data: { fy25_base:2473555, fy26_base:2096525, fy26_rec:null, fy26_total:2096525, fy27_base:1372163, fy27_rec:3926560, fy27_total:5298723 },
+    qty:  { fy25_base:17, fy26_base:12, fy26_rec:null, fy26_total:12, fy27_base:8, fy27_rec:29, fy27_total:37 }
   },
   'fa18ef': {
     label: 'F/A-18E/F Super Hornet',
     breadcrumb: 'Navy → Aircraft → F/A-18E/F',
-    data: { fy25_base:28554, fy26_base:29506, fy26_rec:null, fy26_total:29506, fy27_base:49088, fy27_rec:null, fy27_total:49088 }
+    qtyUnit: null,
+    data: { fy25_base:28554, fy26_base:29506, fy26_rec:null, fy26_total:29506, fy27_base:49088, fy27_rec:null, fy27_total:49088 },
+    note: 'No new-buy quantity; funding is sustainment/support only.'
   },
   'ch53k': {
     label: 'CH-53K King Stallion',
     breadcrumb: 'Navy → Aircraft → CH-53K',
-    data: { fy25_base:2611848, fy26_base:2268610, fy26_rec:null, fy26_total:2268610, fy27_base:3398601, fy27_rec:null, fy27_total:3398601 }
+    qtyUnit: 'aircraft',
+    data: { fy25_base:2611848, fy26_base:2268610, fy26_rec:null, fy26_total:2268610, fy27_base:3398601, fy27_rec:null, fy27_total:3398601 },
+    qty:  { fy25_base:18, fy26_base:14, fy26_rec:null, fy26_total:14, fy27_base:22, fy27_rec:null, fy27_total:22 }
   },
   'e2d': {
     label: 'E-2D Advanced Hawkeye',
     breadcrumb: 'Navy → Aircraft → E-2D',
-    data: { fy25_base:95219, fy26_base:1100800, fy26_rec:null, fy26_total:1100800, fy27_base:2075025, fy27_rec:null, fy27_total:2075025 }
+    qtyUnit: 'aircraft',
+    data: { fy25_base:95219, fy26_base:1100800, fy26_rec:null, fy26_total:1100800, fy27_base:2075025, fy27_rec:null, fy27_total:2075025 },
+    qty:  { fy25_base:null, fy26_base:3, fy26_rec:null, fy26_total:3, fy27_base:6, fy27_rec:null, fy27_total:6 }
   },
   'p8a': {
     label: 'P-8A Poseidon',
     breadcrumb: 'Navy → Aircraft → P-8A',
-    data: { fy25_base:12424, fy26_base:13631, fy26_rec:null, fy26_total:13631, fy27_base:4227350, fy27_rec:null, fy27_total:4227350 }
+    qtyUnit: 'aircraft',
+    data: { fy25_base:12424, fy26_base:13631, fy26_rec:null, fy26_total:13631, fy27_base:4227350, fy27_rec:null, fy27_total:4227350 },
+    qty:  { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:12, fy27_rec:null, fy27_total:12 }
   },
   'kc130j-navy': {
     label: 'KC-130J (Navy/USMC)',
     breadcrumb: 'Navy → Aircraft → KC-130J',
-    data: { fy25_base:294406, fy26_base:518017, fy26_rec:145000, fy26_total:663017, fy27_base:1601906, fy27_rec:1190000, fy27_total:2791906 }
+    qtyUnit: 'aircraft',
+    data: { fy25_base:294406, fy26_base:518017, fy26_rec:145000, fy26_total:663017, fy27_base:1601906, fy27_rec:1190000, fy27_total:2791906 },
+    qty:  { fy25_base:2, fy26_base:4, fy26_rec:1, fy26_total:5, fy27_base:11, fy27_rec:7, fy27_total:18 }
   },
   'mq25': {
     label: 'MQ-25 Stingray',
     breadcrumb: 'Navy → Aircraft → MQ-25',
-    data: { fy25_base:61979, fy26_base:387686, fy26_rec:100000, fy26_total:487686, fy27_base:823368, fy27_rec:null, fy27_total:823368 }
+    qtyUnit: 'aircraft',
+    data: { fy25_base:61979, fy26_base:387686, fy26_rec:100000, fy26_total:487686, fy27_base:823368, fy27_rec:null, fy27_total:823368 },
+    qty:  { fy25_base:null, fy26_base:3, fy26_rec:null, fy26_total:3, fy27_base:3, fy27_rec:null, fy27_total:3 }
   },
   'columbia': {
     label: 'Columbia Class Submarine',
     breadcrumb: 'Navy → Shipbuilding → Columbia Class',
+    qtyUnit: 'hulls',
     data: { fy25_base:null, fy26_base:10744317, fy26_rec:null, fy26_total:10744317, fy27_base:10486369, fy27_rec:null, fy27_total:10486369 },
+    qty:  { fy25_base:null, fy26_base:1, fy26_rec:null, fy26_total:1, fy27_base:1, fy27_rec:null, fy27_total:1 },
     note: 'Values shown are gross; advance procurement offsets apply. FY25 funded under National Sea-Based Deterrence Fund (omitted per scope).'
   },
   'virginia': {
     label: 'Virginia Class Submarine',
     breadcrumb: 'Navy → Shipbuilding → Virginia Class',
-    data: { fy25_base:9500534, fy26_base:5389109, fy26_rec:4600000, fy26_total:9989109, fy27_base:11437036, fy27_rec:null, fy27_total:11437036 }
+    qtyUnit: 'hulls',
+    data: { fy25_base:9500534, fy26_base:5389109, fy26_rec:4600000, fy26_total:9989109, fy27_base:11437036, fy27_rec:null, fy27_total:11437036 },
+    qty:  { fy25_base:1, fy26_base:1, fy26_rec:1, fy26_total:2, fy27_base:2, fy27_rec:null, fy27_total:2 }
   },
   'cvn81': {
     label: 'CVN-81 (Carrier Replacement Program)',
     breadcrumb: 'Navy → Shipbuilding → CVN-81',
+    qtyUnit: null,
     data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:null, fy27_rec:null, fy27_total:null },
     note: 'CVN-81 line present in document but no funding reported in visible columns. May be classified or advance procurement only.'
   },
   'ddg51': {
     label: 'DDG-51 Arleigh Burke Destroyer',
     breadcrumb: 'Navy → Shipbuilding → DDG-51',
-    data: { fy25_base:7858814, fy26_base:306125, fy26_rec:5400000, fy26_total:5706125, fy27_base:4256914, fy27_rec:314000, fy27_total:4570914 }
+    qtyUnit: 'hulls',
+    data: { fy25_base:7858814, fy26_base:306125, fy26_rec:5400000, fy26_total:5706125, fy27_base:4256914, fy27_rec:314000, fy27_total:4570914 },
+    qty:  { fy25_base:3, fy26_base:null, fy26_rec:2, fy26_total:2, fy27_base:1, fy27_rec:null, fy27_total:1 }
   },
   'ffg': {
     label: 'FFG-Frigate (Constellation Class)',
     breadcrumb: 'Navy → Shipbuilding → FFG-Frigate',
-    data: { fy25_base:null, fy26_base:100000, fy26_rec:null, fy26_total:100000, fy27_base:null, fy27_rec:null, fy27_total:null }
+    qtyUnit: 'hulls',
+    data: { fy25_base:null, fy26_base:100000, fy26_rec:null, fy26_total:100000, fy27_base:null, fy27_rec:null, fy27_total:null },
+    note: 'Only advance procurement funding shown; no new-start hull qty reported.'
   },
   'lpd17': {
     label: 'LPD-17 San Antonio Class',
     breadcrumb: 'Navy → Shipbuilding → LPD-17',
+    qtyUnit: 'hulls',
     data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:null, fy27_rec:null, fy27_total:null },
+    qty:  { fy25_base:1, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:1, fy27_rec:null, fy27_total:1 },
     note: 'LPD-17 line present; funding appears in prior-year completion costs. No new-start funding in displayed columns.'
   },
   'mls': {
     label: 'Medium Landing Ship',
     breadcrumb: 'Navy → Shipbuilding → Medium Landing Ship',
-    data: { fy25_base:29668, fy26_base:800000, fy26_rec:1963941, fy26_total:2763941, fy27_base:null, fy27_rec:1887500, fy27_total:1887500 }
+    qtyUnit: 'hulls',
+    data: { fy25_base:29668, fy26_base:800000, fy26_rec:1963941, fy26_total:2763941, fy27_base:null, fy27_rec:1887500, fy27_total:1887500 },
+    qty:  { fy25_base:null, fy26_base:2, fy26_rec:8, fy26_total:10, fy27_base:null, fy27_rec:6, fy27_total:6 }
   },
   'sub-tender': {
     label: 'Submarine Tender',
     breadcrumb: 'Navy → Shipbuilding → Submarine Tender',
-    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:4444000, fy27_rec:null, fy27_total:4444000 }
+    qtyUnit: 'hulls',
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:4444000, fy27_rec:null, fy27_total:4444000 },
+    qty:  { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:2, fy27_rec:null, fy27_total:2 }
   },
   'cps': {
     label: 'Conventional Prompt Strike (CPS)',
     breadcrumb: 'Navy → Weapons → CPS',
-    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:750387, fy27_rec:null, fy27_total:750387 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:750387, fy27_rec:null, fy27_total:750387 },
+    qty:  { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:12, fy27_rec:null, fy27_total:12 }
   },
   'tomahawk': {
     label: 'Tomahawk',
     breadcrumb: 'Navy → Weapons → Tomahawk',
-    data: { fy25_base:95940, fy26_base:7193, fy26_rec:250421, fy26_total:257614, fy27_base:1015106, fy27_rec:1993803, fy27_total:3008909 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:95940, fy26_base:7193, fy26_rec:250421, fy26_total:257614, fy27_base:1015106, fy27_rec:1993803, fy27_total:3008909 },
+    qty:  { fy25_base:20, fy26_base:null, fy26_rec:55, fy26_total:55, fy27_base:58, fy27_rec:727, fy27_total:785 }
   },
   'lrasm-navy': {
     label: 'LRASM (Navy)',
     breadcrumb: 'Navy → Weapons → LRASM',
-    data: { fy25_base:597530, fy26_base:656724, fy26_rec:350000, fy26_total:1006724, fy27_base:670456, fy27_rec:236389, fy27_total:906845 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:597530, fy26_base:656724, fy26_rec:350000, fy26_total:1006724, fy27_base:670456, fy27_rec:236389, fy27_total:906845 },
+    qty:  { fy25_base:164, fy26_base:136, fy26_rec:64, fy26_total:200, fy27_base:129, fy27_rec:48, fy27_total:177 }
   },
   'sm': {
     label: 'Standard Missile (SM-2/6)',
     breadcrumb: 'Navy → Weapons → Standard Missile',
-    data: { fy25_base:788223, fy26_base:470278, fy26_rec:1048000, fy26_total:1518278, fy27_base:733159, fy27_rec:3599221, fy27_total:4332380 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:788223, fy26_base:470278, fy26_rec:1048000, fy26_total:1518278, fy27_base:733159, fy27_rec:3599221, fy27_total:4332380 },
+    qty:  { fy25_base:102, fy26_base:55, fy26_rec:111, fy26_total:166, fy27_base:106, fy27_rec:434, fy27_total:540 }
   },
   'essm': {
     label: 'ESSM (Evolved Sea Sparrow)',
     breadcrumb: 'Navy → Weapons → ESSM',
-    data: { fy25_base:624821, fy26_base:503381, fy26_rec:null, fy26_total:503381, fy27_base:521006, fy27_rec:null, fy27_total:521006 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:624821, fy26_base:503381, fy26_rec:null, fy26_total:503381, fy27_base:521006, fy27_rec:null, fy27_total:521006 },
+    qty:  { fy25_base:374, fy26_base:305, fy26_rec:null, fy26_total:305, fy27_base:290, fy27_rec:null, fy27_total:290 }
   },
   'aargm-er': {
     label: 'AARGM-ER',
     breadcrumb: 'Navy → Weapons → AARGM-ER',
-    data: { fy25_base:226486, fy26_base:227817, fy26_rec:null, fy26_total:227817, fy27_base:24304, fy27_rec:null, fy27_total:24304 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:226486, fy26_base:227817, fy26_rec:null, fy26_total:227817, fy27_base:24304, fy27_rec:null, fy27_total:24304 },
+    qty:  { fy25_base:157, fy26_base:99, fy26_rec:null, fy26_total:99, fy27_base:20, fy27_rec:null, fy27_total:20 }
   },
   'nsm': {
     label: 'Naval Strike Missile (NSM)',
     breadcrumb: 'Navy → Weapons → NSM',
-    data: { fy25_base:33695, fy26_base:36075, fy26_rec:null, fy26_total:36075, fy27_base:79801, fy27_rec:null, fy27_total:79801 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:33695, fy26_base:36075, fy26_rec:null, fy26_total:36075, fy27_base:79801, fy27_rec:null, fy27_total:79801 },
+    qty:  { fy25_base:10, fy26_base:16, fy26_rec:null, fy26_total:16, fy27_base:32, fy27_rec:null, fy27_total:32 }
   },
   'amraam-navy': {
     label: 'AMRAAM (Navy)',
     breadcrumb: 'Navy → Weapons → AMRAAM',
-    data: { fy25_base:207093, fy26_base:69913, fy26_rec:null, fy26_total:69913, fy27_base:167439, fy27_rec:636846, fy27_total:804285 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:207093, fy26_base:69913, fy26_rec:null, fy26_total:69913, fy27_base:167439, fy27_rec:636846, fy27_total:804285 },
+    qty:  { fy25_base:155, fy26_base:41, fy26_rec:null, fy26_total:41, fy27_base:106, fy27_rec:388, fy27_total:494 }
   },
   'jatm-navy': {
     label: 'JATM / AIM-260 (Navy)',
     breadcrumb: 'Navy → Weapons → JATM',
-    data: { fy25_base:null, fy26_base:301858, fy26_rec:null, fy26_total:301858, fy27_base:557806, fy27_rec:716275, fy27_total:1274081 }
+    qtyUnit: null,
+    data: { fy25_base:null, fy26_base:301858, fy26_rec:null, fy26_total:301858, fy27_base:557806, fy27_rec:716275, fy27_total:1274081 },
+    note: 'Quantity not reported in unclassified P-1.'
   },
   'mse-navy': {
     label: 'PAC-3 MSE Missile (Navy)',
     breadcrumb: 'Navy → Weapons → PAC-3 MSE',
-    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:97835, fy27_rec:1632988, fy27_total:1730823 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:97835, fy27_rec:1632988, fy27_total:1730823 },
+    qty:  { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:23, fy27_rec:382, fy27_total:405 }
   },
   'csuas-navy': {
     label: 'C-SUAS System (Navy)',
@@ -806,82 +875,114 @@ const DATA = {
   'b21': {
     label: 'B-21 Raider',
     breadcrumb: 'Air Force → Aircraft → B-21 Raider',
-    data: { fy25_base:2586868, fy26_base:2691616, fy26_rec:4500000, fy26_total:7191616, fy27_base:3092615, fy27_rec:null, fy27_total:3092615 }
+    qtyUnit: null,
+    data: { fy25_base:2586868, fy26_base:2691616, fy26_rec:4500000, fy26_total:7191616, fy27_base:3092615, fy27_rec:null, fy27_total:3092615 },
+    note: 'Quantity classified.'
   },
   'f35-af': {
     label: 'F-35A (Air Force)',
     breadcrumb: 'Air Force → Aircraft → F-35A',
-    data: { fy25_base:4808515, fy26_base:4323677, fy26_rec:null, fy26_total:4323677, fy27_base:2942679, fy27_rec:2338058, fy27_total:5280737 }
+    qtyUnit: 'aircraft',
+    data: { fy25_base:4808515, fy26_base:4323677, fy26_rec:null, fy26_total:4323677, fy27_base:2942679, fy27_rec:2338058, fy27_total:5280737 },
+    qty:  { fy25_base:40, fy26_base:24, fy26_rec:null, fy26_total:24, fy27_base:24, fy27_rec:14, fy27_total:38 }
   },
   'f15ex': {
     label: 'F-15EX Eagle II',
     breadcrumb: 'Air Force → Aircraft → F-15EX',
-    data: { fy25_base:2036472, fy26_base:115000, fy26_rec:2806792, fy26_total:2921792, fy27_base:2656716, fy27_rec:null, fy27_total:2656716 }
+    qtyUnit: 'aircraft',
+    data: { fy25_base:2036472, fy26_base:115000, fy26_rec:2806792, fy26_total:2921792, fy27_base:2656716, fy27_rec:null, fy27_total:2656716 },
+    qty:  { fy25_base:18, fy26_base:1, fy26_rec:21, fy26_total:22, fy27_base:24, fy27_rec:null, fy27_total:24 }
   },
   'kc46': {
     label: 'KC-46A Pegasus',
     breadcrumb: 'Air Force → Aircraft → KC-46A',
-    data: { fy25_base:2779618, fy26_base:2749974, fy26_rec:null, fy26_total:2749974, fy27_base:3520530, fy27_rec:null, fy27_total:3520530 }
+    qtyUnit: 'aircraft',
+    data: { fy25_base:2779618, fy26_base:2749974, fy26_rec:null, fy26_total:2749974, fy27_base:3520530, fy27_rec:null, fy27_total:3520530 },
+    qty:  { fy25_base:15, fy26_base:15, fy26_rec:null, fy26_total:15, fy27_base:15, fy27_rec:null, fy27_total:15 }
   },
   'c130j-af': {
     label: 'C-130J Super Hercules (Air Force)',
     breadcrumb: 'Air Force → Aircraft → C-130J',
-    data: { fy25_base:414005, fy26_base:1191000, fy26_rec:287060, fy26_total:1478060, fy27_base:636680, fy27_rec:null, fy27_total:636680 }
+    qtyUnit: 'aircraft',
+    data: { fy25_base:414005, fy26_base:1191000, fy26_rec:287060, fy26_total:1478060, fy27_base:636680, fy27_rec:null, fy27_total:636680 },
+    qty:  { fy25_base:1, fy26_base:7, fy26_rec:1, fy26_total:8, fy27_base:null, fy27_rec:null, fy27_total:null }
   },
   't7a': {
     label: 'T-7A Red Hawk',
     breadcrumb: 'Air Force → Aircraft → T-7A',
-    data: { fy25_base:20780, fy26_base:362083, fy26_rec:null, fy26_total:362083, fy27_base:529464, fy27_rec:null, fy27_total:529464 }
+    qtyUnit: 'aircraft',
+    data: { fy25_base:20780, fy26_base:362083, fy26_rec:null, fy26_total:362083, fy27_base:529464, fy27_rec:null, fy27_total:529464 },
+    qty:  { fy25_base:null, fy26_base:14, fy26_rec:null, fy26_total:14, fy27_base:23, fy27_rec:null, fy27_total:23 }
   },
   'cca': {
     label: 'Collaborative Combat Aircraft (CCA)',
     breadcrumb: 'Air Force → Aircraft → CCA',
-    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:996528, fy27_rec:null, fy27_total:996528 }
+    qtyUnit: null,
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:996528, fy27_rec:null, fy27_total:996528 },
+    note: 'New program; no quantity reported in FY27 request.'
   },
   'lrso': {
     label: 'Long Range Stand-Off Weapon (LRSO)',
     breadcrumb: 'Air Force → Missiles → LRSO',
-    data: { fy25_base:70335, fy26_base:131372, fy26_rec:null, fy26_total:131372, fy27_base:506047, fy27_rec:null, fy27_total:506047 }
+    qtyUnit: null,
+    data: { fy25_base:70335, fy26_base:131372, fy26_rec:null, fy26_total:131372, fy27_base:506047, fy27_rec:null, fy27_total:506047 },
+    note: 'Quantity classified.'
   },
   'jassm': {
     label: 'JASSM (Joint Air-to-Surface Standoff Missile)',
     breadcrumb: 'Air Force → Missiles → JASSM',
-    data: { fy25_base:970051, fy26_base:328081, fy26_rec:490000, fy26_total:818081, fy27_base:967866, fy27_rec:1029448, fy27_total:1997314 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:970051, fy26_base:328081, fy26_rec:490000, fy26_total:818081, fy27_base:967866, fy27_rec:1029448, fy27_total:1997314 },
+    qty:  { fy25_base:577, fy26_base:144, fy26_rec:237, fy26_total:381, fy27_base:491, fy27_rec:330, fy27_total:821 }
   },
   'lrasm-af': {
     label: 'LRASM (Air Force)',
     breadcrumb: 'Air Force → Missiles → LRASM',
-    data: { fy25_base:564109, fy26_base:294401, fy26_rec:112000, fy26_total:406401, fy27_base:500916, fy27_rec:236389, fy27_total:737305 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:564109, fy26_base:294401, fy26_rec:112000, fy26_total:406401, fy27_base:500916, fy27_rec:236389, fy27_total:737305 },
+    qty:  { fy25_base:172, fy26_base:93, fy26_rec:21, fy26_total:114, fy27_base:111, fy27_rec:45, fy27_total:156 }
   },
   'hacm': {
     label: 'Hypersonic Attack Cruise Missile (HACM)',
     breadcrumb: 'Air Force → Missiles → HACM',
-    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:403974, fy27_rec:null, fy27_total:403974 }
+    qtyUnit: null,
+    data: { fy25_base:null, fy26_base:null, fy26_rec:null, fy26_total:null, fy27_base:403974, fy27_rec:null, fy27_total:403974 },
+    note: 'New program; no quantity reported in FY27 request.'
   },
   'amraam-af': {
     label: 'AMRAAM (Air Force)',
     breadcrumb: 'Air Force → Missiles → AMRAAM',
-    data: { fy25_base:584391, fy26_base:382125, fy26_rec:298600, fy26_total:680725, fy27_base:115856, fy27_rec:1944956, fy27_total:2060812 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:584391, fy26_base:382125, fy26_rec:298600, fy26_total:680725, fy27_base:115856, fy27_rec:1944956, fy27_total:2060812 },
+    qty:  { fy25_base:411, fy26_base:237, fy26_rec:186, fy26_total:423, fy27_base:38, fy27_rec:1279, fy27_total:1317 }
   },
   'aim9x': {
     label: 'AIM-9X Sidewinder (Air Force)',
     breadcrumb: 'Air Force → Missiles → AIM-9X',
-    data: { fy25_base:306159, fy26_base:100352, fy26_rec:null, fy26_total:100352, fy27_base:419238, fy27_rec:null, fy27_total:419238 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:306159, fy26_base:100352, fy26_rec:null, fy26_total:100352, fy27_base:419238, fy27_rec:null, fy27_total:419238 },
+    qty:  { fy25_base:579, fy26_base:173, fy26_rec:null, fy26_total:173, fy27_base:648, fy27_rec:null, fy27_total:648 }
   },
   'jatm-af': {
     label: 'JATM / AIM-260 (Air Force)',
     breadcrumb: 'Air Force → Missiles → JATM',
-    data: { fy25_base:null, fy26_base:593593, fy26_rec:null, fy26_total:593593, fy27_base:608743, fy27_rec:1055876, fy27_total:1664619 }
+    qtyUnit: null,
+    data: { fy25_base:null, fy26_base:593593, fy26_rec:null, fy26_total:593593, fy27_base:608743, fy27_rec:1055876, fy27_total:1664619 },
+    note: 'Quantity not reported in unclassified P-1.'
   },
   'siaw': {
     label: 'Stand-In Attack Weapon (SIAW)',
     breadcrumb: 'Air Force → Missiles → SIAW',
-    data: { fy25_base:152646, fy26_base:152646, fy26_rec:null, fy26_total:152646, fy27_base:401607, fy27_rec:null, fy27_total:401607 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:152646, fy26_base:152646, fy26_rec:null, fy26_total:152646, fy27_base:401607, fy27_rec:null, fy27_total:401607 },
+    qty:  { fy25_base:null, fy26_base:75, fy26_rec:null, fy26_total:75, fy27_base:155, fy27_rec:null, fy27_total:155 }
   },
   'famm': {
     label: 'Family of Affordable Mass Missiles (FAMM)',
     breadcrumb: 'Air Force → Missiles → FAMM',
-    data: { fy25_base:null, fy26_base:null, fy26_rec:335000, fy26_total:335000, fy27_base:55000, fy27_rec:300000, fy27_total:355000 }
+    qtyUnit: 'missiles',
+    data: { fy25_base:null, fy26_base:null, fy26_rec:335000, fy26_total:335000, fy27_base:55000, fy27_rec:300000, fy27_total:355000 },
+    qty:  { fy25_base:null, fy26_base:null, fy26_rec:1000, fy26_total:1000, fy27_base:1000, fy27_rec:1000, fy27_total:2000 }
   },
 
   // ── DEFENSE-WIDE ──────────────────────────────
@@ -916,28 +1017,38 @@ const DATA = {
   'thaad-sys': {
     label: 'THAAD System (MDA)',
     breadcrumb: 'Defense-Wide → MDA → THAAD System',
+    qtyUnit: 'fire units',
     data: { fy25_base:955199, fy26_base:823125, fy26_rec:null, fy26_total:823125, fy27_base:null, fy27_rec:null, fy27_total:null },
+    qty:  { fy25_base:62, fy26_base:55, fy26_rec:null, fy26_total:55, fy27_base:null, fy27_rec:null, fy27_total:null },
     note: 'THAAD system (radar, launchers, C2) under MDA/Defense-Wide. FY27 shows $0 discretionary; no mandatory request.'
   },
   'aegis-bmd': {
     label: 'Aegis BMD (MDA)',
     breadcrumb: 'Defense-Wide → MDA → Aegis BMD',
-    data: { fy25_base:695180, fy26_base:475000, fy26_rec:350000, fy26_total:825000, fy27_base:null, fy27_rec:1245759, fy27_total:1245759 }
+    qtyUnit: 'system installations',
+    data: { fy25_base:695180, fy26_base:475000, fy26_rec:350000, fy26_total:825000, fy27_base:null, fy27_rec:1245759, fy27_total:1245759 },
+    qty:  { fy25_base:29, fy26_base:26, fy26_rec:16, fy26_total:42, fy27_base:null, fy27_rec:78, fy27_total:78 }
   },
   'sm3': {
     label: 'SM-3 IIA (MDA)',
     breadcrumb: 'Defense-Wide → MDA → SM-3 IIA',
-    data: { fy25_base:406370, fy26_base:444835, fy26_rec:65000, fy26_total:509835, fy27_base:778964, fy27_rec:3439640, fy27_total:4218604 }
+    qtyUnit: 'interceptors',
+    data: { fy25_base:406370, fy26_base:444835, fy26_rec:65000, fy26_total:509835, fy27_base:778964, fy27_rec:3439640, fy27_total:4218604 },
+    qty:  { fy25_base:12, fy26_base:12, fy26_rec:null, fy26_total:12, fy27_base:22, fy27_rec:114, fy27_total:136 }
   },
   'iron-dome': {
     label: 'Iron Dome (MDA)',
     breadcrumb: 'Defense-Wide → MDA → Iron Dome',
-    data: { fy25_base:110000, fy26_base:60000, fy26_rec:null, fy26_total:60000, fy27_base:20000, fy27_rec:null, fy27_total:20000 }
+    qtyUnit: 'batteries',
+    data: { fy25_base:110000, fy26_base:60000, fy26_rec:null, fy26_total:60000, fy27_base:20000, fy27_rec:null, fy27_total:20000 },
+    qty:  { fy25_base:1, fy26_base:1, fy26_rec:null, fy26_total:1, fy27_base:1, fy27_rec:null, fy27_total:1 }
   },
   'arrow3': {
     label: 'Arrow 3 (MDA)',
     breadcrumb: 'Defense-Wide → MDA → Arrow 3',
-    data: { fy25_base:50000, fy26_base:100000, fy26_rec:null, fy26_total:100000, fy27_base:150000, fy27_rec:null, fy27_total:150000 }
+    qtyUnit: 'batteries',
+    data: { fy25_base:50000, fy26_base:100000, fy26_rec:null, fy26_total:100000, fy27_base:150000, fy27_rec:null, fy27_total:150000 },
+    qty:  { fy25_base:1, fy26_base:1, fy26_rec:null, fy26_total:1, fy27_base:1, fy27_rec:null, fy27_total:1 }
   },
   'guam': {
     label: 'Defense of Guam (MDA)',
@@ -1419,6 +1530,11 @@ function renderTable(entry, cols) {
     { label: 'Value ($B)',    key: 'billions' },
   ];
 
+  // Add qty row if data exists
+  if (entry.qty) {
+    rows.push({ label: `Qty${entry.qtyUnit ? ' (' + entry.qtyUnit + ')' : ''}`, key: 'qty' });
+  }
+
   rows.forEach(row => {
     const tr = document.createElement('tr');
     const td0 = document.createElement('td');
@@ -1427,12 +1543,15 @@ function renderTable(entry, cols) {
 
     cols.forEach(c => {
       const td = document.createElement('td');
-      const v = entry.data[c.key];
-      if (v === null || v === undefined) {
-        td.textContent = '—';
-        td.className = 'null-val';
+      let v;
+      if (row.key === 'qty') {
+        v = entry.qty ? entry.qty[c.key] : null;
+        if (v === null || v === undefined) { td.textContent = '—'; td.className = 'null-val'; }
+        else { td.textContent = v.toLocaleString(); }
       } else {
-        td.textContent = row.key === 'raw' ? fmt(v) : fmtB(v);
+        v = entry.data[c.key];
+        if (v === null || v === undefined) { td.textContent = '—'; td.className = 'null-val'; }
+        else { td.textContent = row.key === 'raw' ? fmt(v) : fmtB(v); }
       }
       tr.appendChild(td);
     });
@@ -1440,16 +1559,27 @@ function renderTable(entry, cols) {
     // Delta
     if (deltaCol) {
       const td = document.createElement('td');
-      const from = entry.data[deltaCol._fromKey];
-      const to   = entry.data[deltaCol._toKey];
-      if (from !== null && from !== undefined && to !== null && to !== undefined) {
-        const delta = to - from;
-        const pct   = ((delta / from) * 100).toFixed(1);
-        td.textContent = row.key === 'raw'
-          ? (delta >= 0 ? '+' : '') + fmt(delta)
-          : (delta >= 0 ? '+' : '') + fmtB(delta) + ` (${pct}%)`;
-        td.className = delta >= 0 ? 'delta-pos' : 'delta-neg';
-      } else { td.textContent = '—'; td.className = 'null-val'; }
+      if (row.key === 'qty') {
+        // qty delta
+        const from = entry.qty ? entry.qty[deltaCol._fromKey] : null;
+        const to   = entry.qty ? entry.qty[deltaCol._toKey]   : null;
+        if (from !== null && from !== undefined && to !== null && to !== undefined) {
+          const delta = to - from;
+          td.textContent = (delta >= 0 ? '+' : '') + delta.toLocaleString();
+          td.className = delta >= 0 ? 'delta-pos' : 'delta-neg';
+        } else { td.textContent = '—'; td.className = 'null-val'; }
+      } else {
+        const from = entry.data[deltaCol._fromKey];
+        const to   = entry.data[deltaCol._toKey];
+        if (from !== null && from !== undefined && to !== null && to !== undefined) {
+          const delta = to - from;
+          const pct   = ((delta / from) * 100).toFixed(1);
+          td.textContent = row.key === 'raw'
+            ? (delta >= 0 ? '+' : '') + fmt(delta)
+            : (delta >= 0 ? '+' : '') + fmtB(delta) + ` (${pct}%)`;
+          td.className = delta >= 0 ? 'delta-pos' : 'delta-neg';
+        } else { td.textContent = '—'; td.className = 'null-val'; }
+      }
       tr.appendChild(td);
     }
 
