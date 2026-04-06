@@ -495,7 +495,7 @@ function onModeChange() {
 }
 
 function buildSeriesButtons(mode) {
-  const defs = SERIES_DEFS[mode] || [];
+  const defs = (SERIES_DEFS[mode] || []).filter(d => !(displayMode === 'pct' && d.pctHide));
   const grid = document.getElementById('series-grid');
   grid.innerHTML = '';
   activeSeries = new Set(defs.map(d => d.key));
@@ -533,6 +533,8 @@ function setDisplay(mode) {
   displayMode = mode;
   document.getElementById('btn-abs').classList.toggle('active', mode === 'abs');
   document.getElementById('btn-pct').classList.toggle('active', mode === 'pct');
+  const currentMode = document.getElementById('sel-mode').value;
+  buildSeriesButtons(currentMode);
   render();
 }
 
