@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DoD Procurement Budget Comparison</title>
+<title>DoW Procurement Budget Comparison</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
@@ -26,9 +26,6 @@ header span{font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',m
 .divider{border:none;border-top:1px solid var(--border);margin:12px 0}
 /* Tom Select overrides */
 .ts-wrapper{padding:0 14px}.ts-control{background:var(--surface2)!important;border-color:var(--border)!important;color:var(--text)!important;font-family:'IBM Plex Sans',sans-serif!important;font-size:13px!important;min-height:36px}
-.ts-control input{color:var(--text)!important}
-.ts-control input::placeholder{color:var(--text-muted)!important;opacity:1!important}
-.ts-control .placeholder{color:var(--text-muted)!important}
 .ts-dropdown{background:var(--surface2)!important;border-color:var(--border)!important;color:var(--text)!important;font-size:13px!important;z-index:9999}
 .ts-dropdown .option{padding:6px 10px!important;color:var(--text)!important}
 .ts-dropdown .option:hover,.ts-dropdown .option.active{background:var(--surface)!important;color:var(--accent)!important}
@@ -55,9 +52,6 @@ header span{font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',m
 .fy-btn.active{border-color:var(--accent);color:var(--text);background:color-mix(in srgb,var(--accent) 10%,transparent)}
 .fy-btn.active .dot{background:var(--accent)}
 /* Chart type */
-.chart-toggle{display:flex;gap:4px;padding:0 14px}
-.chart-toggle button{flex:1;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:5px 0;border-radius:3px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;transition:all .15s}
-.chart-toggle button.active{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
 /* Main */
 .main{padding:24px 28px;overflow-y:auto}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;color:var(--text-muted)}
@@ -82,6 +76,11 @@ tr:hover td{background:var(--surface2)}
 tr.total-row:hover td{background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
 td.col-total{background:color-mix(in srgb,var(--accent) 6%,transparent)}
 td.null-val{color:var(--text-muted)}
+td.delta-pos{color:#5bc4a0;font-weight:600}
+td.delta-neg{color:#e05c5c;font-weight:600}
+td.delta-zero{color:var(--text-muted)}
+th.delta-col{border-left:1px solid var(--border);color:var(--accent2)!important}
+td.delta-col{border-left:1px solid var(--border)}
 tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);padding:6px 12px;border-top:1px solid var(--border)}
 .note{font-size:12px;color:var(--text-muted);padding:8px 12px;background:var(--surface);border-radius:4px;border-left:3px solid var(--accent2)}
 
@@ -94,19 +93,17 @@ tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospac
   .qty-inline { color: #666; }
   @page{size:landscape;margin:0.6in 0.5in}
   .app-nav,.sidebar,.header-actions,.sel-actions,header{display:none!important}
-  .chart-wrap{display:none!important}
   .layout{display:block}
   .main{padding:0}
-  body{background:#fff;color:#111;font-size:11px}
-  .table-wrap{border:1px solid #bbb;page-break-inside:avoid}
+  body{background:#fff;color:#000;font-size:11px}
+  .chart-wrap{border:1px solid #ccc;page-break-inside:avoid;background:#fff}
+  .table-wrap{border:1px solid #ccc;page-break-inside:avoid}
   table{font-size:10px}
-  th{color:#111;background:#ddd!important;border-bottom:2px solid #999}
-  td{color:#111;border-bottom:1px solid #ccc}
-  tr.total-row td{background:#c5d8f0!important;font-weight:700;color:#000!important;border-top:2px solid #2a6baa}
-  tr.total-row td:first-child{color:#1a4a7a!important}
-  td.col-total{background:#ddeeff!important}
-  tr.acct-header td{background:#e8e8e8!important;color:#333;font-weight:600}
-  tr:hover td{background:inherit!important}
+  th{color:#444;background:#f0f0f0!important}
+  td{color:#000}
+  tr.total-row td{background:#dce8f5!important;font-weight:700}
+  td.col-total{background:#eff5fb!important}
+  tr.acct-header td{background:#f5f5f5!important;color:#555}
   .results{display:block!important}
   .empty-state{display:none!important}
   .print-header{display:block!important}
@@ -119,15 +116,15 @@ tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospac
 <body>
 
 <nav class="app-nav">
-  <span class="nav-brand">DoD Budget Suite</span>
+  <span class="nav-brand">DoW Budget Suite</span>
   <a href="index.html">Home</a>
   <a href="defense_budget_tool.html" class="active">P-1 Comparison</a>
   <a href="historical_budget_tool.html">Historical Trends</a>
 </nav>
 
 <header>
-  <h1>DoD Procurement Budget Comparison</h1>
-  <span>P-1 Exhibit &middot; FY2025&ndash;FY2027</span>
+  <h1>DoW Procurement Budget Comparison</h1>
+  <span>P-1 Exhibit &middot; FY2025&ndash;FY2027 &middot; Dollars in Thousands</span>
 </header>
 
 <div class="layout">
@@ -170,13 +167,12 @@ tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospac
       </div>
     </div>
 
-
   </aside>
 
   <main class="main">
     <div class="print-header" id="print-header">
-      <h2 id="print-title">DoD Procurement Budget Comparison</h2>
-      <p>FY2025&ndash;FY2027 &middot; P-1 Exhibit &middot; Source: FY2027 President's Budget</p>
+      <h2 id="print-title">DoW Procurement Budget Comparison</h2>
+      <p>FY2025&ndash;FY2027 &middot; P-1 Exhibit &middot; Dollars in Thousands &middot; Source: FY2027 President's Budget</p>
     </div>
 
     <div class="empty-state" id="empty-state">
@@ -407,10 +403,6 @@ function fmtK(v) {
 
 function fmtB(v) {
   if (v === null || v === undefined) return '—';
-  // Data is in thousands. 1B = 1,000,000 thousands.
-  if (Math.abs(v) < 1000000) {
-    return '$' + (v / 1000).toFixed(2) + 'M';
-  }
   return '$' + (v / 1000000).toFixed(2) + 'B';
 }
 
@@ -522,15 +514,46 @@ function renderTable(cols, totals) {
   const body = document.getElementById('table-body');
   const isTotalCol = c => c.type === 'total';
 
+  // Delta column: show if 2+ total columns are active
+  const activeTotals = ALL_COLS.filter(c => c.type === 'total' &&
+    [...document.querySelectorAll('.fy-btn.active')].map(b => b.dataset.col).includes(c.key));
+  const showDelta = activeTotals.length >= 2;
+  const deltaFrom = showDelta ? activeTotals[0] : null;
+  const deltaTo   = showDelta ? activeTotals[activeTotals.length - 1] : null;
+  const deltaLabel = showDelta ? `% Chg in $ · ${deltaFrom.fy}→${deltaTo.fy}` : null;
+
+  function computeDelta(data) {
+    if (!showDelta) return null;
+    const vFrom = data[deltaFrom.key];
+    const vTo   = data[deltaTo.key];
+    if (vFrom == null || vTo == null || vFrom === 0) return null;
+    return ((vTo - vFrom) / Math.abs(vFrom)) * 100;
+  }
+
+  function fmtDelta(pct) {
+    if (pct === null) return '—';
+    return (pct > 0 ? '+' : '') + pct.toFixed(1) + '%';
+  }
+
+  function deltaCls(pct) {
+    const base = 'delta-col';
+    if (pct === null) return base + ' null-val';
+    if (pct > 0)  return base + ' delta-pos';
+    if (pct < 0)  return base + ' delta-neg';
+    return base + ' delta-zero';
+  }
+
   // Header
   head.innerHTML = '<th>Program</th>' + cols.map(c =>
     `<th class="${isTotalCol(c) ? 'col-total' : ''}">${c.label}</th>`
-  ).join('');
+  ).join('') + (showDelta ? `<th class="delta-col">${deltaLabel}</th>` : '');
 
   // Total row
+  const totalDelta = computeDelta(totals);
   let rows = `<tr class="total-row">
     <td>Total — Selected Programs</td>
     ${cols.map(c => `<td class="${isTotalCol(c) ? 'col-total' : ''}">${fmtB(totals[c.key])}</td>`).join('')}
+    ${showDelta ? `<td class="${deltaCls(totalDelta)}">${fmtDelta(totalDelta)}</td>` : ''}
   </tr>`;
 
   // Group by account if multiple items
@@ -545,17 +568,19 @@ function renderTable(cols, totals) {
 
     Object.entries(byAcct).forEach(([key, { label, items }]) => {
       if (Object.keys(byAcct).length > 1) {
-        rows += `<tr class="acct-header"><td colspan="${cols.length + 1}">${label}</td></tr>`;
+        rows += `<tr class="acct-header"><td colspan="${cols.length + 1 + (showDelta ? 1 : 0)}">${label}</td></tr>`;
       }
       items.forEach(item => {
         const d = getItemData(item);
         const prog = item.isAccount ? null : P1.programs[item.id.slice(5)];
+        const itemDelta = computeDelta(d);
         rows += `<tr>
           <td>${item.label}</td>
           ${cols.map(c => {
             const v = d[c.key];
             return `<td class="${isTotalCol(c) ? 'col-total' : ''} ${v === null || v === undefined ? 'null-val' : ''}">${fmtB(v)}</td>`;
           }).join('')}
+          ${showDelta ? `<td class="${deltaCls(itemDelta)}">${fmtDelta(itemDelta)}</td>` : ''}
         </tr>`;
         // Qty row if available
         if (prog && prog.qty) {
@@ -565,6 +590,7 @@ function renderTable(cols, totals) {
             rows += `<tr class="qty-row">
               <td><em>Quantity${unit}</em></td>
               ${cols.map(c => `<td class="${isTotalCol(c) ? 'col-total' : ''}">${prog.qty[c.key] !== null && prog.qty[c.key] !== undefined ? prog.qty[c.key].toLocaleString() : '—'}</td>`).join('')}
+              ${showDelta ? `<td class="delta-col"></td>` : ''}
             </tr>`;
           }
         }
@@ -574,9 +600,11 @@ function renderTable(cols, totals) {
     // Single item — also show qty if available
     const item = selected[0];
     const d = getItemData(item);
+    const itemDelta = computeDelta(d);
     rows += `<tr>
       <td>${item.label}${item.account ? '<br><small style="color:var(--text-muted);font-size:11px">' + item.account + '</small>' : ''}</td>
       ${cols.map(c => `<td class="${isTotalCol(c) ? 'col-total' : ''}">${fmtB(d[c.key])}</td>`).join('')}
+      ${showDelta ? `<td class="${deltaCls(itemDelta)}">${fmtDelta(itemDelta)}</td>` : ''}
     </tr>`;
     // Qty row if available
     const prog = item.isAccount ? null : P1.programs[item.id.slice(5)];
@@ -587,6 +615,7 @@ function renderTable(cols, totals) {
         rows += `<tr class="qty-row">
           <td><em>Quantity${unit}</em></td>
           ${cols.map(c => `<td class="${isTotalCol(c) ? 'col-total' : ''}">${prog.qty[c.key] !== null && prog.qty[c.key] !== undefined ? prog.qty[c.key].toLocaleString() : '—'}</td>`).join('')}
+          ${showDelta ? `<td class="delta-col"></td>` : ''}
         </tr>`;
       }
     }
@@ -602,6 +631,7 @@ function toggleCol(btn) {
   btn.classList.toggle('active');
   render();
 }
+
 
 function printView() {
   window.print();
