@@ -551,22 +551,24 @@ function renderTable(cols, totals) {
       items.forEach(item => {
         const d = getItemData(item);
         const prog = item.isAccount ? null : P1.programs[item.id.slice(5)];
-        // Build qty summary string: show FY27 total qty if available
-        let qtySummary = '—';
-        if (prog && prog.qty) {
-          const activeTotalCol = cols.find(c => c.key === 'fy27_total') || cols.find(c => c.type === 'total');
-          const qv = activeTotalCol ? prog.qty[activeTotalCol.key] : null;
-          if (qv !== null && qv !== undefined) {
-            qtySummary = qv.toLocaleString() + (prog.qty_unit ? ' ' + prog.qty_unit : '');
-          }
-        }
         rows += `<tr>
-          <td>${item.label}<br><small class="qty-inline">${qtySummary !== '—' ? 'FY27 qty: ' + qtySummary : ''}</small></td>
+          <td>${item.label}</td>
           ${cols.map(c => {
             const v = d[c.key];
             return `<td class="${isTotalCol(c) ? 'col-total' : ''} ${v === null || v === undefined ? 'null-val' : ''}">${fmtB(v)}</td>`;
           }).join('')}
         </tr>`;
+        // Qty row if available
+        if (prog && prog.qty) {
+          const anyQty = cols.some(c => prog.qty[c.key] !== null && prog.qty[c.key] !== undefined);
+          if (anyQty) {
+            const unit = prog.qty_unit ? ` (${prog.qty_unit})` : '';
+            rows += `<tr class="qty-row">
+              <td><em>Quantity${unit}</em></td>
+              ${cols.map(c => `<td class="${isTotalCol(c) ? 'col-total' : ''}">${prog.qty[c.key] !== null && prog.qty[c.key] !== undefined ? prog.qty[c.key].toLocaleString() : '—'}</td>`).join('')}
+            </tr>`;
+          }
+        }
       });
     });
   } else {
