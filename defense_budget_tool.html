@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DoD Procurement Budget Comparison</title>
@@ -130,14 +130,14 @@ tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospac
 
 <nav class="app-nav">
   <span class="nav-brand">DoD Budget Suite</span>
-  <a href="index.html">Home</a>
-  <a href="defense_budget_tool.html" class="active">P-1 Comparison</a>
-  <a href="historical_budget_tool.html">Historical Trends</a>
+  <a href="https://carlton-haelig.github.io/CNAS-FY27-Budget-Tools/index.html">Home</a>
+  <a href="https://carlton-haelig.github.io/CNAS-FY27-Budget-Tools/defense_budget_tool.html" class="active">P-1 Comparison</a>
+  <a href="https://carlton-haelig.github.io/CNAS-FY27-Budget-Tools/historical_budget_tool.html">Historical Trends</a>
 </nav>
 
 <header>
   <h1>DoD Procurement Budget Comparison</h1>
-  <span>P-1 Exhibit &middot; FY2025&ndash;FY2027</span>
+  <span>P-1 Exhibit · FY2025–FY2027</span>
 </header>
 
 <div class="layout">
@@ -146,7 +146,7 @@ tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospac
     <div class="sidebar-section" style="padding-top:16px">
       <span class="sidebar-label">Search &amp; Add Programs</span>
       <div class="ts-wrapper" style="padding:0 14px">
-        <select id="prog-picker" placeholder="Search programs or accounts..."></select>
+        <select id="prog-picker" placeholder="Search programs or accounts..." tabindex="-1" class="tomselected ts-hidden-accessible"><option value="" selected="selected"></option></select><div class="ts-wrapper single"><div class="ts-control"><input type="text" autocomplete="off" size="1" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="prog-picker-ts-dropdown" id="prog-picker-ts-control" placeholder="Search programs or accounts..."></div><div class="ts-dropdown single" style="display: none;"><div role="listbox" tabindex="-1" class="ts-dropdown-content" id="prog-picker-ts-dropdown"></div></div></div>
       </div>
     </div>
 
@@ -159,7 +159,7 @@ tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospac
       </div>
       <div class="sel-actions">
         <button class="btn-sm" onclick="clearAll()">Clear all</button>
-        <button class="btn-sm primary" onclick="printView()">&#x2399; Print / Export</button>
+        <button class="btn-sm primary" onclick="printView()">⎙ Print / Export</button>
       </div>
     </div>
 
@@ -168,14 +168,14 @@ tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospac
     <div class="sidebar-section">
       <span class="sidebar-label">Fiscal Years</span>
       <div class="fy-grid">
-        <button class="fy-btn"        data-col="fy25_base"  onclick="toggleCol(this)"><span class="dot"></span>FY25 Base</button>
-        <button class="fy-btn"        data-col="fy25_rec"   onclick="toggleCol(this)"><span class="dot"></span>FY25 Rec.</button>
+        <button class="fy-btn" data-col="fy25_base" onclick="toggleCol(this)"><span class="dot"></span>FY25 Base</button>
+        <button class="fy-btn" data-col="fy25_rec" onclick="toggleCol(this)"><span class="dot"></span>FY25 Rec.</button>
         <button class="fy-btn active" data-col="fy25_total" onclick="toggleCol(this)"><span class="dot"></span>FY25 Total</button>
-        <button class="fy-btn"        data-col="fy26_base"  onclick="toggleCol(this)"><span class="dot"></span>FY26 Disc.</button>
-        <button class="fy-btn"        data-col="fy26_rec"   onclick="toggleCol(this)"><span class="dot"></span>FY26 Mand.</button>
+        <button class="fy-btn" data-col="fy26_base" onclick="toggleCol(this)"><span class="dot"></span>FY26 Disc.</button>
+        <button class="fy-btn" data-col="fy26_rec" onclick="toggleCol(this)"><span class="dot"></span>FY26 Mand.</button>
         <button class="fy-btn active" data-col="fy26_total" onclick="toggleCol(this)"><span class="dot"></span>FY26 Total</button>
-        <button class="fy-btn"        data-col="fy27_base"  onclick="toggleCol(this)"><span class="dot"></span>FY27 Disc.</button>
-        <button class="fy-btn"        data-col="fy27_rec"   onclick="toggleCol(this)"><span class="dot"></span>FY27 Mand.</button>
+        <button class="fy-btn" data-col="fy27_base" onclick="toggleCol(this)"><span class="dot"></span>FY27 Disc.</button>
+        <button class="fy-btn" data-col="fy27_rec" onclick="toggleCol(this)"><span class="dot"></span>FY27 Mand.</button>
         <button class="fy-btn active" data-col="fy27_total" onclick="toggleCol(this)"><span class="dot"></span>FY27 Total</button>
       </div>
     </div>
@@ -185,12 +185,12 @@ tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospac
   <main class="main">
     <div class="print-header" id="print-header">
       <h2 id="print-title">DoD Procurement Budget Comparison</h2>
-      <p>FY2025&ndash;FY2027 &middot; P-1 Exhibit &middot; Source: FY2027 President's Budget</p>
+      <p>FY2025–FY2027 · P-1 Exhibit · Source: FY2027 President's Budget</p>
     </div>
 
     <div class="empty-state" id="empty-state">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+        <rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18M9 21V9"></path>
       </svg>
       <span>Search and select programs to compare</span>
     </div>
@@ -203,7 +203,7 @@ tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospac
           <div class="result-sub" id="res-sub"></div>
         </div>
         <div class="header-actions">
-          <button class="btn-sm primary" onclick="printView()">&#x2399; Print / Export</button>
+          <button class="btn-sm primary" onclick="printView()">⎙ Print / Export</button>
         </div>
       </div>
 
@@ -538,12 +538,20 @@ function renderTable(cols, totals) {
   const showDelta = activeTotals.length >= 2;
   const deltaFrom = showDelta ? activeTotals[0] : null;
   const deltaTo   = showDelta ? activeTotals[activeTotals.length - 1] : null;
-  const deltaLabel = showDelta ? `% Chg in $ · ${deltaFrom.fy}→${deltaTo.fy}` : null;
+  const deltaLabel = showDelta ? `% Chg · ${deltaFrom.fy}→${deltaTo.fy}` : null;
 
   function computeDelta(data) {
     if (!showDelta) return null;
     const vFrom = data[deltaFrom.key];
     const vTo   = data[deltaTo.key];
+    if (vFrom == null || vTo == null || vFrom === 0) return null;
+    return ((vTo - vFrom) / Math.abs(vFrom)) * 100;
+  }
+
+  function computeQtyDelta(qty) {
+    if (!showDelta || !qty) return null;
+    const vFrom = qty[deltaFrom.key];
+    const vTo   = qty[deltaTo.key];
     if (vFrom == null || vTo == null || vFrom === 0) return null;
     return ((vTo - vFrom) / Math.abs(vFrom)) * 100;
   }
@@ -608,7 +616,7 @@ function renderTable(cols, totals) {
             rows += `<tr class="qty-row">
               <td><em>Quantity${unit}</em></td>
               ${cols.map(c => `<td class="${isTotalCol(c) ? 'col-total' : ''}">${prog.qty[c.key] !== null && prog.qty[c.key] !== undefined ? prog.qty[c.key].toLocaleString() : '—'}</td>`).join('')}
-              ${showDelta ? `<td class="delta-col"></td>` : ''}
+              ${showDelta ? `<td class="${deltaCls(computeQtyDelta(prog.qty))}">${fmtDelta(computeQtyDelta(prog.qty))}</td>` : ''}
             </tr>`;
           }
         }
@@ -633,7 +641,7 @@ function renderTable(cols, totals) {
         rows += `<tr class="qty-row">
           <td><em>Quantity${unit}</em></td>
           ${cols.map(c => `<td class="${isTotalCol(c) ? 'col-total' : ''}">${prog.qty[c.key] !== null && prog.qty[c.key] !== undefined ? prog.qty[c.key].toLocaleString() : '—'}</td>`).join('')}
-          ${showDelta ? `<td class="delta-col"></td>` : ''}
+          ${showDelta ? `<td class="${deltaCls(computeQtyDelta(prog.qty))}">${fmtDelta(computeQtyDelta(prog.qty))}</td>` : ''}
         </tr>`;
       }
     }
@@ -660,5 +668,6 @@ function printView() {
 // ─────────────────────────────────────────────
 initPicker();
 </script>
-</body>
-</html>
+
+
+</body></html>
