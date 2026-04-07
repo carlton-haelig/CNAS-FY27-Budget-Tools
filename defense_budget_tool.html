@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DoD Procurement Budget Comparison</title>
@@ -87,6 +86,9 @@ tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospac
 .note{font-size:12px;color:var(--text-muted);padding:8px 12px;background:var(--surface);border-radius:4px;border-left:3px solid var(--accent2)}
 
 .qty-row td { color: var(--text-muted); font-size: 12px; font-style: italic; background: color-mix(in srgb, var(--accent3) 5%, transparent); }
+.qty-row td.delta-pos{color:#5bc4a0!important;font-weight:600}
+.qty-row td.delta-neg{color:#e05c5c!important;font-weight:600}
+.qty-row td.delta-zero{color:var(--text-muted)!important}
 .qty-row td.col-total { background: color-mix(in srgb, var(--accent3) 10%, color-mix(in srgb, var(--accent) 6%, transparent)); }
 .qty-inline { color: var(--text-muted); font-size: 11px; font-style: italic; display: block; margin-top: 2px; }
 /* ── PRINT STYLES ─────────────────────────── */
@@ -146,7 +148,7 @@ tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospac
     <div class="sidebar-section" style="padding-top:16px">
       <span class="sidebar-label">Search &amp; Add Programs</span>
       <div class="ts-wrapper" style="padding:0 14px">
-        <select id="prog-picker" placeholder="Search programs or accounts..." tabindex="-1" class="tomselected ts-hidden-accessible"><option value="" selected="selected"></option></select><div class="ts-wrapper single"><div class="ts-control"><input type="text" autocomplete="off" size="1" tabindex="0" role="combobox" aria-haspopup="listbox" aria-expanded="false" aria-controls="prog-picker-ts-dropdown" id="prog-picker-ts-control" placeholder="Search programs or accounts..."></div><div class="ts-dropdown single" style="display: none;"><div role="listbox" tabindex="-1" class="ts-dropdown-content" id="prog-picker-ts-dropdown"></div></div></div>
+        <select id="prog-picker" placeholder="Search programs or accounts..."></select>
       </div>
     </div>
 
@@ -666,7 +668,9 @@ function printView() {
 // ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
-initPicker();
+document.addEventListener('DOMContentLoaded', function() {
+  initPicker();
+});
 </script>
 
 
