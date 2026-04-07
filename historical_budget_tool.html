@@ -320,7 +320,7 @@
 
 <!-- SHARED NAV -->
 <nav class="app-nav">
-  <span class="nav-brand">DoW Budget Suite</span>
+  <span class="nav-brand">DoD Budget Suite</span>
   <a href="index.html">Home</a>
   <a href="defense_budget_tool.html">P-1 Comparison</a>
   <a href="historical_budget_tool.html" class="active">Historical Trends</a>
@@ -564,7 +564,7 @@ function getChartData() {
   if (mode === 'topline') {
     sourceData = RAW.topline;
     seriesDefs = SERIES_DEFS.topline;
-    title = 'Department of War — Topline Spending';
+    title = 'Department of Defense — Topline Spending';
     subtitle = 'All titles, FY2025 constant dollars';
   } else if (mode === 'service') {
     const svc = document.getElementById('sel-service').value;
