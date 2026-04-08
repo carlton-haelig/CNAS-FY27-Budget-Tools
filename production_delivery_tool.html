@@ -227,13 +227,11 @@ const PROGRAMS = {
     // Annual delivery summary (all services combined, actuals + planned)
     // Derived from P-21 delivery schedule
     annual_deliveries: [
-      { fy: 'FY2020', delivered: 0,   planned: 90,  note: 'Contract awarded; deliveries completed in FY22' },
-      { fy: 'FY2021', delivered: 0,   planned: 130, note: 'Contract awarded; deliveries span FY23-FY24' },
-      { fy: 'FY2022', delivered: 90,  planned: 0,   note: 'FY2020 lot deliveries completed' },
-      { fy: 'FY2023', delivered: 130, planned: 0,   note: 'FY2021 lot deliveries (partial into FY24)' },
-      { fy: 'FY2024', delivered: 154, planned: 0,   note: 'FY2022 lot (154 total cross-service) plus FY2021 remainder' },
-      { fy: 'FY2025', delivered: 20,  planned: 109, note: '20 via PL118-50 supplemental; FY2022/23 lots delivering' },
-      { fy: 'FY2026', delivered: 0,   planned: 263, note: 'FY2022/23 lots completing + FY2026 lot begins' },
+      { fy: 'FY2022', delivered: 90,  planned: 0,   note: 'FY20 lot: 90 Navy (Aug–Dec 2022)' },
+      { fy: 'FY2023', delivered: 0,   planned: 0,   note: 'Gap — FY21 lot first delivery Dec 2023; no deliveries this FY' },
+      { fy: 'FY2024', delivered: 45,  planned: 0,   note: 'FY21 lot: 45 Navy (Dec 2023=30, Apr 2024=15)' },
+      { fy: 'FY2025', delivered: 158, planned: 0,   note: 'FY21 lot: 85 Navy + FY22 lot: 73 cross-svc (Army 22, MC 51)' },
+      { fy: 'FY2026', delivered: 0,   planned: 190, note: 'FY22 lot balance (81) + FY23 lot (109) — all cross-service' },
     ],
   }
 };
@@ -540,13 +538,14 @@ function renderDeliveryLot(prog) {
     <tbody>
       ${lots.map(l => {
         const total = l.qty_navy + l.qty_army + l.qty_mc;
-        // Estimate delivered based on status
-        const delivered = l.status === 'Complete' ? total :
-                          l.status === 'In Delivery' ? Math.round(total * 0.5) : 0;
-        const balance = total - delivered;
-        // Avg delivered/mo: rough based on delivery window from P-21
-        const avgPerMo = l.status === 'Complete' ? (total / 12).toFixed(1) :
-                         l.status === 'In Delivery' ? (delivered > 0 ? (delivered / 6).toFixed(1) : '—') : '—';
+        const delivered = l.delivered;
+        const balance = l.balance;
+        // Avg delivered/mo: based on actual delivery window from P-21
+        // FY20: 90 over ~5 months (Aug-Dec 2022); FY21: 130 over ~22 months (Dec23-Sep25)
+        // FY22: 73 delivered of 154 over ~5 months (May-Sep 2025); FY23: not yet delivering
+        const deliveryMonths = { 2020: 5, 2021: 22, 2022: 5, 2023: 0 };
+        const months = deliveryMonths[l.lot_fy] || 0;
+        const avgPerMo = delivered > 0 && months > 0 ? (delivered / months).toFixed(1) : '—';
         const statusCls = l.status === 'Complete' ? 'complete' : l.status === 'In Delivery' ? 'in-progress' : 'pending';
         return `<tr>
           <td style="text-align:left;font-family:'IBM Plex Mono',monospace">FY${l.lot_fy}</td>
@@ -569,8 +568,8 @@ function renderDeliveryLot(prog) {
         <td>${lots.reduce((s,l)=>s+l.qty_army,0).toLocaleString()}</td>
         <td>${lots.reduce((s,l)=>s+l.qty_mc,0).toLocaleString()}</td>
         <td>${lots.reduce((s,l)=>s+l.qty_navy+l.qty_army+l.qty_mc,0).toLocaleString()}</td>
-        <td>${(() => { const d = lots.reduce((s,l)=>{ const tot=l.qty_navy+l.qty_army+l.qty_mc; const del=l.status==='Complete'?tot:l.status==='In Delivery'?Math.round(tot*0.5):0; return s+del; },0); return d>0?d.toLocaleString():'—'; })()}</td>
-        <td>${(() => { const b = lots.reduce((s,l)=>{ const tot=l.qty_navy+l.qty_army+l.qty_mc; const del=l.status==='Complete'?tot:l.status==='In Delivery'?Math.round(tot*0.5):0; return s+(tot-del); },0); return b>0?b.toLocaleString():'—'; })()}</td>
+        <td>${lots.reduce((s,l)=>s+l.delivered,0).toLocaleString()}</td>
+        <td>${lots.reduce((s,l)=>s+l.balance,0).toLocaleString()}</td>
         <td></td><td></td>
       </tr>
     </tbody>`;
