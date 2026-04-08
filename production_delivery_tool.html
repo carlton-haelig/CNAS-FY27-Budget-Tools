@@ -39,7 +39,7 @@ header span{font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',m
 .pane-meta{font-size:11px;color:var(--text-muted)}
 .pane-actions{display:flex;gap:8px;align-items:center}
 .pane-body{padding:20px}
-.chart-wrap{position:relative;width:100%;margin-bottom:20px}
+.chart-wrap{position:relative;width:100%;margin-bottom:20px}@media print{.chart-wrap{display:none!important}}
 
 /* TOGGLE */
 .toggle-group{display:flex;border:1px solid var(--border);border-radius:3px;overflow:hidden}
@@ -111,14 +111,17 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
 
 <header>
   <h1>Production &amp; Delivery</h1>
-  <span>J-Book &middot; PB2026 &middot; Dollars in Millions</span>
+  <span>J-Book &middot; PB2026</span>
 </header>
 
 <div class="program-bar">
   <span class="program-bar-label">Program</span>
-  <button class="prog-btn active" data-prog="tomahawk">Tomahawk (USN)</button>
+  <div class="toggle-group" id="prog-selector">
+    <button class="toggle-btn active" data-prog="tomahawk" onclick="selectProg(this)">Tomahawk (USN)</button>
+    <button class="toggle-btn" data-prog="mse" onclick="selectProg(this)">PAC-3 MSE (Army)</button>
+  </div>
   <div style="flex:1"></div>
-  <a href="https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf" target="_blank" class="btn-sm primary" style="text-decoration:none">↗ FY26 J-Book</a>
+  <a id="jbook-link" href="https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf" target="_blank" class="btn-sm primary" style="text-decoration:none">↗ FY26 J-Book</a>
   <button class="btn-sm primary" onclick="window.print()">⎙ Print / Export</button>
   <button class="btn-sm primary" onclick="shareView()">⎗ Share Report</button>
 </div>
@@ -129,7 +132,7 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
   <div class="pane" id="pane-unitcost">
     <div class="pane-header">
       <span class="pane-title">Unit Cost by Contract Lot</span>
-      <span class="pane-meta">P-5a · Tactical Tomahawk VLS AUR · $ Thousands · FY2024–FY26 lots not yet contracted per FY26 J-book</span>
+      <span class="pane-meta" id="cost-pane-meta">P-5a</span>
     </div>
     <div class="pane-body">
       <div class="stat-grid" id="cost-stats"></div>
@@ -148,7 +151,7 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
           <button class="toggle-btn" id="btn-lot" onclick="setDeliveryView('lot')">Lot Breakdown</button>
         </div>
       </div>
-      <span class="pane-meta">P-21 · All Services · Units in Each · FY2024–FY26 lots not yet contracted per FY26 J-book</span>
+      <span class="pane-meta" id="del-pane-meta">P-21 · Units in Each</span>
     </div>
     <div class="pane-body">
       <div id="delivery-annual">
@@ -191,6 +194,11 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
 // ─────────────────────────────────────────────
 // DATA
 // ─────────────────────────────────────────────
+const JBOOK_URLS = {
+  tomahawk: 'https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf',
+  mse: 'https://www.asafm.army.mil/Portals/72/Documents/BudgetMaterial/2026/Procurement/Other%20Procurement/Missile_Procurement_Army.pdf',
+};
+
 const PROGRAMS = {
   tomahawk: {
     label: 'Tomahawk (USN)',
@@ -199,6 +207,7 @@ const PROGRAMS = {
     contractor: 'Raytheon Missile Systems — Tucson, AZ',
     contract_type: 'SS / FPIF',
     pco: 'NAVAIR',
+    qty_unit: 'AURs',
     msr: 90,
     rate_185: 250,
     max_rate: 600,
@@ -232,6 +241,43 @@ const PROGRAMS = {
       { fy: 'FY2024', delivered: 45,  planned: 0,   note: 'FY21 lot: 45 Navy (Dec 2023=30, Apr 2024=15)' },
       { fy: 'FY2025', delivered: 158, planned: 0,   note: 'FY21 lot: 85 Navy + FY22 lot: 73 cross-svc (Army 22, MC 51)' },
       { fy: 'FY2026', delivered: 0,   planned: 190, note: 'FY22 lot balance (81) + FY23 lot (109) — all cross-service' },
+    ],
+  },
+
+  mse: {
+    label: 'PAC-3 MSE (Army)',
+    bli: '8260C53101',
+    account: 'Missile Procurement, Army',
+    contractor: 'Lockheed Martin Missiles & Fire Control (LMMFC) — Dallas, TX',
+    contract_type: 'SS / FFP',
+    pco: 'AMCOM, RSA, AL',
+    qty_unit: 'interceptors',
+    msr: 144,
+    rate_185: 550,
+    max_rate: 550,
+    lead_time_reorder: '31 months',
+    note: 'Production line serves both US Army and Foreign Military Sales (FMS). Gaps in US delivery schedule attributed to FMS. FMS and US combine to provide production line continuity and buying power efficiencies. Unit costs for FY2024–FY2026 MYP lots subject to change at definitization. FY2025 P-1 actuals (194) differ from J-book planned quantity (214); P-1 figure used.',
+
+    funding: [
+      { fy: 'Prior Years', disc: 10400.998, mandatory: 0,          total: 10400.998, qty_disc: 2047, qty_mandatory: 0,    qty_total: 2047, note: 'Cumulative prior year · Source: FY26 J-book P-40' },
+      { fy: 'FY2024',      disc: 2562.908,  mandatory: 0,          total: 2562.908,  qty_disc: 230,  qty_mandatory: 0,    qty_total: 230,  note: 'Includes $252M advance procurement for long-lead items · Source: FY26 J-book P-40' },
+      { fy: 'FY2025',      disc: 905.060,   mandatory: 0,          total: 905.060,   qty_disc: 194,  qty_mandatory: 0,    qty_total: 194,  note: 'Actuals; P-1 qty (194) differs from J-book planned qty (214) · Source: FY27 P-1' },
+      { fy: 'FY2026',      disc: 1445.905,  mandatory: 200.000,    total: 1645.905,  qty_disc: 310,  qty_mandatory: 47,   qty_total: 357,  note: 'Enacted; mandatory via reconciliation · Source: FY27 P-1' },
+      { fy: 'FY2027',      disc: 1297.528,  mandatory: 10931.919,  total: 12229.447, qty_disc: 244,  qty_mandatory: 2554, qty_total: 2798, note: 'Request · Source: FY27 P-1' },
+    ],
+
+    lots: [
+      { lot_fy: 2023, award_date: 'Dec 2022', first_delivery: 'May 2025', qty_navy: 0, qty_army: 252, qty_mc: 0, unit_cost_k: 3825.131, status: 'In Delivery', delivered: 100,  balance: 152 },
+      { lot_fy: 2024, award_date: 'Jul 2025', first_delivery: 'Sep 2026', qty_navy: 0, qty_army: 230, qty_mc: 0, unit_cost_k: 3839.704, status: 'Pending',     delivered: 0,    balance: 230 },
+      { lot_fy: 2025, award_date: 'Jul 2025', first_delivery: 'Sep 2027', qty_navy: 0, qty_army: 214, qty_mc: 0, unit_cost_k: 3867.729, status: 'Pending',     delivered: 0,    balance: 214 },
+      { lot_fy: 2026, award_date: 'Dec 2025', first_delivery: 'May 2028', qty_navy: 0, qty_army: 121, qty_mc: 0, unit_cost_k: 3889.727, status: 'Pending',     delivered: 0,    balance: 121 },
+    ],
+
+    annual_deliveries: [
+      { fy: 'FY2025', delivered: 100, planned: 0,   note: 'FY23 lot: 100 Army (May–Sep 2025)' },
+      { fy: 'FY2026', delivered: 172, planned: 0,   note: 'FY23 lot complete (152) + FY24 lot begins (20 Army)' },
+      { fy: 'FY2027', delivered: 0,   planned: 210, note: 'FY24 lot: 210 remaining Army' },
+      { fy: 'FY2028', delivered: 0,   planned: 335, note: 'FY25 lot (~211) + FY26 lot (~121) + FY24 tail (3)' },
     ],
   }
 };
@@ -277,13 +323,13 @@ function renderFunding(prog) {
 
   // Stat cards
   const totalObligated = rows.filter(r => ['FY2024','FY2025','FY2026'].includes(r.fy)).reduce((s,r) => s+r.total, 0);
-  const fy27 = rows.find(r => r.fy === 'FY2027');
-  const fy26 = rows.find(r => r.fy === 'FY2026');
+  const fy27 = rows.find(r => r.fy === 'FY2027') || {};
+  const fy26 = rows.find(r => r.fy === 'FY2026') || {};
   document.getElementById('funding-stats').innerHTML = `
     <div class="stat-card">
       <div class="stat-label">FY2026 Total</div>
       <div class="stat-value">${fmtM(fy26.total)}</div>
-      <div class="stat-sub">${fmtN(fy26.qty_navy)} Navy AURs</div>
+      <div class="stat-sub">${fmtN(fy26.qty_total)} ${prog.qty_unit||'units'}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">FY2026 Mandatory Share</div>
@@ -293,7 +339,7 @@ function renderFunding(prog) {
     <div class="stat-card">
       <div class="stat-label">FY2027 Request</div>
       <div class="stat-value">${fmtM(fy27.total)}</div>
-      <div class="stat-sub">${fmtN(fy27.qty_navy)} Navy AURs (base)</div>
+      <div class="stat-sub">${fmtN(fy27.qty_disc)} ${prog.qty_unit||'units'} (disc.)</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">FY24–26 Obligated</div>
@@ -355,6 +401,13 @@ function renderFunding(prog) {
 
 // ── UNIT COST PANE ────────────────────────────
 function renderUnitCost(prog) {
+  const allArmyOnly = prog.lots.every(l => l.qty_navy === 0 && l.qty_mc === 0);
+  const svcLabel = allArmyOnly ? 'Army only' : 'All Services';
+  const lotNote = prog.lots.some(l => l.status === 'Pending') ? ' · Some lots pending definitization' : '';
+  const metaEl = document.getElementById('cost-pane-meta');
+  if (metaEl) metaEl.textContent = `P-5a · ${svcLabel}${lotNote}`;
+  const delMeta = document.getElementById('del-pane-meta');
+  if (delMeta) delMeta.textContent = `P-21 · ${svcLabel} · Units in Each`;
   const lots = prog.lots.filter(l => l.unit_cost_k !== null);
 
   // Stat cards
@@ -368,22 +421,22 @@ function renderUnitCost(prog) {
   document.getElementById('cost-stats').innerHTML = `
     <div class="stat-card">
       <div class="stat-label">Latest Lot Unit Cost</div>
-      <div class="stat-value">${fmtK(latestCost)}</div>
+      <div class="stat-value">${fmtM(latestCost/1000)}</div>
       <div class="stat-sub">FY${lots[lots.length-1].lot_fy} lot</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Lowest Lot Unit Cost</div>
-      <div class="stat-value">${fmtK(minCost)}</div>
+      <div class="stat-value">${fmtM(minCost/1000)}</div>
       <div class="stat-sub">FY${lots.find(l=>l.unit_cost_k===minCost).lot_fy} lot</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Cost Change (FY20→FY23)</div>
+      <div class="stat-label">Cost Change (FY${lots[0].lot_fy}→FY${lots[lots.length-1].lot_fy})</div>
       <div class="stat-value" style="color:${pctChange>0?'var(--red)':'var(--green)'}">${pctChange>0?'+':''}${pctChange}%</div>
-      <div class="stat-sub">${fmtK(firstCost)} → ${fmtK(latestCost)}</div>
+      <div class="stat-sub">${fmtM(firstCost/1000)} → ${fmtM(latestCost/1000)}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Range</div>
-      <div class="stat-value">${fmtK(maxCost - minCost)}</div>
+      <div class="stat-value">${fmtM((maxCost-minCost)/1000)}</div>
       <div class="stat-sub">Min to max spread</div>
     </div>`;
 
@@ -420,16 +473,19 @@ function renderUnitCost(prog) {
   });
 
   // Table
+  const ucHasNavy = prog.lots.some(l => l.qty_navy > 0);
+  const ucHasArmy = prog.lots.some(l => l.qty_army > 0);
+  const ucHasMC   = prog.lots.some(l => l.qty_mc > 0);
   document.getElementById('cost-table').innerHTML = `
     <thead><tr>
       <th>Lot (FY)</th>
       <th>Award Date</th>
       <th>First Delivery</th>
-      <th>Navy Qty</th>
-      <th>Army Qty</th>
-      <th>USMC Qty</th>
+      ${ucHasNavy ? '<th>Navy Qty</th>' : ''}
+      ${ucHasArmy ? '<th>Army Qty</th>' : ''}
+      ${ucHasMC   ? '<th>USMC Qty</th>' : ''}
       <th>Total Qty</th>
-      <th>Unit Cost ($K)</th>
+      <th>Unit Cost</th>
       <th>Status</th>
     </tr></thead>
     <tbody>
@@ -441,20 +497,20 @@ function renderUnitCost(prog) {
           <td style="text-align:left;font-family:'IBM Plex Mono',monospace">FY${l.lot_fy}</td>
           <td>${l.award_date}</td>
           <td>${l.first_delivery}</td>
-          <td>${fmtN(l.qty_navy)}</td>
-          <td>${fmtN(l.qty_army)}</td>
-          <td>${fmtN(l.qty_mc)}</td>
+          ${ucHasNavy ? `<td>${fmtN(l.qty_navy)}</td>` : ''}
+          ${ucHasArmy ? `<td>${fmtN(l.qty_army)}</td>` : ''}
+          ${ucHasMC   ? `<td>${fmtN(l.qty_mc)}</td>`   : ''}
           <td>${fmtN(total)}</td>
-          <td>${l.unit_cost_k ? fmtK(l.unit_cost_k) + (costChange !== null && l.lot_fy !== lots[0].lot_fy ? ` <span style="font-size:10px;color:${costChange>0?'var(--red)':'var(--green)'}">(${costChange>0?'+':''}${costChange.toFixed(1)}%)</span>` : '') : '<span class="null-val">TBD</span>'}</td>
+          <td>${l.unit_cost_k ? fmtM(l.unit_cost_k/1000) + (costChange !== null && l.lot_fy !== lots[0].lot_fy ? ` <span style="font-size:10px;color:${costChange>0?'var(--red)':'var(--green)'}">(${costChange>0?'+':''}${costChange.toFixed(1)}%)</span>` : '') : '<span class="null-val">TBD</span>'}</td>
           <td class="${statusCls}">${l.status}</td>
         </tr>`;
       }).join('')}
       <tr class="total-row">
         <td style="text-align:left">Total</td>
         <td></td><td></td>
-        <td>${prog.lots.reduce((s,l)=>s+l.qty_navy,0).toLocaleString()}</td>
-        <td>${prog.lots.reduce((s,l)=>s+l.qty_army,0).toLocaleString()}</td>
-        <td>${prog.lots.reduce((s,l)=>s+l.qty_mc,0).toLocaleString()}</td>
+        ${ucHasNavy ? `<td>${prog.lots.reduce((s,l)=>s+l.qty_navy,0).toLocaleString()}</td>` : ''}
+        ${ucHasArmy ? `<td>${prog.lots.reduce((s,l)=>s+l.qty_army,0).toLocaleString()}</td>` : ''}
+        ${ucHasMC   ? `<td>${prog.lots.reduce((s,l)=>s+l.qty_mc,0).toLocaleString()}</td>`   : ''}
         <td>${prog.lots.reduce((s,l)=>s+l.qty_navy+l.qty_army+l.qty_mc,0).toLocaleString()}</td>
         <td></td><td></td>
       </tr>
@@ -521,14 +577,17 @@ function renderDeliveryAnnual(prog) {
 
 function renderDeliveryLot(prog) {
   const lots = prog.lots;
+  const hasNavy = prog.lots.some(l => l.qty_navy > 0);
+  const hasArmy = prog.lots.some(l => l.qty_army > 0);
+  const hasMC   = prog.lots.some(l => l.qty_mc > 0);
   document.getElementById('delivery-lot-table').innerHTML = `
     <thead><tr>
       <th>Lot (FY)</th>
       <th>Award Date</th>
       <th>First Delivery</th>
-      <th>Navy Proc.</th>
-      <th>Army Proc.</th>
-      <th>USMC Proc.</th>
+      ${hasNavy ? '<th>Navy Proc.</th>' : ''}
+      ${hasArmy ? '<th>Army Proc.</th>' : ''}
+      ${hasMC   ? '<th>USMC Proc.</th>' : ''}
       <th>Total Proc.</th>
       <th>Delivered</th>
       <th>Balance Due</th>
@@ -543,17 +602,26 @@ function renderDeliveryLot(prog) {
         // Avg delivered/mo: based on actual delivery window from P-21
         // FY20: 90 over ~5 months (Aug-Dec 2022); FY21: 130 over ~22 months (Dec23-Sep25)
         // FY22: 73 delivered of 154 over ~5 months (May-Sep 2025); FY23: not yet delivering
-        const deliveryMonths = { 2020: 5, 2021: 22, 2022: 5, 2023: 0 };
-        const months = deliveryMonths[l.lot_fy] || 0;
-        const avgPerMo = delivered > 0 && months > 0 ? (delivered / months).toFixed(1) : '—';
+        // Estimate delivery window: from first_delivery month to now (or balance=0)
+        // Use delivered count and a rough window based on status
+        let avgPerMo = '—';
+        if (delivered > 0 && l.status === 'Complete') {
+          // Completed lots: use full delivery window months
+          const windows = { 2020: 5, 2021: 22, 2022: 5, 2023: 0, 2024: 0 };
+          const mo = windows[l.lot_fy];
+          if (mo) avgPerMo = (delivered / mo).toFixed(1);
+        } else if (delivered > 0 && l.status === 'In Delivery') {
+          // Partial: use months since first delivery (approximate)
+          avgPerMo = (delivered / 5).toFixed(1);
+        }
         const statusCls = l.status === 'Complete' ? 'complete' : l.status === 'In Delivery' ? 'in-progress' : 'pending';
         return `<tr>
           <td style="text-align:left;font-family:'IBM Plex Mono',monospace">FY${l.lot_fy}</td>
           <td>${l.award_date}</td>
           <td>${l.first_delivery}</td>
-          <td>${fmtN(l.qty_navy)}</td>
-          <td>${fmtN(l.qty_army)}</td>
-          <td>${fmtN(l.qty_mc)}</td>
+          ${hasNavy ? `<td>${fmtN(l.qty_navy)}</td>` : ''}
+          ${hasArmy ? `<td>${fmtN(l.qty_army)}</td>` : ''}
+          ${hasMC   ? `<td>${fmtN(l.qty_mc)}</td>`   : ''}
           <td>${total.toLocaleString()}</td>
           <td>${delivered > 0 ? delivered.toLocaleString() : '<span class="null-val">—</span>'}</td>
           <td>${balance > 0 ? balance.toLocaleString() : '<span class="complete">✓</span>'}</td>
@@ -564,9 +632,9 @@ function renderDeliveryLot(prog) {
       <tr class="total-row">
         <td style="text-align:left">Total</td>
         <td></td><td></td>
-        <td>${lots.reduce((s,l)=>s+l.qty_navy,0).toLocaleString()}</td>
-        <td>${lots.reduce((s,l)=>s+l.qty_army,0).toLocaleString()}</td>
-        <td>${lots.reduce((s,l)=>s+l.qty_mc,0).toLocaleString()}</td>
+        ${hasNavy ? `<td>${lots.reduce((s,l)=>s+l.qty_navy,0).toLocaleString()}</td>` : ''}
+        ${hasArmy ? `<td>${lots.reduce((s,l)=>s+l.qty_army,0).toLocaleString()}</td>` : ''}
+        ${hasMC   ? `<td>${lots.reduce((s,l)=>s+l.qty_mc,0).toLocaleString()}</td>`   : ''}
         <td>${lots.reduce((s,l)=>s+l.qty_navy+l.qty_army+l.qty_mc,0).toLocaleString()}</td>
         <td>${lots.reduce((s,l)=>s+l.delivered,0).toLocaleString()}</td>
         <td>${lots.reduce((s,l)=>s+l.balance,0).toLocaleString()}</td>
@@ -601,6 +669,25 @@ function renderRates(prog) {
 // ─────────────────────────────────────────────
 // CONTROLS
 // ─────────────────────────────────────────────
+function selectProg(btn) {
+  currentProg = btn.dataset.prog;
+  document.querySelectorAll('#prog-selector .toggle-btn').forEach(b => {
+    b.classList.toggle('active', b === btn);
+  });
+  deliveryView = 'annual';
+  setDeliveryView('annual');
+  updateJbookLink();
+  render();
+  pushState();
+}
+
+function updateJbookLink() {
+  const link = document.getElementById('jbook-link');
+  if (link && JBOOK_URLS[currentProg]) {
+    link.href = JBOOK_URLS[currentProg];
+  }
+}
+
 function setDeliveryView(view) {
   deliveryView = view;
   document.getElementById('delivery-annual').style.display = view === 'annual' ? 'block' : 'none';
@@ -623,7 +710,7 @@ function loadState() {
   const params = new URLSearchParams(location.search);
   if (params.has('prog') && PROGRAMS[params.get('prog')]) {
     currentProg = params.get('prog');
-    document.querySelectorAll('.prog-btn').forEach(b => {
+    document.querySelectorAll('#prog-selector .toggle-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.prog === currentProg);
     });
   }
@@ -662,14 +749,11 @@ document.addEventListener('DOMContentLoaded', () => {
   render();
   pushState();
 
-  document.querySelectorAll('.prog-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      currentProg = btn.dataset.prog;
-      document.querySelectorAll('.prog-btn').forEach(b => b.classList.toggle('active', b === btn));
-      render();
-      pushState();
-    });
+  document.querySelectorAll('#prog-selector .toggle-btn').forEach(btn => {
+    if (btn.dataset.prog === currentProg) btn.classList.add('active');
+    else btn.classList.remove('active');
   });
+  updateJbookLink();
 });
 </script>
 </body>
