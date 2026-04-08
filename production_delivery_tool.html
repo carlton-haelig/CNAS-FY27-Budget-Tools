@@ -137,7 +137,6 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
     </div>
     <div class="pane-body">
       <div class="stat-grid" id="cost-stats"></div>
-      <div class="chart-wrap"><canvas id="cost-chart" style="max-height:240px"></canvas></div>
       <div class="table-wrap"><table id="cost-table"></table></div>
     </div>
   </div>
@@ -459,7 +458,7 @@ function renderUnitCost(prog) {
   const metaEl = document.getElementById('cost-pane-meta');
   if (metaEl) metaEl.textContent = `P-5a · ${svcLabel}${lotNote}`;
   const delMeta = document.getElementById('del-pane-meta');
-  if (delMeta) delMeta.textContent = `P-21 · ${svcLabel} · Units in Each`;
+  if (delMeta) delMeta.textContent = `P-21 · ${isJointProg ? 'USAF + Navy only (FMS excl.)' : svcLabel} · Units in Each`;
   const lots = prog.lots.filter(l => l.unit_cost_k !== null);
 
   // Stat cards
@@ -492,41 +491,9 @@ function renderUnitCost(prog) {
       <div class="stat-sub">Min to max spread</div>
     </div>`;
 
-  // Chart
-  destroyChart('cost-chart');
-  const ctx = document.getElementById('cost-chart').getContext('2d');
-  chartInstances['cost-chart'] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: lots.map(l => 'FY' + l.lot_fy),
-      datasets: [{
-        label: 'Unit Cost ($K)',
-        data: lots.map(l => l.unit_cost_k),
-        backgroundColor: lots.map(l => l.unit_cost_k > firstCost ? '#e05c5ccc' : '#5bc4a0cc'),
-        borderColor: lots.map(l => l.unit_cost_k > firstCost ? '#e05c5c' : '#5bc4a0'),
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => ` Unit Cost: ${fmtK(ctx.parsed.y)}` } }
-      },
-      scales: {
-        x: { ticks: { color: '#6b7a99' }, grid: { color: '#2a3348' } },
-        y: {
-          ticks: { color: '#6b7a99', callback: v => '$' + (v/1000).toFixed(1) + 'M' },
-          grid: { color: '#2a3348' },
-          min: 1400
-        }
-      }
-    }
-  });
-
   // Table
   const isJoint   = prog.lots.some(l => l.qty_af !== undefined);
-  const ucHasNavy = !isJoint && prog.lots.some(l => l.qty_navy > 0);
+  const ucHasNavy = prog.lots.some(l => l.qty_navy > 0);
   const ucHasArmy = !isJoint && prog.lots.some(l => l.qty_army > 0);
   const ucHasMC   = !isJoint && prog.lots.some(l => l.qty_mc > 0);
   const ucHasAF   = isJoint;
@@ -640,7 +607,7 @@ function renderDeliveryAnnual(prog) {
 function renderDeliveryLot(prog) {
   const lots = prog.lots;
   const isJointLot = prog.lots.some(l => l.qty_af !== undefined);
-  const hasNavy = !isJointLot && prog.lots.some(l => l.qty_navy > 0);
+  const hasNavy = prog.lots.some(l => l.qty_navy > 0);
   const hasArmy = !isJointLot && prog.lots.some(l => l.qty_army > 0);
   const hasMC   = !isJointLot && prog.lots.some(l => l.qty_mc > 0);
   const hasAF   = isJointLot;
