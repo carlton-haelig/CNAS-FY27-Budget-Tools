@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Production & Delivery</title>
+<title>CNAS Defense Budget Suite · Production &amp; Delivery</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
@@ -102,11 +102,11 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
 <body>
 
 <nav class="app-nav">
-  <span class="nav-brand">DoD Budget Suite</span>
+  <span class="nav-brand">CNAS Defense Budget Suite</span>
   <a href="index.html">Home</a>
   <a href="defense_budget_tool.html">P-1 Comparison</a>
+  <a href="production_delivery_tool.html" class="active">Production &amp; Delivery</a>
   <a href="historical_budget_tool.html">Historical Trends</a>
-  <a href="production_delivery_tool.html" class="active">Production & Delivery</a>
 </nav>
 
 <header>
@@ -118,11 +118,15 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
   <span class="program-bar-label">Program</span>
   <div class="toggle-group" id="prog-selector">
     <button class="toggle-btn active" data-prog="tomahawk" onclick="selectProg(this)">Tomahawk (USN)</button>
-    <button class="toggle-btn" data-prog="mse" onclick="selectProg(this)">PAC-3 MSE (Army)</button>
+    <button class="toggle-btn" data-prog="prsm" onclick="selectProg(this)">PrSM (Army)</button>
     <button class="toggle-btn" data-prog="amraam" onclick="selectProg(this)">AMRAAM (Joint)</button>
-    <button class="toggle-btn" data-prog="sm6" onclick="selectProg(this)">SM-6 (Navy)</button>
     <button class="toggle-btn" data-prog="aim9x" onclick="selectProg(this)">AIM-9X (Joint)</button>
+    <button class="toggle-btn" data-prog="sm6" onclick="selectProg(this)">SM-6 (Navy)</button>
     <button class="toggle-btn" data-prog="essm" onclick="selectProg(this)">ESSM Blk 2 (Navy)</button>
+    <button class="toggle-btn" data-prog="mse" onclick="selectProg(this)">PAC-3 MSE (Army)</button>
+    <button class="toggle-btn" data-prog="thaad" onclick="selectProg(this)">THAAD (MDA)</button>
+    <button class="toggle-btn" data-prog="sm3iia" onclick="selectProg(this)">SM-3 Block IIA (MDA)</button>
+    <button class="toggle-btn" data-prog="sm3ib" onclick="selectProg(this)">SM-3 Block IB (MDA)</button>
   </div>
   <div style="flex:1"></div>
   <a id="jbook-link" href="https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf" target="_blank" class="btn-sm primary" style="text-decoration:none">↗ FY26 J-Book</a>
@@ -202,6 +206,10 @@ const JBOOK_URLS = {
   sm6: 'https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf',
   aim9x: 'https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf',
   essm: 'https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf',
+  prsm: 'https://www.asafm.army.mil/Portals/72/Documents/BudgetMaterial/2026/Procurement/Other%20Procurement/Missile_Procurement_Army.pdf',
+  thaad: 'https://comptroller.defense.gov/Portals/45/Documents/defbudget/FY2026/FY2026_MDA_Procurement.pdf',
+  sm3iia: 'https://comptroller.defense.gov/Portals/45/Documents/defbudget/FY2026/FY2026_MDA_Procurement.pdf',
+  sm3ib: 'https://comptroller.defense.gov/Portals/45/Documents/defbudget/FY2026/FY2026_MDA_Procurement.pdf',
 };
 
 const PROGRAMS = {
@@ -488,6 +496,173 @@ const PROGRAMS = {
       { fy: 'FY2029', delivered: 0,   planned: 56,  note: 'FY2026 lot: 56 remaining (Oct–Nov 2028)' },
     ],
   }
+,
+
+  prsm: {
+    label: 'PrSM Inc 1/2 (Army)',
+    bli: '8540C29600',
+    account: 'Missile Procurement, Army',
+    contractor: 'Lockheed Martin MFCS — Dallas, TX',
+    contract_type: 'SS / FFP',
+    pco: 'AMCOM (Aviation and Missile Command)',
+    msr: 22,
+    rate_185: 390,
+    max_rate: 390,
+    lead_time_reorder: '45 months',
+    qty_unit: 'missiles',
+    note: 'Army next-generation surface-to-surface missile replacing ATACMS. Compatible with M270A2 MLRS and M142 HIMARS. Two increments share 400/yr production capacity: Inc 1 (GPS-guided, surface-to-surface) and Inc 2 (adds seeker for moving maritime/relocatable targets, procured from FY2026). FY2024 quantities classified — suppressed throughout J-book; FY2024 total funding $1,048.491M ($334.759M base + $713.732M emergency supplemental). FY2024 lot not shown in lot table per J-book suppression. FY2026 P-1 funding and quantity reflect combined Inc 1 + Inc 2; individual increment breakdown from J-book P-40: 35 Inc 1 + 10 Inc 2 base + 107 Inc 1 mandatory = 152 total — P-1 qty (108 disc) may differ due to combined accounting. FY27 P-1 is authoritative for funding; FY26 J-book used for lot data and delivery schedule pending FY27 J-book release. Production capacity expanded from 300 to 400/yr in FY2025.',
+
+    funding: [
+      { fy: 'Prior Years', disc: 388.935,    mandatory: 0,       total: 388.935,    qty_disc: null, qty_mandatory: 0,    qty_total: null, note: 'Quantities suppressed · Source: MPA J-book P-5' },
+      { fy: 'FY2024',      disc: 1048.491,   mandatory: 0,       total: 1048.491,   qty_disc: null, qty_mandatory: 0,    qty_total: null, note: 'Quantities classified; $334.759M base + $713.732M emergency supplemental · Source: MPA J-book P-40' },
+      { fy: 'FY2025',      disc: 491.497,    mandatory: 0,       total: 491.497,    qty_disc: 338,  qty_mandatory: 0,    qty_total: 338,  note: 'Actuals; qty likely includes deliveries from suppressed FY2024 lot · Source: FY27 P-1' },
+      { fy: 'FY2026',      disc: 268.726,    mandatory: 277.816, total: 546.542,    qty_disc: 108,  qty_mandatory: null, qty_total: 108,  note: 'Enacted; combined Inc 1 + Inc 2; mandatory qty not broken out in P-1; J-book base = 45 (35 Inc1 + 10 Inc2) + 107 mandatory Inc1 = 152 · Source: FY27 P-1' },
+      { fy: 'FY2027',      disc: 1226.526,   mandatory: 692.000, total: 1918.526,   qty_disc: 680,  qty_mandatory: 454,  qty_total: 1134, note: 'Request; combined Inc 1 + Inc 2 · Source: FY27 P-1' },
+    ],
+
+    lots: [
+      { lot_fy: 2021, award_date: 'Sep 2021', first_delivery: 'Nov 2023', qty_navy: 0, qty_army: 26,  qty_mc: 0, unit_cost_k: 1837.929, status: 'Complete',    delivered: 26,  balance: 0,   variant: 'Inc 1' },
+      { lot_fy: 2022, award_date: 'Sep 2022', first_delivery: 'Mar 2025', qty_navy: 0, qty_army: 54,  qty_mc: 0, unit_cost_k: 2496.426, status: 'In Delivery', delivered: 34,  balance: 20,  variant: 'Inc 1' },
+      { lot_fy: 2023, award_date: 'Sep 2023', first_delivery: 'Mar 2026', qty_navy: 0, qty_army: 50,  qty_mc: 0, unit_cost_k: 2731.571, status: 'Pending',     delivered: 0,   balance: 50,  variant: 'Inc 1' },
+      { lot_fy: 2024, award_date: '—',        first_delivery: '—',        qty_navy: 0, qty_army: null,qty_mc: 0, unit_cost_k: null,      status: 'Classified', delivered: null,balance: null, variant: 'Inc 1' },
+      { lot_fy: 2025, award_date: 'Mar 2025', first_delivery: 'Mar 2028', qty_navy: 0, qty_army: 250, qty_mc: 0, unit_cost_k: 1610.536, status: 'Pending',     delivered: 0,   balance: 250, variant: 'Inc 1' },
+      { lot_fy: 2026, award_date: 'Mar 2026', first_delivery: 'Mar 2029', qty_navy: 0, qty_army: 35,  qty_mc: 0, unit_cost_k: 1622.229, status: 'Pending',     delivered: 0,   balance: 35,  variant: 'Inc 1' },
+    ],
+
+    annual_deliveries: [
+      { fy: 'FY2024', delivered: 8,   planned: 0,   note: 'FY2021 lot: 8 missiles (Nov 2023–Sep 2024) · FY2024 lot deliveries classified' },
+      { fy: 'FY2025', delivered: 52,  planned: 0,   note: 'FY2021 lot: 18 (Oct–Dec 2024) + FY2022 lot: 34 (Mar–Sep 2025) · FY2024 lot deliveries classified' },
+      { fy: 'FY2026', delivered: 0,   planned: 70,  note: 'FY2022 lot: 20 (Oct 2025) + FY2023 lot: 50 (Mar–Sep 2026)' },
+      { fy: 'FY2027', delivered: 0,   planned: 0,   note: 'Gap — FY2025 lot first delivery Mar 2028; FY2024 lot deliveries classified' },
+      { fy: 'FY2028', delivered: 0,   planned: 142, note: 'FY2025 lot: ~142 (Mar–Sep 2028 at ~20/mo)' },
+      { fy: 'FY2029', delivered: 0,   planned: 143, note: 'FY2025 lot: 108 remaining + FY2026 lot: 35' },
+    ],
+  },
+
+  thaad: {
+    label: 'THAAD Interceptor (MDA)',
+    bli: 'MD07 / 8046C20200',
+    account: 'Missile Defense Agency Procurement (FY25–26) / Missile Procurement, Army (FY27)',
+    contractor: 'Lockheed Martin — Troy, AL',
+    contract_type: 'SS / FPIF',
+    pco: 'MDA, Huntsville, AL',
+    msr: 1,
+    rate_185: null,
+    max_rate: 8,
+    lead_time_reorder: null,
+    qty_unit: 'interceptors',
+    note: 'Terminal High Altitude Area Defense (THAAD) interceptor procured by MDA through FY2026 (BLI MD07) and shifted to Army Missile Procurement in FY2027 (BLI 8046C20200). MDA procures interceptors only; launchers, radars, and ground components are in separate line items. FY2021–FY2026 lots (Lots 13–18) being synergized — Lots 16, 17, and 18 (FY2024–FY2026) combined in a single contract award. FY2026 mandatory funding provides 12 additional interceptors; those 12 will deliver with Lot 18 in FY2029. FY2027 request ($11.435B) reflects a major ramp driven by the reconciliation act; 830 of 857 requested interceptors are mandatory-funded. Production capacity constrained to ~8/month maximum; critical obsolescence mitigation underway to prevent production break in FY2028. FY27 P-1 authoritative for funding; FY26 MDA J-book used for lot data and delivery schedule pending FY27 J-book.',
+
+    funding: [
+      { fy: 'Prior Years', disc: 7910.551,  mandatory: 0,        total: 7910.551,  qty_disc: null, qty_mandatory: null, qty_total: null, note: 'Through FY2023 · Source: MDA J-book (FY26)' },
+      { fy: 'FY2024',      disc: 216.782,   mandatory: 0,        total: 216.782,   qty_disc: 11,   qty_mandatory: 0,    qty_total: 11,   note: 'Source: MDA J-book (FY26)' },
+      { fy: 'FY2025',      disc: 246.995,   mandatory: 0,        total: 246.995,   qty_disc: 12,   qty_mandatory: 0,    qty_total: 12,   note: 'Source: MDA J-book (FY26)' },
+      { fy: 'FY2026',      disc: 523.125,   mandatory: 317.000,  total: 840.125,   qty_disc: 25,   qty_mandatory: 12,   qty_total: 37,   note: 'Enacted; Lots 16–18 synergized in single award; mandatory provides 12 additional interceptors · Source: MDA J-book (FY26)' },
+      { fy: 'FY2027',      disc: 907.162,   mandatory: 10528.043,total: 11435.205, qty_disc: 27,   qty_mandatory: 830,  qty_total: 857,  note: 'Request; transferred to Army BLI 8046C20200; large mandatory ramp · Source: FY27 P-1' },
+    ],
+
+    lots: [
+      { lot_fy: 2021, award_date: 'Mar 2022', first_delivery: 'Apr 2027', qty_navy: 0, qty_army: 39, qty_mc: 0, unit_cost_k: 9528, status: 'Pending',     delivered: 0, balance: 39, variant: null },
+      { lot_fy: 2022, award_date: 'Apr 2022', first_delivery: 'Sep 2027', qty_navy: 0, qty_army: 32, qty_mc: 0, unit_cost_k: 9528, status: 'Pending',     delivered: 0, balance: 32, variant: null },
+      { lot_fy: 2023, award_date: 'Apr 2023', first_delivery: 'Jan 2028', qty_navy: 0, qty_army: 18, qty_mc: 0, unit_cost_k: 10020,status: 'Pending',     delivered: 0, balance: 18, variant: null },
+      { lot_fy: 2024, award_date: 'Sep 2025', first_delivery: 'Apr 2028', qty_navy: 0, qty_army: 11, qty_mc: 0, unit_cost_k: 12336,status: 'Pending',     delivered: 0, balance: 11, variant: null },
+      { lot_fy: 2025, award_date: 'Sep 2025', first_delivery: 'Jun 2028', qty_navy: 0, qty_army: 12, qty_mc: 0, unit_cost_k: 12773,status: 'Pending',     delivered: 0, balance: 12, variant: null },
+      { lot_fy: 2026, award_date: 'Dec 2025', first_delivery: 'Oct 2028', qty_navy: 0, qty_army: 25, qty_mc: 0, unit_cost_k: 15534,status: 'Pending',     delivered: 0, balance: 25, variant: null },
+    ],
+
+    annual_deliveries: [
+      { fy: 'FY2024', delivered: 0,  planned: 0,  note: 'No deliveries scheduled — Lot 13 first delivery intentionally delayed to Apr 2027 to maintain production line after FMS completion' },
+      { fy: 'FY2025', delivered: 0,  planned: 0,  note: 'No deliveries scheduled' },
+      { fy: 'FY2026', delivered: 0,  planned: 0,  note: 'No deliveries scheduled' },
+      { fy: 'FY2027', delivered: 0,  planned: 47, note: 'Lot 13: 39 (Apr–Aug 2027) + Lot 14: 8 (Sep 2027)' },
+      { fy: 'FY2028', delivered: 0,  planned: 65, note: 'Lot 14: 24 + Lot 15: 18 + Lot 16: 11 + Lot 17: 12' },
+      { fy: 'FY2029', delivered: 0,  planned: 25, note: 'Lot 18: 25 (incl. 12 mandatory interceptors delivering with Lot 18)' },
+    ],
+  },
+
+  sm3iia: {
+    label: 'SM-3 Block IIA (MDA)',
+    bli: 'MD14',
+    account: 'Missile Defense Agency Procurement',
+    contractor: 'Raytheon Missile Systems — Tucson, AZ',
+    contract_type: 'SS / CPIF',
+    pco: 'Dahlgren, VA',
+    msr: null,
+    rate_185: null,
+    max_rate: 2,
+    lead_time_reorder: null,
+    qty_unit: 'interceptors',
+    note: 'Standard Missile-3 Block IIA — sea-based ballistic missile defense interceptor for Aegis BMD. Transferred to BLI MD14 from MD09 per Consolidated Appropriations Act 2020; FY2018–FY2019 funding remains in MD09. FY2019–FY2023 were procured under a multi-year procurement (MYP) of 198 AURs; MYP lapsed in FY2024, resulting in single-year buys and higher unit costs. FY2026 mandatory provides $65M in additional funding (no additional qty). FY2027 request reflects major ramp: 22 disc + 114 mandatory = 136 total at $4.219B, driven by reconciliation act. Maximum production rate is 2/month. FY27 P-1 authoritative for funding; FY26 MDA J-book used for lot data and delivery schedule pending FY27 J-book.',
+
+    funding: [
+      { fy: 'Prior Years', disc: 1714.000,  mandatory: 0,        total: 1714.000,  qty_disc: null, qty_mandatory: null, qty_total: null, note: 'Includes FY2018–FY2019 in MD09; FY2020–FY2023 MYP · Source: MDA J-book (FY26)' },
+      { fy: 'FY2024',      disc: 440.824,   mandatory: 0,        total: 440.824,   qty_disc: 12,   qty_mandatory: 0,    qty_total: 12,   note: 'Single-year buy; MYP lapsed · Source: MDA J-book (FY26)' },
+      { fy: 'FY2025',      disc: 406.370,   mandatory: 0,        total: 406.370,   qty_disc: 12,   qty_mandatory: 0,    qty_total: 12,   note: 'Single-year buy · Source: MDA J-book (FY26)' },
+      { fy: 'FY2026',      disc: 444.835,   mandatory: 65.000,   total: 509.835,   qty_disc: 12,   qty_mandatory: 0,    qty_total: 12,   note: 'Enacted; mandatory $65M additional funding, no additional qty · Source: FY27 P-1' },
+      { fy: 'FY2027',      disc: 778.964,   mandatory: 3439.640, total: 4218.604,  qty_disc: 22,   qty_mandatory: 114,  qty_total: 136,  note: 'Request; large mandatory ramp · Source: FY27 P-1' },
+    ],
+
+    lots: [
+      { lot_fy: 2020, award_date: 'Mar 2020', first_delivery: 'Jul 2025', qty_navy: 0, qty_army: 0, qty_mc: 0, unit_cost_k: 27345, status: 'In Delivery', delivered: null, balance: null, variant: null },
+      { lot_fy: 2021, award_date: 'Jun 2022', first_delivery: 'Oct 2025', qty_navy: 0, qty_army: 0, qty_mc: 0, unit_cost_k: 26227, status: 'In Delivery', delivered: null, balance: null, variant: null },
+      { lot_fy: 2022, award_date: 'Jun 2022', first_delivery: 'Feb 2026', qty_navy: 0, qty_army: 0, qty_mc: 0, unit_cost_k: 28411, status: 'Pending',     delivered: null, balance: null, variant: null },
+      { lot_fy: 2023, award_date: 'Jul 2024', first_delivery: 'Apr 2028', qty_navy: 0, qty_army: 0, qty_mc: 0, unit_cost_k: 26098, status: 'Pending',     delivered: null, balance: null, variant: null },
+      { lot_fy: 2024, award_date: 'Jul 2024', first_delivery: 'Oct 2029', qty_navy: 0, qty_army: 0, qty_mc: 0, unit_cost_k: 26830, status: 'Pending',     delivered: null, balance: null, variant: null },
+      { lot_fy: 2025, award_date: 'Nov 2024', first_delivery: 'Apr 2030', qty_navy: 0, qty_army: 0, qty_mc: 0, unit_cost_k: 28703, status: 'Pending',     delivered: null, balance: null, variant: null },
+      { lot_fy: 2026, award_date: 'Aug 2026', first_delivery: 'Oct 2030', qty_navy: 0, qty_army: 0, qty_mc: 0, unit_cost_k: 28686, status: 'Pending',     delivered: null, balance: null, variant: null },
+    ],
+
+    annual_deliveries: [
+      { fy: 'FY2025', delivered: 6,  planned: 0,  note: 'FY2020 lot: 6 (Jul–Sep 2025)' },
+      { fy: 'FY2026', delivered: 0,  planned: 25, note: 'FY2020 lot: 1 (Oct 2025) + FY2021 lot: 9 + FY2022 lot: 15 (Feb–Sep 2026)' },
+      { fy: 'FY2027', delivered: 0,  planned: 1,  note: 'FY2022 lot: 1 (Oct 2026) — delivery gap until FY2028' },
+      { fy: 'FY2028', delivered: 0,  planned: 12, note: 'FY2023 lot: 12 (Apr–Sep 2028)' },
+      { fy: 'FY2029', delivered: 0,  planned: 12, note: 'FY2024 lot: 12 (Oct 2029)' },
+      { fy: 'FY2030', delivered: 0,  planned: 23, note: 'FY2025 lot: 11 + FY2026 lot: 12 (partial)' },
+      { fy: 'FY2031', delivered: 0,  planned: 13, note: 'FY2026 lot: 1 remaining + FY2025 lot: 1 + other' },
+    ],
+  },
+
+  sm3ib: {
+    label: 'SM-3 Block IB (MDA)',
+    bli: 'MD09',
+    account: 'Missile Defense Agency Procurement (Aegis BMD)',
+    contractor: 'Raytheon Missile Systems — Tucson, AZ',
+    contract_type: 'SS / FPIF',
+    pco: 'Dahlgren, VA',
+    msr: 1,
+    rate_185: null,
+    max_rate: 5,
+    lead_time_reorder: null,
+    qty_unit: 'interceptors',
+    note: 'Standard Missile-3 Block IB — sea-based ballistic missile defense interceptor for Aegis BMD. New production terminated after FY2024; DoD shifting to SM-3 Block IIA. FY2025 includes $110M congressional plus-up for 6 additional missiles and $85M for critical investment spares to support repair/recertification of fielded AURs in anticipation of supply chain attrition. FY2026 enacted: 26 disc + 16 mandatory = 42 qty, reflecting delivery of previously contracted lots and recertification activity. FY2027 request ($1.246B, 78 qty, all mandatory) covers recertification, spares, and sustainment — no new production. MD09 also covers Aegis BMD hardware, software, and ground systems; quantities and funding here represent interceptors/AURs only. FY27 P-1 authoritative for funding; FY26 MDA J-book used for lot data and delivery schedule pending FY27 J-book.',
+
+    funding: [
+      { fy: 'Prior Years', disc: 7091.000,  mandatory: 0,        total: 7091.000,  qty_disc: null, qty_mandatory: null, qty_total: null, note: 'Source: MDA J-book (FY26)' },
+      { fy: 'FY2024',      disc: 601.506,   mandatory: 0,        total: 601.506,   qty_disc: 36,   qty_mandatory: 0,    qty_total: 36,   note: 'Final new-production lot · Source: MDA J-book (FY26)' },
+      { fy: 'FY2025',      disc: 695.180,   mandatory: 0,        total: 695.180,   qty_disc: 29,   qty_mandatory: 0,    qty_total: 29,   note: 'Incl. $110M congressional plus-up (6 missiles) + $85M investment spares; new production ends · Source: FY27 P-1' },
+      { fy: 'FY2026',      disc: 475.000,   mandatory: 350.000,  total: 825.000,   qty_disc: 26,   qty_mandatory: 16,   qty_total: 42,   note: 'Enacted; recertification and delivery of contracted lots · Source: FY27 P-1' },
+      { fy: 'FY2027',      disc: 0,         mandatory: 1245.759, total: 1245.759,  qty_disc: 0,    qty_mandatory: 78,   qty_total: 78,   note: 'Request; recertification and sustainment only — no new production · Source: FY27 P-1' },
+    ],
+
+    lots: [
+      { lot_fy: 2021, award_date: 'Mar 2021', first_delivery: 'Jun 2024', qty_navy: 40, qty_army: 0, qty_mc: 0, unit_cost_k: 8890,  status: 'In Delivery', delivered: null, balance: null, variant: null },
+      { lot_fy: 2022, award_date: 'Mar 2022', first_delivery: 'Apr 2025', qty_navy: 40, qty_army: 0, qty_mc: 0, unit_cost_k: 8890,  status: 'In Delivery', delivered: null, balance: null, variant: null },
+      { lot_fy: 2023, award_date: 'Mar 2023', first_delivery: 'Feb 2026', qty_navy: 47, qty_army: 0, qty_mc: 0, unit_cost_k: 8980,  status: 'Pending',     delivered: null, balance: null, variant: null },
+      { lot_fy: 2024, award_date: 'May 2025', first_delivery: 'Sep 2028', qty_navy: 27, qty_army: 0, qty_mc: 0, unit_cost_k: 12500, status: 'Pending',     delivered: null, balance: null, variant: null },
+      { lot_fy: '2024S', award_date: 'Sep 2025', first_delivery: 'Sep 2028', qty_navy: 9, qty_army: 0, qty_mc: 0, unit_cost_k: 23491, status: 'Pending',   delivered: null, balance: null, variant: 'Supplemental' },
+      { lot_fy: 2025, award_date: 'May 2025', first_delivery: 'Oct 2028', qty_navy: 6,  qty_army: 0, qty_mc: 0, unit_cost_k: 18333, status: 'Pending',     delivered: null, balance: null, variant: 'Congressional plus-up' },
+    ],
+
+    annual_deliveries: [
+      { fy: 'FY2024', delivered: 8,  planned: 0,  note: 'FY2021 lot: 8 (Jun–Sep 2024)' },
+      { fy: 'FY2025', delivered: 0,  planned: 61, note: 'FY2021 lot: 32 + FY2022 lot: 29' },
+      { fy: 'FY2026', delivered: 0,  planned: 45, note: 'FY2022 lot: 11 + FY2023 lot: 34' },
+      { fy: 'FY2027', delivered: 0,  planned: 13, note: 'FY2023 lot: 13 remaining' },
+      { fy: 'FY2028', delivered: 0,  planned: 18, note: 'FY2024 lot: 9 + FY2024 supplemental: 9' },
+      { fy: 'FY2029', delivered: 0,  planned: 24, note: 'FY2024 lot: 18 remaining + FY2025 lot: 6' },
+    ],
+  },
 };
 
 let currentProg = 'tomahawk';
@@ -659,7 +834,7 @@ function renderUnitCost(prog) {
     </tr></thead>
     <tbody>
       ${prog.lots.map(l => {
-        const total = l.qty_navy + l.qty_army + l.qty_mc;
+        const total = (l.qty_navy||0) + (l.qty_army||0) + (l.qty_mc||0);
         const statusCls = l.status === 'Complete' ? 'complete' : l.status === 'In Delivery' ? 'in-progress' : 'pending';
         const costChange = l.unit_cost_k && lots[0] ? ((l.unit_cost_k - lots[0].unit_cost_k)/lots[0].unit_cost_k*100) : null;
         return `<tr>
@@ -668,13 +843,13 @@ function renderUnitCost(prog) {
           <td>${l.award_date}</td>
           <td>${l.first_delivery}</td>
           ${ucHasNavy ? `<td>${fmtN(l.qty_navy)}</td>` : ''}
-          ${ucHasArmy ? `<td>${fmtN(l.qty_army)}</td>` : ''}
+          ${ucHasArmy ? `<td>${l.qty_army != null ? fmtN(l.qty_army) : '<span class="null-val">—</span>'}</td>` : ''}
           ${ucHasMC   ? `<td>${fmtN(l.qty_mc)}</td>`   : ''}
           ${ucHasAF   ? `<td>${fmtN(l.qty_af)}</td>`   : ''}
           ${ucHasFMS  ? `<td>${fmtN(l.qty_fms)}</td>`  : ''}
           <td>${isJoint ? fmtN(l.qty_total_all) : fmtN(total)}</td>
-          <td>${l.unit_cost_k ? fmtM(l.unit_cost_k/1000) + (costChange !== null && l.lot_fy !== lots[0].lot_fy ? ` <span style="font-size:10px;color:${costChange>0?'var(--red)':'var(--green)'}">(${costChange>0?'+':''}${costChange.toFixed(1)}%)</span>` : '') : '<span class="null-val">TBD</span>'}</td>
-          ${isJoint ? `<td style="color:var(--text-muted);font-size:11px">${l.lot_label}</td>` : `<td class="${statusCls}">${l.status}</td>`}
+          <td>${l.unit_cost_k != null ? fmtM(l.unit_cost_k/1000) + (costChange !== null && l.lot_fy !== lots[0].lot_fy ? ` <span style="font-size:10px;color:${costChange>0?'var(--red)':'var(--green)'}">(${costChange>0?'+':''}${costChange.toFixed(1)}%)</span>` : '') : '<span class="null-val">TBD</span>'}</td>
+          ${isJoint ? `<td style="color:var(--text-muted);font-size:11px">${l.lot_label}</td>` : `<td class="${l.status === 'Classified' ? 'pending' : statusCls}" style="${l.status === 'Classified' ? 'color:var(--text-muted);font-style:italic' : ''}">${l.status}</td>`}
         </tr>`;
       }).join('')}
       <tr class="total-row">
@@ -682,11 +857,11 @@ function renderUnitCost(prog) {
         ${prog.lots.some(l => l.variant) ? '<td></td>' : ''}
         <td></td><td></td>
         ${ucHasNavy ? `<td>${prog.lots.reduce((s,l)=>s+l.qty_navy,0).toLocaleString()}</td>` : ''}
-        ${ucHasArmy ? `<td>${prog.lots.reduce((s,l)=>s+l.qty_army,0).toLocaleString()}</td>` : ''}
-        ${ucHasMC   ? `<td>${prog.lots.reduce((s,l)=>s+l.qty_mc,0).toLocaleString()}</td>`   : ''}
+        ${ucHasArmy ? `<td>${prog.lots.reduce((s,l)=>s+(l.qty_army||0),0).toLocaleString()}</td>` : ''}
+        ${ucHasMC   ? `<td>${prog.lots.reduce((s,l)=>s+(l.qty_mc||0),0).toLocaleString()}</td>`   : ''}
         ${ucHasAF   ? `<td>${prog.lots.reduce((s,l)=>s+(l.qty_af||0),0).toLocaleString()}</td>` : ''}
         ${ucHasFMS  ? `<td>${prog.lots.reduce((s,l)=>s+(l.qty_fms||0),0).toLocaleString()}</td>` : ''}
-        <td>${isJoint ? prog.lots.reduce((s,l)=>s+(l.qty_total_all||0),0).toLocaleString() : prog.lots.reduce((s,l)=>s+l.qty_navy+l.qty_army+l.qty_mc,0).toLocaleString()}</td>
+        <td>${isJoint ? prog.lots.reduce((s,l)=>s+(l.qty_total_all||0),0).toLocaleString() : prog.lots.reduce((s,l)=>s+(l.qty_navy||0)+(l.qty_army||0)+(l.qty_mc||0),0).toLocaleString()}</td>
         <td></td><td></td>
       </tr>
     </tbody>`;
@@ -756,8 +931,8 @@ function renderDeliveryLot(prog) {
     </tr></thead>
     <tbody>
       ${lots.map(l => {
-        const total = l.qty_navy + l.qty_army + l.qty_mc;
-        const delivered = l.delivered;
+        const total = (l.qty_navy||0) + (l.qty_army||0) + (l.qty_mc||0);
+        const delivered = l.delivered != null ? l.delivered : null;
         const balance = l.balance;
         // Avg delivered/mo: based on actual delivery window from P-21
         // FY20: 90 over ~5 months (Aug-Dec 2022); FY21: 130 over ~22 months (Dec23-Sep25)
@@ -799,15 +974,15 @@ function renderDeliveryLot(prog) {
           <td>${l.award_date}</td>
           <td>${l.first_delivery}</td>
           ${hasNavy ? `<td>${fmtN(l.qty_navy)}</td>` : ''}
-          ${hasArmy ? `<td>${fmtN(l.qty_army)}</td>` : ''}
+          ${hasArmy ? `<td>${l.qty_army != null ? fmtN(l.qty_army) : '<span class="null-val">—</span>'}</td>` : ''}
           ${hasMC   ? `<td>${fmtN(l.qty_mc)}</td>`   : ''}
           ${hasAF   ? `<td>${fmtN(l.qty_af)}</td>`   : ''}
           ${hasFMS  ? `<td>${fmtN(l.qty_fms)}</td>`  : ''}
           <td>${isJointLot ? fmtN(l.qty_total_all) : total.toLocaleString()}</td>
-          <td>${delivered > 0 ? delivered.toLocaleString() : '<span class="null-val">—</span>'}</td>
-          <td>${balance > 0 ? balance.toLocaleString() : '<span class="complete">✓</span>'}</td>
+          <td>${delivered != null ? (delivered > 0 ? delivered.toLocaleString() : '<span class="null-val">—</span>') : '<span class="null-val">—</span>'}</td>
+          <td>${balance != null ? (balance > 0 ? balance.toLocaleString() : '<span class="complete">✓</span>') : '<span class="null-val">—</span>'}</td>
           <td>${avgPerMo !== '—' ? avgPerMo + '/mo' : '<span class="null-val">—</span>'}</td>
-          ${isJointLot ? `<td style="color:var(--text-muted);font-size:11px">${l.lot_label}</td>` : `<td class="${statusCls}">${l.status}</td>`}
+          ${isJointLot ? `<td style="color:var(--text-muted);font-size:11px">${l.lot_label}</td>` : `<td class="${l.status === 'Classified' ? 'pending' : statusCls}" style="${l.status === 'Classified' ? 'color:var(--text-muted);font-style:italic' : ''}">${l.status}</td>`}
         </tr>`;
       }).join('')}
       <tr class="total-row">
@@ -815,13 +990,13 @@ function renderDeliveryLot(prog) {
         ${prog.lots.some(l => l.variant) ? '<td></td>' : ''}
         <td></td><td></td>
         ${hasNavy ? `<td>${lots.reduce((s,l)=>s+l.qty_navy,0).toLocaleString()}</td>` : ''}
-        ${hasArmy ? `<td>${lots.reduce((s,l)=>s+l.qty_army,0).toLocaleString()}</td>` : ''}
-        ${hasMC   ? `<td>${lots.reduce((s,l)=>s+l.qty_mc,0).toLocaleString()}</td>`   : ''}
+        ${hasArmy ? `<td>${lots.reduce((s,l)=>s+(l.qty_army||0),0).toLocaleString()}</td>` : ''}
+        ${hasMC   ? `<td>${lots.reduce((s,l)=>s+(l.qty_mc||0),0).toLocaleString()}</td>`   : ''}
         ${hasAF   ? `<td>${lots.reduce((s,l)=>s+(l.qty_af||0),0).toLocaleString()}</td>` : ''}
         ${hasFMS  ? `<td>${lots.reduce((s,l)=>s+(l.qty_fms||0),0).toLocaleString()}</td>` : ''}
-        <td>${isJointLot ? lots.reduce((s,l)=>s+(l.qty_total_all||0),0).toLocaleString() : lots.reduce((s,l)=>s+l.qty_navy+l.qty_army+l.qty_mc,0).toLocaleString()}</td>
-        <td>${lots.reduce((s,l)=>s+l.delivered,0).toLocaleString()}</td>
-        <td>${lots.reduce((s,l)=>s+l.balance,0).toLocaleString()}</td>
+        <td>${isJointLot ? lots.reduce((s,l)=>s+(l.qty_total_all||0),0).toLocaleString() : lots.reduce((s,l)=>s+(l.qty_navy||0)+(l.qty_army||0)+(l.qty_mc||0),0).toLocaleString()}</td>
+        <td>${lots.some(l=>l.delivered!=null) ? lots.reduce((s,l)=>s+(l.delivered||0),0).toLocaleString() : '<span class="null-val">—</span>'}</td>
+        <td>${lots.some(l=>l.balance!=null) ? lots.reduce((s,l)=>s+(l.balance||0),0).toLocaleString() : '<span class="null-val">—</span>'}</td>
         <td></td>
         <td></td>
       </tr>
@@ -841,11 +1016,11 @@ function renderRates(prog) {
       <tr><td style="text-align:left">Contract Type</td><td style="text-align:left">${prog.contract_type}</td></tr>
       <tr><td style="text-align:left">PCO</td><td style="text-align:left">${prog.pco}</td></tr>
       <tr><td style="text-align:left;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em" colspan="2" style="padding-top:12px">Production Rates (Units/Year)</td></tr>
-      <tr><td style="text-align:left">Minimum Sustaining Rate (MSR)</td><td style="text-align:left;color:var(--accent2);font-weight:600">${prog.msr.toLocaleString()}</td></tr>
-      <tr><td style="text-align:left">1-8-5 Rate</td><td style="text-align:left">${prog.rate_185.toLocaleString()}</td></tr>
-      <tr><td style="text-align:left">Maximum Rate</td><td style="text-align:left;color:var(--green);font-weight:600">${prog.max_rate.toLocaleString()}</td></tr>
+      <tr><td style="text-align:left">Minimum Sustaining Rate (MSR)</td><td style="text-align:left;color:var(--accent2);font-weight:600">${prog.msr != null ? prog.msr.toLocaleString() : '<span class="null-val">—</span>'}</td></tr>
+      <tr><td style="text-align:left">1-8-5 Rate</td><td style="text-align:left">${prog.rate_185 != null ? prog.rate_185.toLocaleString() : '<span class="null-val">—</span>'}</td></tr>
+      <tr><td style="text-align:left">Maximum Rate</td><td style="text-align:left;color:var(--green);font-weight:600">${prog.max_rate != null ? prog.max_rate.toLocaleString() : '<span class="null-val">—</span>'}</td></tr>
       <tr><td style="text-align:left;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em" colspan="2">Lead Times</td></tr>
-      <tr><td style="text-align:left">Reorder Lead Time</td><td style="text-align:left">${prog.lead_time_reorder}</td></tr>
+      <tr><td style="text-align:left">Reorder Lead Time</td><td style="text-align:left">${prog.lead_time_reorder != null ? prog.lead_time_reorder : '<span class="null-val">—</span>'}</td></tr>
       <tr><td style="text-align:left;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em" colspan="2">Notes</td></tr>
       <tr><td colspan="2" style="text-align:left;color:var(--text-muted);font-size:12px">${prog.note}</td></tr>
     </tbody>`;
@@ -941,5 +1116,10 @@ document.addEventListener('DOMContentLoaded', () => {
   updateJbookLink();
 });
 </script>
+<footer style="border-top:1px solid var(--border);padding:16px 48px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--text-muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+  <span>CNAS Defense Program · Internal Use Only</span>
+  <span>Data current as of April 2026</span>
+</footer>
+
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DoD Budget Suite · CNAS Defense Program</title>
+<title>CNAS Defense Budget Suite</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
@@ -255,9 +255,10 @@
 <body>
 
 <nav class="app-nav">
-  <span class="nav-brand">DoD Budget Suite</span>
+  <span class="nav-brand">CNAS Defense Budget Suite</span>
   <a href="index.html" class="active">Home</a>
   <a href="defense_budget_tool.html">P-1 Comparison</a>
+  <a href="production_delivery_tool.html">Production &amp; Delivery</a>
   <a href="historical_budget_tool.html">Historical Trends</a>
 </nav>
 
@@ -279,6 +280,20 @@
       </div>
       <div class="tool-name">P-1 Procurement Comparison</div>
       <div class="tool-desc">Compare procurement funding across FY2025 enacted, FY2026 enacted (discretionary + mandatory), and FY2027 request. Drill from service totals down to individual program lines with quantity data. Values displayed in millions (under $1B) or billions.</div>
+      <div class="tool-cta">
+        Open tool
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </a>
+
+    <a href="production_delivery_tool.html" class="tool-card" style="--card-accent: #f0a500">
+      <div class="tool-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f0a500" stroke-width="1.8">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="tool-name">Production &amp; Delivery</div>
+      <div class="tool-desc">Program-level production and delivery data for key munitions and interceptors. Covers funding history (FY2024–FY2027), lot-by-lot contract and delivery schedules, annual delivery totals, and production rate parameters. Sources: FY2027 P-1 (funding) and FY2026 service J-books (lots and deliveries).</div>
       <div class="tool-cta">
         Open tool
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -312,6 +327,10 @@
     <div class="note-item">
       <div class="note-label">P-1 Dollar Units</div>
       <div class="note-value">Displayed in millions (values under $1B) or billions, to two decimal places. Source data in thousands as reported in P-1 exhibit. Not inflation-adjusted.</div>
+    </div>
+    <div class="note-item">
+      <div class="note-label">Production &amp; Delivery Sources</div>
+      <div class="note-value">Funding: FY2027 P-1 Exhibit (authoritative). Lot data and delivery schedules: FY2026 service J-books (MDA Vol. 2B; Army MPA; Navy WPN). FY2027 J-books not yet available.</div>
     </div>
     <div class="note-item">
       <div class="note-label">Historical Source</div>
