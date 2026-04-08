@@ -121,6 +121,7 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
     <button class="toggle-btn" data-prog="prsm" onclick="selectProg(this)">PrSM (Army)</button>
     <button class="toggle-btn" data-prog="amraam" onclick="selectProg(this)">AMRAAM (Joint)</button>
     <button class="toggle-btn" data-prog="aim9x" onclick="selectProg(this)">AIM-9X (Joint)</button>
+    <button class="toggle-btn" data-prog="hellfire" onclick="selectProg(this)">AGM-114 Hellfire (Joint)</button>
     <button class="toggle-btn" data-prog="sm6" onclick="selectProg(this)">SM-6 (Navy)</button>
     <button class="toggle-btn" data-prog="essm" onclick="selectProg(this)">ESSM Blk 2 (Navy)</button>
     <button class="toggle-btn" data-prog="mse" onclick="selectProg(this)">PAC-3 MSE (Army)</button>
@@ -207,6 +208,7 @@ const JBOOK_URLS = {
   aim9x: 'https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf',
   essm: 'https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf',
   prsm: 'https://www.asafm.army.mil/Portals/72/Documents/BudgetMaterial/2026/Procurement/Other%20Procurement/Missile_Procurement_Army.pdf',
+  hellfire: 'https://www.asafm.army.mil/Portals/72/Documents/BudgetMaterial/2026/Procurement/Other%20Procurement/Missile_Procurement_Army.pdf',
   thaad: 'https://comptroller.defense.gov/Portals/45/Documents/defbudget/FY2026/FY2026_MDA_Procurement.pdf',
   sm3iia: 'https://comptroller.defense.gov/Portals/45/Documents/defbudget/FY2026/FY2026_MDA_Procurement.pdf',
   sm3ib: 'https://comptroller.defense.gov/Portals/45/Documents/defbudget/FY2026/FY2026_MDA_Procurement.pdf',
@@ -225,7 +227,7 @@ const PROGRAMS = {
     rate_185: 250,
     max_rate: 600,
     lead_time_reorder: '30–40 months',
-    note: 'MSR is 90/year when executing concurrently with Recertification Program. Max capacity of 600/year forecasted for FY2026. Gaps in new production deliveries mitigated by concurrent recertification line (WPN BLI 2301).',
+    note: 'MSR is 90/year when executing concurrently with Recertification Program. Max capacity of 600/year forecasted for FY2026. Gaps in new production deliveries mitigated by concurrent recertification line (WPN BLI 2301). USMC procures Tomahawk separately under PMC BLI 2101 for the Long Range Fires (LRF) program via the same Navy contracts and program office — USMC quantities included in lot breakdown. USMC is terminating the LRF program in FY2026; FY2025 was the last USMC procurement year (22 missiles). Upon termination, all USMC Block V missiles transfer to Navy and all Block Va (MST) missiles transfer to Army per Title 10 USC 2571. Funding data reflects Navy WPN BLI 2101 only; USMC and Army Tomahawk funding are in separate appropriations.',
 
     // P-1 funding data ($M) — Navy WPN BLI 2101 only
     // Sources: FY26 J-book P-40, FY27 P-1
@@ -323,12 +325,12 @@ const PROGRAMS = {
 
     lots: [
       { lot_fy: 2019, award_date: 'Dec 2019', first_delivery: 'Jul 2021', qty_navy: 113, qty_army: 0, qty_mc: 0, qty_af: 190, qty_fms: 434, qty_total_all: 737, unit_cost_k: 891.000, status: 'Complete',     delivered: 303,  balance: 0,   lot_label: 'Lot 37' },
-      { lot_fy: 2020, award_date: 'Mar 2021', first_delivery: 'Jun 2022', qty_navy: 111, qty_army: 0, qty_mc: 0, qty_af: 89,  qty_fms: 300, qty_total_all: 500, unit_cost_k: 891.000, status: 'Complete',     delivered: 200,  balance: 0,   lot_label: 'Lot 38' },
-      { lot_fy: 2022, award_date: 'Aug 2022', first_delivery: 'Jun 2023', qty_navy: 85,  qty_army: 0, qty_mc: 0, qty_af: 317, qty_fms: 547, qty_total_all: 949, unit_cost_k: 880.000, status: 'Complete',     delivered: 402,  balance: 0,   lot_label: 'Lot 38' },
-      { lot_fy: 2023, award_date: 'Jun 2023', first_delivery: 'Oct 2025', qty_navy: 306, qty_army: 0, qty_mc: 0, qty_af: 319, qty_fms: 364, qty_total_all: 989, unit_cost_k: 986.000, status: 'In Delivery',  delivered: 0,    balance: 625, lot_label: 'Lot 39' },
-      { lot_fy: 2024, award_date: 'Sep 2024', first_delivery: 'Jan 2028', qty_navy: 235, qty_army: 0, qty_mc: 0, qty_af: 457, qty_fms: 350, qty_total_all: 1042,unit_cost_k: 834.000, status: 'Pending',      delivered: 0,    balance: 692, lot_label: 'Lot 39' },
-      { lot_fy: 2025, award_date: 'Jun 2025', first_delivery: 'Jan 2030', qty_navy: 94,  qty_army: 0, qty_mc: 0, qty_af: 290, qty_fms: 350, qty_total_all: 734, unit_cost_k: 1077.000,status: 'Pending',      delivered: 0,    balance: 384, lot_label: 'Lot 39' },
-      { lot_fy: 2026, award_date: 'Mar 2026', first_delivery: 'Jan 2031', qty_navy: 151, qty_army: 0, qty_mc: 0, qty_af: 226, qty_fms: 300, qty_total_all: 677, unit_cost_k: 1028.000,status: 'Pending',      delivered: 0,    balance: 377, lot_label: 'Lot 40' },
+      { lot_fy: 2020, award_date: 'Mar 2021', first_delivery: 'Jun 2022', qty_navy: 111, qty_army: 0, qty_mc: 0, qty_af: 89,  qty_fms: 300, qty_total_all: 500,  unit_cost_k: 891.000, status: 'Complete',    delivered: 200, balance: 0,    lot_label: 'Lot 38' },
+      { lot_fy: 2022, award_date: 'Aug 2022', first_delivery: 'Jun 2023', qty_navy: 85,  qty_army: 0, qty_mc: 0, qty_af: 317, qty_fms: 547, qty_total_all: 949,  unit_cost_k: 880.000, status: 'Complete',    delivered: 402, balance: 0,    lot_label: 'Lot 38' },
+      { lot_fy: 2023, award_date: 'Dec 2022', first_delivery: 'Mar 2026', qty_navy: 306, qty_army: 0, qty_mc: 13, qty_af: 319, qty_fms: 364, qty_total_all: 1002, unit_cost_k: 986.000, status: 'In Delivery', delivered: 0,   balance: 638,  lot_label: 'Lot 39' },
+      { lot_fy: 2024, award_date: 'Dec 2024', first_delivery: 'Sep 2027', qty_navy: 235, qty_army: 0, qty_mc: 25, qty_af: 457, qty_fms: 350, qty_total_all: 1067, unit_cost_k: 834.000, status: 'Pending',     delivered: 0,   balance: 1067, lot_label: 'Lot 39' },
+      { lot_fy: 2025, award_date: 'Sep 2025', first_delivery: 'Feb 2029', qty_navy: 94,  qty_army: 0, qty_mc: 18, qty_af: 290, qty_fms: 350, qty_total_all: 752,  unit_cost_k: 1077.000,status: 'Pending',     delivered: 0,   balance: 752,  lot_label: 'Lot 39' },
+      { lot_fy: 2026, award_date: 'Mar 2026', first_delivery: 'Jan 2031', qty_navy: 151, qty_army: 0, qty_mc: 0,  qty_af: 226, qty_fms: 300, qty_total_all: 677,  unit_cost_k: 1028.000,status: 'Pending',     delivered: 0,   balance: 377,  lot_label: 'Lot 40' },
     ],
 
     annual_deliveries: [
@@ -661,6 +663,47 @@ const PROGRAMS = {
       { fy: 'FY2027', delivered: 0,  planned: 13, note: 'FY2023 lot: 13 remaining' },
       { fy: 'FY2028', delivered: 0,  planned: 18, note: 'FY2024 lot: 9 + FY2024 supplemental: 9' },
       { fy: 'FY2029', delivered: 0,  planned: 24, note: 'FY2024 lot: 18 remaining + FY2025 lot: 6' },
+    ],
+  },
+
+  hellfire: {
+    label: 'AGM-114 Hellfire (Joint)',
+    bli: '1338C70000',
+    account: 'Missile Procurement, Army',
+    contractor: 'Lockheed Martin — Orlando, FL',
+    contract_type: 'SS / FPIF (FY2021–FY2025) · SS / FFP (FY2026)',
+    pco: 'Redstone Arsenal, AL',
+    msr: null,
+    rate_185: null,
+    max_rate: null,
+    lead_time_reorder: null,
+    qty_unit: 'missiles',
+    note: 'AGM-114 Hellfire II / Longbow family — precision air-to-ground missile for rotary-wing and UAS platforms (AH-64 Apache, MQ-1C Gray Eagle, MQ-9 Reaper, Special Operations Aviation). Army discontinued new Hellfire procurement in FY2024 per Army Aviation Lethality Strategy; JAGM (AGM-179, BLI 2605C70302) is the replacement. FY2024 J-book funding ($21.976M) is close-out/secondary distribution only — no new missiles. FY2025–FY2027 zeroed in both J-book and P-1. Outstanding lots (FY2025–FY2026) reflect final contracted buys placed before termination and include large FMS quantities sharing the production line. Longbow variant (MMW radar seeker) no longer in production; Hellfire II (semi-active laser) is the remaining variant in delivery. Funding figures are Army appropriation only; Navy and FMS procurement funded through separate accounts.',
+
+    funding: [
+      { fy: 'Prior Years', disc: 5607.221, mandatory: 0, total: 5607.221, qty_disc: 86330, qty_mandatory: 0, qty_total: 86330, note: 'Cumulative Army procurement through FY2023 · Source: MPA J-book (FY26)' },
+      { fy: 'FY2024',      disc: 21.976,   mandatory: 0, total: 21.976,   qty_disc: 0,     qty_mandatory: 0, qty_total: 0,     note: 'Close-out / secondary distribution only; no new missiles · Source: MPA J-book (FY26)' },
+      { fy: 'FY2025',      disc: 0,        mandatory: 0, total: 0,        qty_disc: 0,     qty_mandatory: 0, qty_total: 0,     note: 'Zeroed — new production terminated · Source: FY27 P-1' },
+      { fy: 'FY2026',      disc: 0,        mandatory: 0, total: 0,        qty_disc: 0,     qty_mandatory: 0, qty_total: 0,     note: 'Zeroed · Source: FY27 P-1' },
+      { fy: 'FY2027',      disc: 0,        mandatory: 0, total: 0,        qty_disc: 0,     qty_mandatory: 0, qty_total: 0,     note: 'Zeroed · Source: FY27 P-1' },
+    ],
+
+    lots: [
+      { lot_fy: 2021, award_date: 'May 2021', first_delivery: 'Mar 2024', qty_navy: 161, qty_army: 662,  qty_mc: 0, qty_af: 2, qty_fms: 0,   qty_total_all: 825,  unit_cost_k: 209.320, status: 'Complete',    delivered: 825,  balance: 0,    variant: 'Hellfire II' },
+      { lot_fy: 2022, award_date: 'Mar 2023', first_delivery: 'Dec 2024', qty_navy: 164, qty_army: 490,  qty_mc: 0, qty_af: 0, qty_fms: 0,   qty_total_all: 654,  unit_cost_k: 260.993, status: 'Complete',    delivered: 654,  balance: 0,    variant: 'Hellfire II' },
+      { lot_fy: 2023, award_date: 'May 2023', first_delivery: 'Dec 2025', qty_navy: 293, qty_army: 629,  qty_mc: 0, qty_af: 0, qty_fms: 0,   qty_total_all: 922,  unit_cost_k: 260.301, status: 'In Delivery', delivered: null, balance: null, variant: 'Hellfire II' },
+      { lot_fy: 2024, award_date: 'Mar 2024', first_delivery: 'Dec 2026', qty_navy: 253, qty_army: 1117, qty_mc: 0, qty_af: 0, qty_fms: 0,   qty_total_all: 1370, unit_cost_k: 269.085, status: 'Pending',     delivered: null, balance: null, variant: 'Hellfire II' },
+      { lot_fy: 2025, award_date: 'Mar 2025', first_delivery: 'Oct 2027', qty_navy: 163, qty_army: 23,   qty_mc: 0, qty_af: 0, qty_fms: 963, qty_total_all: 1149, unit_cost_k: 376.870, status: 'Pending',     delivered: null, balance: null, variant: 'Hellfire II' },
+      { lot_fy: 2026, award_date: 'Feb 2026', first_delivery: 'Sep 2028', qty_navy: 257, qty_army: 178,  qty_mc: 0, qty_af: 0, qty_fms: 175, qty_total_all: 610,  unit_cost_k: 249.506, status: 'Pending',     delivered: null, balance: null, variant: 'Hellfire II' },
+    ],
+
+    annual_deliveries: [
+      { fy: 'FY2024', delivered: 725,  planned: 0,    note: 'FY2021 lot: 725 delivered (Army 662, AF 2, Navy 61 of 161); remaining 100 Navy missiles carry into FY2025' },
+      { fy: 'FY2025', delivered: 0,    planned: 754,  note: 'FY2021 lot Navy remainder: 100 (Oct–Nov 2024) + FY2022 lot: 654 (Army 490, Oct 2024–Jun 2025; Navy 164, May–Sep 2025)' },
+      { fy: 'FY2026', delivered: 0,    planned: 629,  note: 'FY2023 lot Army: 629 (Oct 2025–Jun 2026); FY2023 lot Navy (293) delivers Oct 2026 (FY2027)' },
+      { fy: 'FY2027', delivered: 0,    planned: 2685, note: 'FY2023 lot Navy: 166 (Oct–Nov 2026) + FY2024 lot: 1,370 (Army 1,117 + Navy 253, Oct 2026–Sep 2027) + FY2025 lot: 1,149 (Army 23, FMS 963, Navy 163, Oct 2026–Sep 2027)' },
+      { fy: 'FY2028', delivered: 0,    planned: 0,    note: 'Gap — FY2026 lot first delivery Sep 2028; deliveries fall primarily in FY2029' },
+      { fy: 'FY2029', delivered: 0,    planned: 610,  note: 'FY2026 lot: 610 (Army 178, Navy 257, FMS 175)' },
     ],
   },
 };
