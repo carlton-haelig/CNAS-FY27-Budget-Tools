@@ -119,6 +119,7 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
   <div class="toggle-group" id="prog-selector">
     <button class="toggle-btn active" data-prog="tomahawk" onclick="selectProg(this)">Tomahawk (USN)</button>
     <button class="toggle-btn" data-prog="mse" onclick="selectProg(this)">PAC-3 MSE (Army)</button>
+    <button class="toggle-btn" data-prog="amraam" onclick="selectProg(this)">AMRAAM (Joint)</button>
   </div>
   <div style="flex:1"></div>
   <a id="jbook-link" href="https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf" target="_blank" class="btn-sm primary" style="text-decoration:none">↗ FY26 J-Book</a>
@@ -197,6 +198,7 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
 const JBOOK_URLS = {
   tomahawk: 'https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf',
   mse: 'https://www.asafm.army.mil/Portals/72/Documents/BudgetMaterial/2026/Procurement/Other%20Procurement/Missile_Procurement_Army.pdf',
+  amraam: 'https://www.saffm.hq.af.mil/Portals/84/documents/FY2026/PROCUREMENT/FY2026_Air_Force_Missile_Procurement.pdf',
 };
 
 const PROGRAMS = {
@@ -278,6 +280,55 @@ const PROGRAMS = {
       { fy: 'FY2026', delivered: 172, planned: 0,   note: 'FY23 lot complete (152) + FY24 lot begins (20 Army)' },
       { fy: 'FY2027', delivered: 0,   planned: 210, note: 'FY24 lot: 210 remaining Army' },
       { fy: 'FY2028', delivered: 0,   planned: 335, note: 'FY25 lot (~211) + FY26 lot (~121) + FY24 tail (3)' },
+    ],
+  },
+
+  amraam: {
+    label: 'AMRAAM (Joint)',
+    bli: 'MAMRA0 (USAF) / 2206 (Navy)',
+    account: 'Missile Procurement, Air Force + Weapons Procurement, Navy',
+    contractor: 'Raytheon Missile Systems — Tucson, AZ',
+    contract_type: 'SS / FPIF',
+    pco: 'AFLCMC/EB - Weapons (Lot 39+) / Eglin AFB (prior lots)',
+    msr: 100,
+    rate_185: 600,
+    max_rate: 2500,
+    lead_time_reorder: '35 months',
+    qty_unit: 'AURs',
+    note: 'Joint USAF/Navy program; USAF is lead service. Unit cost is quantity-dependent and reflects combined procurement across USAF, Navy, and FMS — it cannot be allocated to any single buyer. MSR of 100/year is per agency; minimum cumulative total across all buyers is 300/year. Max rate of 2,500/year applies to all configurations and all agencies combined. FY2021 procurement year unit cost ($0.10M) omitted — reflects partial incremental cost under Lot 38 MYP, not a full AUR unit cost. Lots span multiple fiscal years under single contracts (Lot 38: FY2020–2022; Lot 39: FY2023–2025; Lot 40: FY2026).',
+
+    funding: [
+      { fy: 'Prior Years (USAF)', disc: 9538.419, mandatory: 0,        total: 9538.419, qty_disc: null, qty_mandatory: 0,    qty_total: null, note: 'Cumulative · Source: MPAF J-book P-5' },
+      { fy: 'Prior Years (Navy)', disc: 3741.193, mandatory: 0,        total: 3741.193, qty_disc: null, qty_mandatory: 0,    qty_total: null, note: 'Cumulative · Source: WPN J-book P-5' },
+      { fy: 'FY2024 (USAF)',      disc: 487.638,  mandatory: 0,        total: 487.638,  qty_disc: 457,  qty_mandatory: 0,    qty_total: 457,  note: 'Incl. $53.1M advance procurement for obsolete parts · Source: MPAF J-book P-40' },
+      { fy: 'FY2024 (Navy)',      disc: 385.678,  mandatory: 0,        total: 385.678,  qty_disc: 300,  qty_mandatory: 0,    qty_total: 300,  note: 'Source: WPN J-book P-40' },
+      { fy: 'FY2025 (USAF)',      disc: 637.494,  mandatory: 0,        total: 637.494,  qty_disc: 411,  qty_mandatory: 0,    qty_total: 411,  note: 'Actuals; incl. HAC-D mark (-$57.6M carryover) · Source: FY27 P-1' },
+      { fy: 'FY2025 (Navy)',      disc: 207.093,  mandatory: 0,        total: 207.093,  qty_disc: 155,  qty_mandatory: 0,    qty_total: 155,  note: 'Actuals; incl. $14.4M supplemental · Source: FY27 P-1' },
+      { fy: 'FY2026 (USAF)',      disc: 365.125,  mandatory: 300.000,  total: 665.125,  qty_disc: 226,  qty_mandatory: 257,  qty_total: 483,  note: 'Enacted; mandatory funds 257 AURs (Lot 40) · Source: FY27 P-1' },
+      { fy: 'FY2026 (Navy)',      disc: 69.913,   mandatory: 0,        total: 69.913,   qty_disc: 41,   qty_mandatory: 0,    qty_total: 41,   note: 'Enacted; disc only · Source: FY27 P-1' },
+      { fy: 'FY2027 (USAF)',      disc: 115.856,  mandatory: 1944.956, total: 2060.812, qty_disc: 38,   qty_mandatory: 1279, qty_total: 1317, note: 'Request · Source: FY27 P-1' },
+      { fy: 'FY2027 (Navy)',      disc: 167.439,  mandatory: 636.846,  total: 804.285,  qty_disc: 106,  qty_mandatory: 388,  qty_total: 494,  note: 'Request · Source: FY27 P-1' },
+    ],
+
+    lots: [
+      { lot_fy: 2019, award_date: 'Dec 2019', first_delivery: 'Jul 2021', qty_navy: 113, qty_army: 0, qty_mc: 0, qty_af: 190, qty_fms: 434, qty_total_all: 737, unit_cost_k: 891.000, status: 'Complete',     delivered: 303,  balance: 0,   lot_label: 'Lot 37' },
+      { lot_fy: 2020, award_date: 'Mar 2021', first_delivery: 'Jun 2022', qty_navy: 111, qty_army: 0, qty_mc: 0, qty_af: 89,  qty_fms: 300, qty_total_all: 500, unit_cost_k: 891.000, status: 'Complete',     delivered: 200,  balance: 0,   lot_label: 'Lot 38' },
+      { lot_fy: 2022, award_date: 'Aug 2022', first_delivery: 'Jun 2023', qty_navy: 85,  qty_army: 0, qty_mc: 0, qty_af: 317, qty_fms: 547, qty_total_all: 949, unit_cost_k: 880.000, status: 'Complete',     delivered: 402,  balance: 0,   lot_label: 'Lot 38' },
+      { lot_fy: 2023, award_date: 'Jun 2023', first_delivery: 'Oct 2025', qty_navy: 306, qty_army: 0, qty_mc: 0, qty_af: 319, qty_fms: 364, qty_total_all: 989, unit_cost_k: 986.000, status: 'In Delivery',  delivered: 0,    balance: 625, lot_label: 'Lot 39' },
+      { lot_fy: 2024, award_date: 'Sep 2024', first_delivery: 'Jan 2028', qty_navy: 235, qty_army: 0, qty_mc: 0, qty_af: 457, qty_fms: 350, qty_total_all: 1042,unit_cost_k: 834.000, status: 'Pending',      delivered: 0,    balance: 692, lot_label: 'Lot 39' },
+      { lot_fy: 2025, award_date: 'Jun 2025', first_delivery: 'Jan 2030', qty_navy: 94,  qty_army: 0, qty_mc: 0, qty_af: 290, qty_fms: 350, qty_total_all: 734, unit_cost_k: 1077.000,status: 'Pending',      delivered: 0,    balance: 384, lot_label: 'Lot 39' },
+      { lot_fy: 2026, award_date: 'Mar 2026', first_delivery: 'Jan 2031', qty_navy: 151, qty_army: 0, qty_mc: 0, qty_af: 226, qty_fms: 300, qty_total_all: 677, unit_cost_k: 1028.000,status: 'Pending',      delivered: 0,    balance: 377, lot_label: 'Lot 40' },
+    ],
+
+    annual_deliveries: [
+      { fy: 'FY2021', delivered: 303, planned: 0,   note: 'Lot 37: 303 AF+Navy (190+113), first del Jul 2021' },
+      { fy: 'FY2022', delivered: 193, planned: 0,   note: 'Lot 38 FY2020 portion: ~193 AF+Navy balance delivered' },
+      { fy: 'FY2023', delivered: 443, planned: 0,   note: 'Lot 38 FY2021 portion: 443 AF+Navy (269+174)' },
+      { fy: 'FY2024', delivered: 202, planned: 0,   note: 'Lot 38 FY2022 portion: ~202 AF+Navy remaining' },
+      { fy: 'FY2025', delivered: 0,   planned: 0,   note: 'Gap — Lot 39 FY2023 first delivery Oct 2025' },
+      { fy: 'FY2026', delivered: 0,   planned: 625, note: 'Lot 39 FY2023: 625 AF+Navy (319+306) planned' },
+      { fy: 'FY2027', delivered: 0,   planned: 0,   note: 'Gap — Lot 39 FY2024 first delivery Jan 2028' },
+      { fy: 'FY2028', delivered: 0,   planned: 692, note: 'Lot 39 FY2024: 692 AF+Navy (457+235) planned' },
     ],
   }
 };
@@ -391,9 +442,9 @@ function renderFunding(prog) {
         <td>${fmtM(r.disc)}</td>
         <td>${r.mandatory ? fmtM(r.mandatory) : '<span class="null-val">—</span>'}</td>
         <td>${fmtM(r.total)}</td>
-        <td>${r.qty_disc > 0 ? r.qty_disc.toLocaleString() : '<span class="null-val">—</span>'}</td>
-        <td>${r.qty_mandatory > 0 ? r.qty_mandatory.toLocaleString() : '<span class="null-val">—</span>'}</td>
-        <td>${r.qty_total > 0 ? r.qty_total.toLocaleString() : '<span class="null-val">—</span>'}</td>
+        <td>${r.qty_disc != null && r.qty_disc > 0 ? r.qty_disc.toLocaleString() : '<span class="null-val">—</span>'}</td>
+        <td>${r.qty_mandatory != null && r.qty_mandatory > 0 ? r.qty_mandatory.toLocaleString() : '<span class="null-val">—</span>'}</td>
+        <td>${r.qty_total != null && r.qty_total > 0 ? r.qty_total.toLocaleString() : '<span class="null-val">—</span>'}</td>
         <td style="text-align:left;font-size:11px;color:var(--text-muted)">${r.note||''}</td>
       </tr>`).join('')}
     </tbody>`;
@@ -401,8 +452,9 @@ function renderFunding(prog) {
 
 // ── UNIT COST PANE ────────────────────────────
 function renderUnitCost(prog) {
-  const allArmyOnly = prog.lots.every(l => l.qty_navy === 0 && l.qty_mc === 0);
-  const svcLabel = allArmyOnly ? 'Army only' : 'All Services';
+  const isJointProg = prog.lots.some(l => l.qty_af !== undefined);
+  const allArmyOnly = !isJointProg && prog.lots.every(l => l.qty_navy === 0 && l.qty_mc === 0);
+  const svcLabel = isJointProg ? 'USAF + Navy (unit cost reflects all buyers incl. FMS)' : allArmyOnly ? 'Army only' : 'All Services';
   const lotNote = prog.lots.some(l => l.status === 'Pending') ? ' · Some lots pending definitization' : '';
   const metaEl = document.getElementById('cost-pane-meta');
   if (metaEl) metaEl.textContent = `P-5a · ${svcLabel}${lotNote}`;
@@ -473,9 +525,12 @@ function renderUnitCost(prog) {
   });
 
   // Table
-  const ucHasNavy = prog.lots.some(l => l.qty_navy > 0);
-  const ucHasArmy = prog.lots.some(l => l.qty_army > 0);
-  const ucHasMC   = prog.lots.some(l => l.qty_mc > 0);
+  const isJoint   = prog.lots.some(l => l.qty_af !== undefined);
+  const ucHasNavy = !isJoint && prog.lots.some(l => l.qty_navy > 0);
+  const ucHasArmy = !isJoint && prog.lots.some(l => l.qty_army > 0);
+  const ucHasMC   = !isJoint && prog.lots.some(l => l.qty_mc > 0);
+  const ucHasAF   = isJoint;
+  const ucHasFMS  = isJoint && prog.lots.some(l => l.qty_fms > 0);
   document.getElementById('cost-table').innerHTML = `
     <thead><tr>
       <th>Lot (FY)</th>
@@ -484,9 +539,12 @@ function renderUnitCost(prog) {
       ${ucHasNavy ? '<th>Navy Qty</th>' : ''}
       ${ucHasArmy ? '<th>Army Qty</th>' : ''}
       ${ucHasMC   ? '<th>USMC Qty</th>' : ''}
-      <th>Total Qty</th>
+      ${ucHasAF   ? '<th>AF Qty</th>' : ''}
+      ${ucHasNavy || ucHasAF ? '' : ''}
+      ${ucHasFMS  ? '<th>FMS Qty</th>' : ''}
+      <th>${isJoint ? 'All-Buyer Total' : 'Total Qty'}</th>
       <th>Unit Cost</th>
-      <th>Status</th>
+      ${isJoint ? '<th>Contract</th>' : '<th>Status</th>'}
     </tr></thead>
     <tbody>
       ${prog.lots.map(l => {
@@ -500,9 +558,11 @@ function renderUnitCost(prog) {
           ${ucHasNavy ? `<td>${fmtN(l.qty_navy)}</td>` : ''}
           ${ucHasArmy ? `<td>${fmtN(l.qty_army)}</td>` : ''}
           ${ucHasMC   ? `<td>${fmtN(l.qty_mc)}</td>`   : ''}
-          <td>${fmtN(total)}</td>
+          ${ucHasAF   ? `<td>${fmtN(l.qty_af)}</td>`   : ''}
+          ${ucHasFMS  ? `<td>${fmtN(l.qty_fms)}</td>`  : ''}
+          <td>${isJoint ? fmtN(l.qty_total_all) : fmtN(total)}</td>
           <td>${l.unit_cost_k ? fmtM(l.unit_cost_k/1000) + (costChange !== null && l.lot_fy !== lots[0].lot_fy ? ` <span style="font-size:10px;color:${costChange>0?'var(--red)':'var(--green)'}">(${costChange>0?'+':''}${costChange.toFixed(1)}%)</span>` : '') : '<span class="null-val">TBD</span>'}</td>
-          <td class="${statusCls}">${l.status}</td>
+          ${isJoint ? `<td style="color:var(--text-muted);font-size:11px">${l.lot_label}</td>` : `<td class="${statusCls}">${l.status}</td>`}
         </tr>`;
       }).join('')}
       <tr class="total-row">
@@ -511,7 +571,9 @@ function renderUnitCost(prog) {
         ${ucHasNavy ? `<td>${prog.lots.reduce((s,l)=>s+l.qty_navy,0).toLocaleString()}</td>` : ''}
         ${ucHasArmy ? `<td>${prog.lots.reduce((s,l)=>s+l.qty_army,0).toLocaleString()}</td>` : ''}
         ${ucHasMC   ? `<td>${prog.lots.reduce((s,l)=>s+l.qty_mc,0).toLocaleString()}</td>`   : ''}
-        <td>${prog.lots.reduce((s,l)=>s+l.qty_navy+l.qty_army+l.qty_mc,0).toLocaleString()}</td>
+        ${ucHasAF   ? `<td>${prog.lots.reduce((s,l)=>s+(l.qty_af||0),0).toLocaleString()}</td>` : ''}
+        ${ucHasFMS  ? `<td>${prog.lots.reduce((s,l)=>s+(l.qty_fms||0),0).toLocaleString()}</td>` : ''}
+        <td>${isJoint ? prog.lots.reduce((s,l)=>s+(l.qty_total_all||0),0).toLocaleString() : prog.lots.reduce((s,l)=>s+l.qty_navy+l.qty_army+l.qty_mc,0).toLocaleString()}</td>
         <td></td><td></td>
       </tr>
     </tbody>`;
@@ -577,9 +639,12 @@ function renderDeliveryAnnual(prog) {
 
 function renderDeliveryLot(prog) {
   const lots = prog.lots;
-  const hasNavy = prog.lots.some(l => l.qty_navy > 0);
-  const hasArmy = prog.lots.some(l => l.qty_army > 0);
-  const hasMC   = prog.lots.some(l => l.qty_mc > 0);
+  const isJointLot = prog.lots.some(l => l.qty_af !== undefined);
+  const hasNavy = !isJointLot && prog.lots.some(l => l.qty_navy > 0);
+  const hasArmy = !isJointLot && prog.lots.some(l => l.qty_army > 0);
+  const hasMC   = !isJointLot && prog.lots.some(l => l.qty_mc > 0);
+  const hasAF   = isJointLot;
+  const hasFMS  = isJointLot && prog.lots.some(l => l.qty_fms > 0);
   document.getElementById('delivery-lot-table').innerHTML = `
     <thead><tr>
       <th>Lot (FY)</th>
@@ -588,7 +653,9 @@ function renderDeliveryLot(prog) {
       ${hasNavy ? '<th>Navy Proc.</th>' : ''}
       ${hasArmy ? '<th>Army Proc.</th>' : ''}
       ${hasMC   ? '<th>USMC Proc.</th>' : ''}
-      <th>Total Proc.</th>
+      ${hasAF   ? '<th>AF Proc.</th>'   : ''}
+      ${hasFMS  ? '<th>FMS Proc.</th>'  : ''}
+      <th>${isJointLot ? 'All-Buyer Total' : 'Total Proc.'}</th>
       <th>Delivered</th>
       <th>Balance Due</th>
       <th>Avg Delivered/Mo</th>
@@ -622,11 +689,13 @@ function renderDeliveryLot(prog) {
           ${hasNavy ? `<td>${fmtN(l.qty_navy)}</td>` : ''}
           ${hasArmy ? `<td>${fmtN(l.qty_army)}</td>` : ''}
           ${hasMC   ? `<td>${fmtN(l.qty_mc)}</td>`   : ''}
-          <td>${total.toLocaleString()}</td>
+          ${hasAF   ? `<td>${fmtN(l.qty_af)}</td>`   : ''}
+          ${hasFMS  ? `<td>${fmtN(l.qty_fms)}</td>`  : ''}
+          <td>${isJointLot ? fmtN(l.qty_total_all) : total.toLocaleString()}</td>
           <td>${delivered > 0 ? delivered.toLocaleString() : '<span class="null-val">—</span>'}</td>
           <td>${balance > 0 ? balance.toLocaleString() : '<span class="complete">✓</span>'}</td>
           <td>${avgPerMo !== '—' ? avgPerMo + '/mo' : '<span class="null-val">—</span>'}</td>
-          <td class="${statusCls}">${l.status}</td>
+          ${isJointLot ? `<td style="color:var(--text-muted);font-size:11px">${l.lot_label}</td>` : `<td class="${statusCls}">${l.status}</td>`}
         </tr>`;
       }).join('')}
       <tr class="total-row">
@@ -635,7 +704,9 @@ function renderDeliveryLot(prog) {
         ${hasNavy ? `<td>${lots.reduce((s,l)=>s+l.qty_navy,0).toLocaleString()}</td>` : ''}
         ${hasArmy ? `<td>${lots.reduce((s,l)=>s+l.qty_army,0).toLocaleString()}</td>` : ''}
         ${hasMC   ? `<td>${lots.reduce((s,l)=>s+l.qty_mc,0).toLocaleString()}</td>`   : ''}
-        <td>${lots.reduce((s,l)=>s+l.qty_navy+l.qty_army+l.qty_mc,0).toLocaleString()}</td>
+        ${hasAF   ? `<td>${lots.reduce((s,l)=>s+(l.qty_af||0),0).toLocaleString()}</td>` : ''}
+        ${hasFMS  ? `<td>${lots.reduce((s,l)=>s+(l.qty_fms||0),0).toLocaleString()}</td>` : ''}
+        <td>${isJointLot ? lots.reduce((s,l)=>s+(l.qty_total_all||0),0).toLocaleString() : lots.reduce((s,l)=>s+l.qty_navy+l.qty_army+l.qty_mc,0).toLocaleString()}</td>
         <td>${lots.reduce((s,l)=>s+l.delivered,0).toLocaleString()}</td>
         <td>${lots.reduce((s,l)=>s+l.balance,0).toLocaleString()}</td>
         <td></td><td></td>
