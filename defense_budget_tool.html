@@ -160,8 +160,7 @@ tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospac
         <div class="sel-empty" id="sel-empty">No programs selected</div>
       </div>
       <div class="sel-actions">
-        <button class="btn-sm" onclick="clearAll()">Clear all</button>
-        <button class="btn-sm primary" onclick="printView()">⎙ Print / Export</button>
+        <button class="btn-sm primary" onclick="clearAll()">Clear all</button>
       </div>
     </div>
 
@@ -206,6 +205,7 @@ tr.acct-header td{background:var(--surface);font-family:'IBM Plex Mono',monospac
         </div>
         <div class="header-actions">
           <button class="btn-sm primary" onclick="printView()">⎙ Print / Export</button>
+          <button class="btn-sm primary" onclick="shareView()" id="share-btn-main">⎗ Share Report</button>
         </div>
       </div>
 
@@ -430,6 +430,7 @@ function fmtB(v) {
 // RENDER
 // ─────────────────────────────────────────────
 function render() {
+  pushState();
   const empty = document.getElementById('empty-state');
   const results = document.getElementById('results');
 
@@ -668,8 +669,65 @@ function printView() {
 // ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// URL STATE
+// ─────────────────────────────────────────────
+function pushState() {
+  const params = new URLSearchParams();
+  // Selected items
+  const ids = selected.map(s => s.id);
+  if (ids.length) params.set('s', ids.join(','));
+  // Active columns
+  const cols = [...document.querySelectorAll('.fy-btn.active')].map(b => b.dataset.col);
+  const defaultCols = ['fy25_total','fy26_total','fy27_total'];
+  const isDefault = cols.length === defaultCols.length && cols.every((c,i) => c === defaultCols[i]);
+  if (!isDefault) params.set('c', cols.join(','));
+  const newUrl = params.toString() ? location.pathname + '?' + params.toString() : location.pathname;
+  try { history.replaceState(null, '', newUrl); } catch(e) {}
+}
+
+function loadState() {
+  const params = new URLSearchParams(location.search);
+  // Restore columns first
+  if (params.has('c')) {
+    const activeCols = new Set(params.get('c').split(','));
+    document.querySelectorAll('.fy-btn').forEach(btn => {
+      btn.classList.toggle('active', activeCols.has(btn.dataset.col));
+    });
+  }
+  // Restore selections
+  if (params.has('s')) {
+    params.get('s').split(',').forEach(id => addItem(id));
+  }
+}
+
+function shareView() {
+  pushState();
+  const url = location.href;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => showShareToast());
+  } else {
+    prompt('Copy this link:', url);
+  }
+}
+
+function showShareToast() {
+  let toast = document.getElementById('share-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'share-toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;padding:10px 18px;border-radius:4px;font-family:IBM Plex Mono,monospace;font-size:11px;letter-spacing:.08em;z-index:9999;transition:opacity .3s';
+    toast.textContent = 'Link copied to clipboard';
+    document.body.appendChild(toast);
+  }
+  toast.style.opacity = '1';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   initPicker();
+  loadState();
 });
 </script>
 

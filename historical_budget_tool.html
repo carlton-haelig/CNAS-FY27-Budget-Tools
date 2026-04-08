@@ -314,6 +314,30 @@
     transition: background 0.15s, color 0.15s;
   }
   .chart-toggle button.active { background: var(--accent); color: #fff; }
+.btn-sm{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;transition:color .15s,border-color .15s}
+.btn-sm:hover{color:var(--text);border-color:var(--accent)}
+.btn-sm.primary{border-color:var(--accent);color:var(--accent)}
+.btn-sm.primary:hover{background:var(--accent);color:#fff}
+
+@media print {
+  @page{size:landscape;margin:0.6in 0.5in}
+  .sidebar,.header-actions{display:none!important}
+  .layout{display:block}
+  .main{padding:0}
+  body{background:#fff;color:#111;font-size:11px}
+  .result-title{color:#555!important}
+  .result-name{color:#111!important}
+  .result-meta{color:#555!important}
+  .chart-wrap{border:1px solid #ccc;page-break-inside:avoid;background:#fff}
+  .table-wrap{border:1px solid #ccc;page-break-inside:avoid}
+  table{font-size:10px}
+  th{color:#333!important;background:#e8e8e8!important;border-bottom:1px solid #bbb!important}
+  td{color:#111!important;border-bottom:1px solid #ddd!important}
+  td.null-val{color:#999!important}
+  .note{background:#fffbe6!important;border-left:3px solid #c8960a!important;color:#555!important}
+  [style*="display:flex"]{display:flex!important}
+  button{display:none!important}
+}
 </style>
 </head>
 <body>
@@ -407,7 +431,11 @@
           <div class="result-title" id="res-title"></div>
           <div class="result-name" id="res-name"></div>
         </div>
-        <div class="result-meta" id="res-meta"></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="result-meta" id="res-meta"></div>
+          <button class="btn-sm primary" onclick="window.print()">⎙ Print / Export</button>
+          <button class="btn-sm primary" onclick="shareView()">⎗ Share Report</button>
+        </div>
       </div>
 
 
@@ -462,8 +490,75 @@ const SERIES_DEFS = {
 // ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
+
+// ─────────────────────────────────────────────
+// URL STATE
+// ─────────────────────────────────────────────
+function pushState() {
+  const params = new URLSearchParams();
+  params.set('mode', document.getElementById('sel-mode').value);
+  const svc = document.getElementById('sel-service').value;
+  if (svc) params.set('svc', svc);
+  params.set('from', document.getElementById('fy-from').value);
+  params.set('to', document.getElementById('fy-to').value);
+  params.set('disp', displayMode);
+  if (activeSeries.size) params.set('series', [...activeSeries].join(','));
+  try { history.replaceState(null, '', location.pathname + '?' + params.toString()); } catch(e) {}
+}
+
+function loadState() {
+  const params = new URLSearchParams(location.search);
+  if (!params.toString()) return;
+  if (params.has('mode')) {
+    document.getElementById('sel-mode').value = params.get('mode');
+    onModeChange();
+  }
+  if (params.has('svc')) document.getElementById('sel-service').value = params.get('svc');
+  if (params.has('from')) document.getElementById('fy-from').value = params.get('from');
+  if (params.has('to')) document.getElementById('fy-to').value = params.get('to');
+  if (params.has('disp')) {
+    displayMode = params.get('disp');
+    document.getElementById('btn-abs').classList.toggle('active', displayMode === 'abs');
+    document.getElementById('btn-pct').classList.toggle('active', displayMode === 'pct');
+  }
+  if (params.has('series')) {
+    const savedSeries = new Set(params.get('series').split(','));
+    activeSeries = savedSeries;
+    document.querySelectorAll('.series-btn').forEach(btn => {
+      const isActive = savedSeries.has(btn.dataset.key);
+      btn.classList.toggle('active', isActive);
+      btn.style.opacity = isActive ? '1' : '0.35';
+    });
+  }
+  render();
+}
+
+function shareView() {
+  pushState();
+  const url = location.href;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => showShareToast());
+  } else {
+    prompt('Copy this link:', url);
+  }
+}
+
+function showShareToast() {
+  let toast = document.getElementById('share-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'share-toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;padding:10px 18px;border-radius:4px;font-family:IBM Plex Mono,monospace;font-size:11px;letter-spacing:.08em;z-index:9999;transition:opacity .3s';
+    toast.textContent = 'Link copied to clipboard';
+    document.body.appendChild(toast);
+  }
+  toast.style.opacity = '1';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+}
 document.addEventListener('DOMContentLoaded', () => {
   onModeChange();
+  loadState();
 });
 
 function onModeChange() {
