@@ -118,30 +118,18 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
   <span class="program-bar-label">Program</span>
   <button class="prog-btn active" data-prog="tomahawk">Tomahawk (USN)</button>
   <div style="flex:1"></div>
+  <a href="https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf" target="_blank" class="btn-sm primary" style="text-decoration:none">↗ FY26 J-Book</a>
   <button class="btn-sm primary" onclick="window.print()">⎙ Print / Export</button>
   <button class="btn-sm primary" onclick="shareView()">⎗ Share Report</button>
 </div>
 
 <div class="main">
 
-  <!-- PANE 1: FUNDING -->
-  <div class="pane" id="pane-funding">
-    <div class="pane-header">
-      <span class="pane-title">Procurement Funding</span>
-      <span class="pane-meta">WPN BLI 2101 · Weapons Procurement, Navy · P-1</span>
-    </div>
-    <div class="pane-body">
-      <div class="stat-grid" id="funding-stats"></div>
-      <div class="chart-wrap"><canvas id="funding-chart" style="max-height:260px"></canvas></div>
-      <div class="table-wrap"><table id="funding-table"></table></div>
-    </div>
-  </div>
-
-  <!-- PANE 2: UNIT COST -->
+  <!-- PANE 1: UNIT COST -->
   <div class="pane" id="pane-unitcost">
     <div class="pane-header">
       <span class="pane-title">Unit Cost by Contract Lot</span>
-      <span class="pane-meta">P-5a · Tactical Tomahawk VLS AUR · $ Thousands</span>
+      <span class="pane-meta">P-5a · Tactical Tomahawk VLS AUR · $ Thousands · FY2024–FY26 lots not yet contracted per FY26 J-book</span>
     </div>
     <div class="pane-body">
       <div class="stat-grid" id="cost-stats"></div>
@@ -150,7 +138,7 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
     </div>
   </div>
 
-  <!-- PANE 3: DELIVERY -->
+  <!-- PANE 2: DELIVERY -->
   <div class="pane" id="pane-delivery">
     <div class="pane-header">
       <span class="pane-title">Production &amp; Delivery Schedule</span>
@@ -160,7 +148,7 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
           <button class="toggle-btn" id="btn-lot" onclick="setDeliveryView('lot')">Lot Breakdown</button>
         </div>
       </div>
-      <span class="pane-meta">P-21 · All Services · Units in Each</span>
+      <span class="pane-meta">P-21 · All Services · Units in Each · FY2024–FY26 lots not yet contracted per FY26 J-book</span>
     </div>
     <div class="pane-body">
       <div id="delivery-annual">
@@ -170,6 +158,19 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
       <div id="delivery-lot" style="display:none">
         <div class="table-wrap"><table id="delivery-lot-table"></table></div>
       </div>
+    </div>
+  </div>
+
+  <!-- PANE 3: FUNDING -->
+  <div class="pane" id="pane-funding">
+    <div class="pane-header">
+      <span class="pane-title">Procurement Funding</span>
+      <span class="pane-meta">WPN BLI 2101 · Weapons Procurement, Navy · P-1</span>
+    </div>
+    <div class="pane-body">
+      <div class="stat-grid" id="funding-stats"></div>
+      <div class="chart-wrap"><canvas id="funding-chart" style="max-height:260px"></canvas></div>
+      <div class="table-wrap"><table id="funding-table"></table></div>
     </div>
   </div>
 
@@ -207,11 +208,11 @@ const PROGRAMS = {
     // P-1 funding data ($M) — Navy WPN BLI 2101 only
     // Sources: FY26 J-book P-40, FY27 P-1
     funding: [
-      { fy: 'Prior Years', base: 15248.916, mandatory: 0,       total: 15248.916, qty_navy: 8959, note: 'Cumulative prior year' },
-      { fy: 'FY2024',      base: 77.904,    mandatory: 0,       total: 77.904,    qty_navy: 0,    note: 'No new AURs procured; support/obsolescence costs only' },
-      { fy: 'FY2025',      base: 32.677,    mandatory: 0,       total: 32.677,    qty_navy: 0,    note: 'Base; +20 AURs via PL 118-50 supplemental ($63.3M) not reflected here' },
-      { fy: 'FY2026',      base: 12.593,    mandatory: 193.977, total: 206.570,   qty_navy: 57,   note: '57 new Block V AURs; discretionary covers partial costs only' },
-      { fy: 'FY2027',      base: 20.000,    mandatory: 1993.803,total: 3008.909,  qty_navy: 58,   note: 'FY27 request; 58 base + 727 mandatory AURs per FY27 P-1' },
+      { fy: 'Prior Years', disc: 15248.916, mandatory: 0,        total: 15248.916, qty_disc: 8959, qty_mandatory: 0,   qty_total: 8959, note: 'Cumulative prior year · Source: FY26 J-book P-40' },
+      { fy: 'FY2024',      disc: 77.904,    mandatory: 0,        total: 77.904,    qty_disc: 0,    qty_mandatory: 0,   qty_total: 0,    note: 'No new AURs procured; support/obsolescence costs only · Source: FY26 J-book P-40' },
+      { fy: 'FY2025',      disc: 95.940,    mandatory: 0,        total: 95.940,    qty_disc: 20,   qty_mandatory: 0,   qty_total: 20,   note: 'Actuals; includes PL 118-50 supplemental ($63.3M, 20 AURs) · Source: FY27 P-1' },
+      { fy: 'FY2026',      disc: 7.193,     mandatory: 250.421,  total: 257.614,   qty_disc: 0,    qty_mandatory: 55,  qty_total: 55,   note: 'Enacted; mandatory via PL 119-21 spend plan · Source: FY27 P-1' },
+      { fy: 'FY2027',      disc: 1015.106,  mandatory: 1993.803, total: 3008.909,  qty_disc: 58,   qty_mandatory: 727, qty_total: 785,  note: 'Request · Source: FY27 P-1' },
     ],
 
     // Unit cost by lot (P-5a) — Tactical Tomahawk VLS only
@@ -220,7 +221,7 @@ const PROGRAMS = {
       { lot_fy: 2021, award_date: 'Feb 2021', first_delivery: 'Dec 2023', qty_navy: 130, qty_army: 0,  qty_mc: 0,  unit_cost_k: 1586.180, status: 'Complete' },
       { lot_fy: 2022, award_date: 'Mar 2022', first_delivery: 'Apr 2025', qty_navy: 70,  qty_army: 30, qty_mc: 54, unit_cost_k: 1684.157, status: 'In Delivery' },
       { lot_fy: 2023, award_date: 'Dec 2022', first_delivery: 'Mar 2026', qty_navy: 40,  qty_army: 56, qty_mc: 13, unit_cost_k: 1894.927, status: 'In Delivery' },
-      { lot_fy: 2026, award_date: 'TBD',      first_delivery: 'TBD',      qty_navy: 57,  qty_army: 0,  qty_mc: 0,  unit_cost_k: null,      status: 'Planned' },
+
     ],
 
     // Annual delivery summary (all services combined, actuals + planned)
@@ -254,8 +255,10 @@ function render() {
 
 function fmtM(v) {
   if (v === null || v === undefined) return '—';
-  if (Math.abs(v) >= 1000) return '$' + (v/1000).toFixed(2) + 'B';
-  return '$' + v.toFixed(1) + 'M';
+  const abs = Math.abs(v);
+  if (abs >= 1000) return '$' + (v/1000).toFixed(2) + 'B';
+  if (abs >= 1) return '$' + v.toFixed(2) + 'M';
+  return '$' + (v * 1000).toFixed(0) + 'K';
 }
 function fmtK(v) {
   if (v === null || v === undefined) return '—';
@@ -308,7 +311,7 @@ function renderFunding(prog) {
     data: {
       labels: rows.map(r => r.fy),
       datasets: [
-        { label: 'Base / Discretionary', data: rows.map(r => r.base), backgroundColor: '#4a90d9cc', borderColor: '#4a90d9', borderWidth: 1 },
+        { label: 'Discretionary', data: rows.map(r => r.disc), backgroundColor: '#4a90d9cc', borderColor: '#4a90d9', borderWidth: 1 },
         { label: 'Mandatory / Reconciliation', data: rows.map(r => r.mandatory), backgroundColor: '#e8a838cc', borderColor: '#e8a838', borderWidth: 1 },
       ]
     },
@@ -330,19 +333,23 @@ function renderFunding(prog) {
   document.getElementById('funding-table').innerHTML = `
     <thead><tr>
       <th>Fiscal Year</th>
-      <th>Base / Disc. ($M)</th>
+      <th>Disc. ($M)</th>
       <th>Mandatory ($M)</th>
       <th>Total ($M)</th>
-      <th>Navy Qty (AURs)</th>
+      <th>Qty (Disc.)</th>
+      <th>Qty (Mand.)</th>
+      <th>Qty (Total)</th>
       <th style="text-align:left">Notes</th>
     </tr></thead>
     <tbody>
       ${allRows.map(r => `<tr ${r.fy==='Prior Years'?'class="total-row"':''}>
         <td style="text-align:left;font-family:'IBM Plex Mono',monospace;font-size:11px">${r.fy}</td>
-        <td>${fmtM(r.base)}</td>
+        <td>${fmtM(r.disc)}</td>
         <td>${r.mandatory ? fmtM(r.mandatory) : '<span class="null-val">—</span>'}</td>
         <td>${fmtM(r.total)}</td>
-        <td>${fmtN(r.qty_navy)}</td>
+        <td>${r.qty_disc > 0 ? r.qty_disc.toLocaleString() : '<span class="null-val">—</span>'}</td>
+        <td>${r.qty_mandatory > 0 ? r.qty_mandatory.toLocaleString() : '<span class="null-val">—</span>'}</td>
+        <td>${r.qty_total > 0 ? r.qty_total.toLocaleString() : '<span class="null-val">—</span>'}</td>
         <td style="text-align:left;font-size:11px;color:var(--text-muted)">${r.note||''}</td>
       </tr>`).join('')}
     </tbody>`;
@@ -562,7 +569,9 @@ function renderDeliveryLot(prog) {
         <td>${lots.reduce((s,l)=>s+l.qty_army,0).toLocaleString()}</td>
         <td>${lots.reduce((s,l)=>s+l.qty_mc,0).toLocaleString()}</td>
         <td>${lots.reduce((s,l)=>s+l.qty_navy+l.qty_army+l.qty_mc,0).toLocaleString()}</td>
-        <td></td><td></td><td></td><td></td>
+        <td>${(() => { const d = lots.reduce((s,l)=>{ const tot=l.qty_navy+l.qty_army+l.qty_mc; const del=l.status==='Complete'?tot:l.status==='In Delivery'?Math.round(tot*0.5):0; return s+del; },0); return d>0?d.toLocaleString():'—'; })()}</td>
+        <td>${(() => { const b = lots.reduce((s,l)=>{ const tot=l.qty_navy+l.qty_army+l.qty_mc; const del=l.status==='Complete'?tot:l.status==='In Delivery'?Math.round(tot*0.5):0; return s+(tot-del); },0); return b>0?b.toLocaleString():'—'; })()}</td>
+        <td></td><td></td>
       </tr>
     </tbody>`;
 }
