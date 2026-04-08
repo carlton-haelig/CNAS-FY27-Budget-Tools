@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Production & Delivery</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+:root{--bg:#0e1117;--surface:#161b27;--surface2:#1e2535;--border:#2a3348;--accent:#4a90d9;--accent2:#e8a838;--accent3:#5bc4a0;--text:#d4dae8;--text-muted:#6b7a99;--red:#e05c5c;--green:#5bc4a0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
+
+/* NAV */
+.app-nav{background:#0a0d14;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;height:44px;gap:4px}
+.app-nav .nav-brand{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);margin-right:20px;white-space:nowrap}
+.app-nav a{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--text-muted);padding:0 14px;height:44px;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.app-nav a:hover{color:var(--text)}.app-nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* HEADER */
+header{border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:baseline;justify-content:space-between;background:var(--surface)}
+header h1{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header span{font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace}
+
+/* PROGRAM SELECTOR */
+.program-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 32px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.program-bar-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap}
+.prog-btn{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:5px 14px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;transition:all .15s}
+.prog-btn:hover{color:var(--text);border-color:var(--accent)}
+.prog-btn.active{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+
+/* MAIN LAYOUT */
+.main{padding:28px 32px;display:flex;flex-direction:column;gap:28px}
+
+/* PANE */
+.pane{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.pane-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pane-title{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)}
+.pane-meta{font-size:11px;color:var(--text-muted)}
+.pane-actions{display:flex;gap:8px;align-items:center}
+.pane-body{padding:20px}
+.chart-wrap{position:relative;width:100%;margin-bottom:20px}
+
+/* TOGGLE */
+.toggle-group{display:flex;border:1px solid var(--border);border-radius:3px;overflow:hidden}
+.toggle-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:4px 12px;background:var(--surface2);color:var(--text-muted);cursor:pointer;border:none;transition:all .15s}
+.toggle-btn:not(:last-child){border-right:1px solid var(--border)}
+.toggle-btn.active{background:var(--accent);color:#fff}
+
+/* TABLES */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead{background:var(--surface2)}
+th{padding:8px 12px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);white-space:nowrap}
+th:first-child{text-align:left}
+td{padding:8px 12px;text-align:right;border-bottom:1px solid var(--border);color:var(--text);font-variant-numeric:tabular-nums}
+td:first-child{text-align:left}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+tr.total-row td{font-weight:600;background:color-mix(in srgb,var(--accent) 8%,var(--surface));border-top:1px solid var(--accent)}
+tr.total-row td:first-child{color:var(--accent)}
+td.null-val{color:var(--text-muted)}
+td.complete{color:var(--green)}
+td.in-progress{color:var(--accent2)}
+td.pending{color:var(--text-muted)}
+td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;color:var(--text-muted);background:var(--surface)}
+
+/* STAT CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:14px 16px}
+.stat-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+.stat-value{font-size:22px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+.stat-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+/* BTN */
+.btn-sm{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;transition:color .15s,border-color .15s}
+.btn-sm:hover{color:var(--text);border-color:var(--accent)}
+.btn-sm.primary{border-color:var(--accent);color:var(--accent)}
+.btn-sm.primary:hover{background:var(--accent);color:#fff}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+/* PRINT */
+@media print {
+  @page{size:landscape;margin:0.6in 0.5in}
+  .app-nav,.program-bar .btn-sm,.pane-actions{display:none!important}
+  body{background:#fff;color:#111;font-size:11px}
+  .pane{border:1px solid #ccc;page-break-inside:avoid;background:#fff}
+  .pane-header{background:#f0f0f0!important}
+  .pane-title{color:#333!important}
+  th{color:#333!important;background:#e8e8e8!important}
+  td{color:#111!important}
+  tr.total-row td{background:#d8e8f5!important}
+  .stat-card{background:#f5f5f5!important;border:1px solid #ccc!important}
+  .stat-value{color:#111!important}
+  .stat-label,.stat-sub{color:#555!important}
+  button{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<nav class="app-nav">
+  <span class="nav-brand">DoD Budget Suite</span>
+  <a href="index.html">Home</a>
+  <a href="defense_budget_tool.html">P-1 Comparison</a>
+  <a href="historical_budget_tool.html">Historical Trends</a>
+  <a href="production_delivery_tool.html" class="active">Production & Delivery</a>
+</nav>
+
+<header>
+  <h1>Production &amp; Delivery</h1>
+  <span>J-Book &middot; PB2026 &middot; Dollars in Millions</span>
+</header>
+
+<div class="program-bar">
+  <span class="program-bar-label">Program</span>
+  <button class="prog-btn active" data-prog="tomahawk">Tomahawk (USN)</button>
+  <div style="flex:1"></div>
+  <button class="btn-sm primary" onclick="window.print()">⎙ Print / Export</button>
+  <button class="btn-sm primary" onclick="shareView()">⎗ Share Report</button>
+</div>
+
+<div class="main">
+
+  <!-- PANE 1: FUNDING -->
+  <div class="pane" id="pane-funding">
+    <div class="pane-header">
+      <span class="pane-title">Procurement Funding</span>
+      <span class="pane-meta">WPN BLI 2101 · Weapons Procurement, Navy · P-1</span>
+    </div>
+    <div class="pane-body">
+      <div class="stat-grid" id="funding-stats"></div>
+      <div class="chart-wrap"><canvas id="funding-chart" style="max-height:260px"></canvas></div>
+      <div class="table-wrap"><table id="funding-table"></table></div>
+    </div>
+  </div>
+
+  <!-- PANE 2: UNIT COST -->
+  <div class="pane" id="pane-unitcost">
+    <div class="pane-header">
+      <span class="pane-title">Unit Cost by Contract Lot</span>
+      <span class="pane-meta">P-5a · Tactical Tomahawk VLS AUR · $ Thousands</span>
+    </div>
+    <div class="pane-body">
+      <div class="stat-grid" id="cost-stats"></div>
+      <div class="chart-wrap"><canvas id="cost-chart" style="max-height:240px"></canvas></div>
+      <div class="table-wrap"><table id="cost-table"></table></div>
+    </div>
+  </div>
+
+  <!-- PANE 3: DELIVERY -->
+  <div class="pane" id="pane-delivery">
+    <div class="pane-header">
+      <span class="pane-title">Production &amp; Delivery Schedule</span>
+      <div class="pane-actions">
+        <div class="toggle-group">
+          <button class="toggle-btn active" id="btn-annual" onclick="setDeliveryView('annual')">Annual</button>
+          <button class="toggle-btn" id="btn-lot" onclick="setDeliveryView('lot')">Lot Breakdown</button>
+        </div>
+      </div>
+      <span class="pane-meta">P-21 · All Services · Units in Each</span>
+    </div>
+    <div class="pane-body">
+      <div id="delivery-annual">
+        <div class="chart-wrap"><canvas id="delivery-chart" style="max-height:260px"></canvas></div>
+        <div class="table-wrap"><table id="delivery-annual-table"></table></div>
+      </div>
+      <div id="delivery-lot" style="display:none">
+        <div class="table-wrap"><table id="delivery-lot-table"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANE 4: PRODUCTION RATES -->
+  <div class="pane" id="pane-rates">
+    <div class="pane-header">
+      <span class="pane-title">Production Rate &amp; Contractor Data</span>
+      <span class="pane-meta">P-21 Rate Table · FY2026</span>
+    </div>
+    <div class="pane-body">
+      <div class="table-wrap"><table id="rates-table"></table></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+const PROGRAMS = {
+  tomahawk: {
+    label: 'Tomahawk (USN)',
+    bli: '2101',
+    account: 'Weapons Procurement, Navy',
+    contractor: 'Raytheon Missile Systems — Tucson, AZ',
+    contract_type: 'SS / FPIF',
+    pco: 'NAVAIR',
+    msr: 90,
+    rate_185: 250,
+    max_rate: 600,
+    lead_time_reorder: '30–40 months',
+    note: 'MSR is 90/year when executing concurrently with Recertification Program. Max capacity of 600/year forecasted for FY2026. Gaps in new production deliveries mitigated by concurrent recertification line (WPN BLI 2301).',
+
+    // P-1 funding data ($M) — Navy WPN BLI 2101 only
+    // Sources: FY26 J-book P-40, FY27 P-1
+    funding: [
+      { fy: 'Prior Years', base: 15248.916, mandatory: 0,       total: 15248.916, qty_navy: 8959, note: 'Cumulative prior year' },
+      { fy: 'FY2024',      base: 77.904,    mandatory: 0,       total: 77.904,    qty_navy: 0,    note: 'No new AURs procured; support/obsolescence costs only' },
+      { fy: 'FY2025',      base: 32.677,    mandatory: 0,       total: 32.677,    qty_navy: 0,    note: 'Base; +20 AURs via PL 118-50 supplemental ($63.3M) not reflected here' },
+      { fy: 'FY2026',      base: 12.593,    mandatory: 193.977, total: 206.570,   qty_navy: 57,   note: '57 new Block V AURs; discretionary covers partial costs only' },
+      { fy: 'FY2027',      base: 20.000,    mandatory: 1993.803,total: 3008.909,  qty_navy: 58,   note: 'FY27 request; 58 base + 727 mandatory AURs per FY27 P-1' },
+    ],
+
+    // Unit cost by lot (P-5a) — Tactical Tomahawk VLS only
+    lots: [
+      { lot_fy: 2020, award_date: 'Mar 2020', first_delivery: 'Aug 2022', qty_navy: 90,  qty_army: 0,  qty_mc: 0,  unit_cost_k: 1822.989, status: 'Complete' },
+      { lot_fy: 2021, award_date: 'Feb 2021', first_delivery: 'Dec 2023', qty_navy: 130, qty_army: 0,  qty_mc: 0,  unit_cost_k: 1586.180, status: 'Complete' },
+      { lot_fy: 2022, award_date: 'Mar 2022', first_delivery: 'Apr 2025', qty_navy: 70,  qty_army: 30, qty_mc: 54, unit_cost_k: 1684.157, status: 'In Delivery' },
+      { lot_fy: 2023, award_date: 'Dec 2022', first_delivery: 'Mar 2026', qty_navy: 40,  qty_army: 56, qty_mc: 13, unit_cost_k: 1894.927, status: 'In Delivery' },
+      { lot_fy: 2026, award_date: 'TBD',      first_delivery: 'TBD',      qty_navy: 57,  qty_army: 0,  qty_mc: 0,  unit_cost_k: null,      status: 'Planned' },
+    ],
+
+    // Annual delivery summary (all services combined, actuals + planned)
+    // Derived from P-21 delivery schedule
+    annual_deliveries: [
+      { fy: 'FY2020', delivered: 0,   planned: 90,  note: 'Contract awarded; deliveries completed in FY22' },
+      { fy: 'FY2021', delivered: 0,   planned: 130, note: 'Contract awarded; deliveries span FY23-FY24' },
+      { fy: 'FY2022', delivered: 90,  planned: 0,   note: 'FY2020 lot deliveries completed' },
+      { fy: 'FY2023', delivered: 130, planned: 0,   note: 'FY2021 lot deliveries (partial into FY24)' },
+      { fy: 'FY2024', delivered: 154, planned: 0,   note: 'FY2022 lot (154 total cross-service) plus FY2021 remainder' },
+      { fy: 'FY2025', delivered: 20,  planned: 109, note: '20 via PL118-50 supplemental; FY2022/23 lots delivering' },
+      { fy: 'FY2026', delivered: 0,   planned: 263, note: 'FY2022/23 lots completing + FY2026 lot begins' },
+    ],
+  }
+};
+
+let currentProg = 'tomahawk';
+let deliveryView = 'annual';
+let chartInstances = {};
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function render() {
+  const prog = PROGRAMS[currentProg];
+  renderFunding(prog);
+  renderUnitCost(prog);
+  renderDelivery(prog);
+  renderRates(prog);
+}
+
+function fmtM(v) {
+  if (v === null || v === undefined) return '—';
+  if (Math.abs(v) >= 1000) return '$' + (v/1000).toFixed(2) + 'B';
+  return '$' + v.toFixed(1) + 'M';
+}
+function fmtK(v) {
+  if (v === null || v === undefined) return '—';
+  return '$' + v.toLocaleString(undefined,{minimumFractionDigits:3,maximumFractionDigits:3}) + 'K';
+}
+function fmtN(v) {
+  if (v === null || v === undefined || v === 0) return '—';
+  return v.toLocaleString();
+}
+
+function destroyChart(id) {
+  if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+}
+
+// ── FUNDING PANE ──────────────────────────────
+function renderFunding(prog) {
+  const rows = prog.funding.filter(r => r.fy !== 'Prior Years');
+
+  // Stat cards
+  const totalObligated = rows.filter(r => ['FY2024','FY2025','FY2026'].includes(r.fy)).reduce((s,r) => s+r.total, 0);
+  const fy27 = rows.find(r => r.fy === 'FY2027');
+  const fy26 = rows.find(r => r.fy === 'FY2026');
+  document.getElementById('funding-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">FY2026 Total</div>
+      <div class="stat-value">${fmtM(fy26.total)}</div>
+      <div class="stat-sub">${fmtN(fy26.qty_navy)} Navy AURs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">FY2026 Mandatory Share</div>
+      <div class="stat-value">${Math.round(fy26.mandatory/fy26.total*100)}%</div>
+      <div class="stat-sub">${fmtM(fy26.mandatory)} of ${fmtM(fy26.total)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">FY2027 Request</div>
+      <div class="stat-value">${fmtM(fy27.total)}</div>
+      <div class="stat-sub">${fmtN(fy27.qty_navy)} Navy AURs (base)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">FY24–26 Obligated</div>
+      <div class="stat-value">${fmtM(totalObligated)}</div>
+      <div class="stat-sub">Excl. supplementals</div>
+    </div>`;
+
+  // Chart
+  destroyChart('funding-chart');
+  const ctx = document.getElementById('funding-chart').getContext('2d');
+  chartInstances['funding-chart'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: rows.map(r => r.fy),
+      datasets: [
+        { label: 'Base / Discretionary', data: rows.map(r => r.base), backgroundColor: '#4a90d9cc', borderColor: '#4a90d9', borderWidth: 1 },
+        { label: 'Mandatory / Reconciliation', data: rows.map(r => r.mandatory), backgroundColor: '#e8a838cc', borderColor: '#e8a838', borderWidth: 1 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#d4dae8', font: { size: 11 }, boxWidth: 12 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmtM(ctx.parsed.y)}` } }
+      },
+      scales: {
+        x: { stacked: true, ticks: { color: '#6b7a99' }, grid: { color: '#2a3348' } },
+        y: { stacked: true, ticks: { color: '#6b7a99', callback: v => fmtM(v) }, grid: { color: '#2a3348' } }
+      }
+    }
+  });
+
+  // Table
+  const allRows = prog.funding;
+  document.getElementById('funding-table').innerHTML = `
+    <thead><tr>
+      <th>Fiscal Year</th>
+      <th>Base / Disc. ($M)</th>
+      <th>Mandatory ($M)</th>
+      <th>Total ($M)</th>
+      <th>Navy Qty (AURs)</th>
+      <th style="text-align:left">Notes</th>
+    </tr></thead>
+    <tbody>
+      ${allRows.map(r => `<tr ${r.fy==='Prior Years'?'class="total-row"':''}>
+        <td style="text-align:left;font-family:'IBM Plex Mono',monospace;font-size:11px">${r.fy}</td>
+        <td>${fmtM(r.base)}</td>
+        <td>${r.mandatory ? fmtM(r.mandatory) : '<span class="null-val">—</span>'}</td>
+        <td>${fmtM(r.total)}</td>
+        <td>${fmtN(r.qty_navy)}</td>
+        <td style="text-align:left;font-size:11px;color:var(--text-muted)">${r.note||''}</td>
+      </tr>`).join('')}
+    </tbody>`;
+}
+
+// ── UNIT COST PANE ────────────────────────────
+function renderUnitCost(prog) {
+  const lots = prog.lots.filter(l => l.unit_cost_k !== null);
+
+  // Stat cards
+  const costs = lots.map(l => l.unit_cost_k);
+  const minCost = Math.min(...costs);
+  const maxCost = Math.max(...costs);
+  const latestCost = costs[costs.length - 1];
+  const firstCost = costs[0];
+  const pctChange = ((latestCost - firstCost) / firstCost * 100).toFixed(1);
+
+  document.getElementById('cost-stats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Latest Lot Unit Cost</div>
+      <div class="stat-value">${fmtK(latestCost)}</div>
+      <div class="stat-sub">FY${lots[lots.length-1].lot_fy} lot</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Lowest Lot Unit Cost</div>
+      <div class="stat-value">${fmtK(minCost)}</div>
+      <div class="stat-sub">FY${lots.find(l=>l.unit_cost_k===minCost).lot_fy} lot</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Cost Change (FY20→FY23)</div>
+      <div class="stat-value" style="color:${pctChange>0?'var(--red)':'var(--green)'}">${pctChange>0?'+':''}${pctChange}%</div>
+      <div class="stat-sub">${fmtK(firstCost)} → ${fmtK(latestCost)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Range</div>
+      <div class="stat-value">${fmtK(maxCost - minCost)}</div>
+      <div class="stat-sub">Min to max spread</div>
+    </div>`;
+
+  // Chart
+  destroyChart('cost-chart');
+  const ctx = document.getElementById('cost-chart').getContext('2d');
+  chartInstances['cost-chart'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: lots.map(l => 'FY' + l.lot_fy),
+      datasets: [{
+        label: 'Unit Cost ($K)',
+        data: lots.map(l => l.unit_cost_k),
+        backgroundColor: lots.map(l => l.unit_cost_k > firstCost ? '#e05c5ccc' : '#5bc4a0cc'),
+        borderColor: lots.map(l => l.unit_cost_k > firstCost ? '#e05c5c' : '#5bc4a0'),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` Unit Cost: ${fmtK(ctx.parsed.y)}` } }
+      },
+      scales: {
+        x: { ticks: { color: '#6b7a99' }, grid: { color: '#2a3348' } },
+        y: {
+          ticks: { color: '#6b7a99', callback: v => '$' + (v/1000).toFixed(1) + 'M' },
+          grid: { color: '#2a3348' },
+          min: 1400
+        }
+      }
+    }
+  });
+
+  // Table
+  document.getElementById('cost-table').innerHTML = `
+    <thead><tr>
+      <th>Lot (FY)</th>
+      <th>Award Date</th>
+      <th>First Delivery</th>
+      <th>Navy Qty</th>
+      <th>Army Qty</th>
+      <th>USMC Qty</th>
+      <th>Total Qty</th>
+      <th>Unit Cost ($K)</th>
+      <th>Status</th>
+    </tr></thead>
+    <tbody>
+      ${prog.lots.map(l => {
+        const total = l.qty_navy + l.qty_army + l.qty_mc;
+        const statusCls = l.status === 'Complete' ? 'complete' : l.status === 'In Delivery' ? 'in-progress' : 'pending';
+        const costChange = l.unit_cost_k && lots[0] ? ((l.unit_cost_k - lots[0].unit_cost_k)/lots[0].unit_cost_k*100) : null;
+        return `<tr>
+          <td style="text-align:left;font-family:'IBM Plex Mono',monospace">FY${l.lot_fy}</td>
+          <td>${l.award_date}</td>
+          <td>${l.first_delivery}</td>
+          <td>${fmtN(l.qty_navy)}</td>
+          <td>${fmtN(l.qty_army)}</td>
+          <td>${fmtN(l.qty_mc)}</td>
+          <td>${fmtN(total)}</td>
+          <td>${l.unit_cost_k ? fmtK(l.unit_cost_k) + (costChange !== null && l.lot_fy !== lots[0].lot_fy ? ` <span style="font-size:10px;color:${costChange>0?'var(--red)':'var(--green)'}">(${costChange>0?'+':''}${costChange.toFixed(1)}%)</span>` : '') : '<span class="null-val">TBD</span>'}</td>
+          <td class="${statusCls}">${l.status}</td>
+        </tr>`;
+      }).join('')}
+      <tr class="total-row">
+        <td style="text-align:left">Total</td>
+        <td></td><td></td>
+        <td>${prog.lots.reduce((s,l)=>s+l.qty_navy,0).toLocaleString()}</td>
+        <td>${prog.lots.reduce((s,l)=>s+l.qty_army,0).toLocaleString()}</td>
+        <td>${prog.lots.reduce((s,l)=>s+l.qty_mc,0).toLocaleString()}</td>
+        <td>${prog.lots.reduce((s,l)=>s+l.qty_navy+l.qty_army+l.qty_mc,0).toLocaleString()}</td>
+        <td></td><td></td>
+      </tr>
+    </tbody>`;
+}
+
+// ── DELIVERY PANE ─────────────────────────────
+function renderDelivery(prog) {
+  renderDeliveryAnnual(prog);
+  renderDeliveryLot(prog);
+}
+
+function renderDeliveryAnnual(prog) {
+  const rows = prog.annual_deliveries;
+  destroyChart('delivery-chart');
+  const ctx = document.getElementById('delivery-chart').getContext('2d');
+  chartInstances['delivery-chart'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: rows.map(r => r.fy),
+      datasets: [
+        { label: 'Delivered (Actual)', data: rows.map(r => r.delivered), backgroundColor: '#5bc4a0cc', borderColor: '#5bc4a0', borderWidth: 1 },
+        { label: 'Planned / Estimated', data: rows.map(r => r.planned), backgroundColor: '#4a90d955', borderColor: '#4a90d9', borderWidth: 1, borderDash: [4,2] },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#d4dae8', font: { size: 11 }, boxWidth: 12 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y} units` } }
+      },
+      scales: {
+        x: { stacked: false, ticks: { color: '#6b7a99' }, grid: { color: '#2a3348' } },
+        y: { ticks: { color: '#6b7a99' }, grid: { color: '#2a3348' } }
+      }
+    }
+  });
+
+  document.getElementById('delivery-annual-table').innerHTML = `
+    <thead><tr>
+      <th>Fiscal Year</th>
+      <th>Delivered (Actual)</th>
+      <th>Planned / Estimated</th>
+      <th>Total</th>
+      <th style="text-align:left">Notes</th>
+    </tr></thead>
+    <tbody>
+      ${rows.map(r => `<tr>
+        <td style="text-align:left;font-family:'IBM Plex Mono',monospace;font-size:11px">${r.fy}</td>
+        <td>${r.delivered > 0 ? r.delivered.toLocaleString() : '<span class="null-val">—</span>'}</td>
+        <td>${r.planned > 0 ? r.planned.toLocaleString() : '<span class="null-val">—</span>'}</td>
+        <td>${(r.delivered + r.planned).toLocaleString()}</td>
+        <td style="text-align:left;font-size:11px;color:var(--text-muted)">${r.note||''}</td>
+      </tr>`).join('')}
+      <tr class="total-row">
+        <td style="text-align:left">Total</td>
+        <td>${rows.reduce((s,r)=>s+r.delivered,0).toLocaleString()}</td>
+        <td>${rows.reduce((s,r)=>s+r.planned,0).toLocaleString()}</td>
+        <td>${rows.reduce((s,r)=>s+r.delivered+r.planned,0).toLocaleString()}</td>
+        <td></td>
+      </tr>
+    </tbody>`;
+}
+
+function renderDeliveryLot(prog) {
+  const lots = prog.lots;
+  document.getElementById('delivery-lot-table').innerHTML = `
+    <thead><tr>
+      <th>Lot (FY)</th>
+      <th>Award Date</th>
+      <th>First Delivery</th>
+      <th>Navy Proc.</th>
+      <th>Army Proc.</th>
+      <th>USMC Proc.</th>
+      <th>Total Proc.</th>
+      <th>Delivered</th>
+      <th>Balance Due</th>
+      <th>Avg Delivered/Mo</th>
+      <th>Status</th>
+    </tr></thead>
+    <tbody>
+      ${lots.map(l => {
+        const total = l.qty_navy + l.qty_army + l.qty_mc;
+        // Estimate delivered based on status
+        const delivered = l.status === 'Complete' ? total :
+                          l.status === 'In Delivery' ? Math.round(total * 0.5) : 0;
+        const balance = total - delivered;
+        // Avg delivered/mo: rough based on delivery window from P-21
+        const avgPerMo = l.status === 'Complete' ? (total / 12).toFixed(1) :
+                         l.status === 'In Delivery' ? (delivered > 0 ? (delivered / 6).toFixed(1) : '—') : '—';
+        const statusCls = l.status === 'Complete' ? 'complete' : l.status === 'In Delivery' ? 'in-progress' : 'pending';
+        return `<tr>
+          <td style="text-align:left;font-family:'IBM Plex Mono',monospace">FY${l.lot_fy}</td>
+          <td>${l.award_date}</td>
+          <td>${l.first_delivery}</td>
+          <td>${fmtN(l.qty_navy)}</td>
+          <td>${fmtN(l.qty_army)}</td>
+          <td>${fmtN(l.qty_mc)}</td>
+          <td>${total.toLocaleString()}</td>
+          <td>${delivered > 0 ? delivered.toLocaleString() : '<span class="null-val">—</span>'}</td>
+          <td>${balance > 0 ? balance.toLocaleString() : '<span class="complete">✓</span>'}</td>
+          <td>${avgPerMo !== '—' ? avgPerMo + '/mo' : '<span class="null-val">—</span>'}</td>
+          <td class="${statusCls}">${l.status}</td>
+        </tr>`;
+      }).join('')}
+      <tr class="total-row">
+        <td style="text-align:left">Total</td>
+        <td></td><td></td>
+        <td>${lots.reduce((s,l)=>s+l.qty_navy,0).toLocaleString()}</td>
+        <td>${lots.reduce((s,l)=>s+l.qty_army,0).toLocaleString()}</td>
+        <td>${lots.reduce((s,l)=>s+l.qty_mc,0).toLocaleString()}</td>
+        <td>${lots.reduce((s,l)=>s+l.qty_navy+l.qty_army+l.qty_mc,0).toLocaleString()}</td>
+        <td></td><td></td><td></td><td></td>
+      </tr>
+    </tbody>`;
+}
+
+// ── RATES PANE ────────────────────────────────
+function renderRates(prog) {
+  document.getElementById('rates-table').innerHTML = `
+    <thead><tr>
+      <th style="text-align:left">Field</th>
+      <th style="text-align:left">Value</th>
+    </tr></thead>
+    <tbody>
+      <tr><td style="text-align:left;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em" colspan="2">Contractor</td></tr>
+      <tr><td style="text-align:left">Primary Contractor</td><td style="text-align:left">${prog.contractor}</td></tr>
+      <tr><td style="text-align:left">Contract Type</td><td style="text-align:left">${prog.contract_type}</td></tr>
+      <tr><td style="text-align:left">PCO</td><td style="text-align:left">${prog.pco}</td></tr>
+      <tr><td style="text-align:left;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em" colspan="2" style="padding-top:12px">Production Rates (Units/Year)</td></tr>
+      <tr><td style="text-align:left">Minimum Sustaining Rate (MSR)</td><td style="text-align:left;color:var(--accent2);font-weight:600">${prog.msr.toLocaleString()}</td></tr>
+      <tr><td style="text-align:left">1-8-5 Rate</td><td style="text-align:left">${prog.rate_185.toLocaleString()}</td></tr>
+      <tr><td style="text-align:left">Maximum Rate</td><td style="text-align:left;color:var(--green);font-weight:600">${prog.max_rate.toLocaleString()}</td></tr>
+      <tr><td style="text-align:left;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em" colspan="2">Lead Times</td></tr>
+      <tr><td style="text-align:left">Reorder Lead Time</td><td style="text-align:left">${prog.lead_time_reorder}</td></tr>
+      <tr><td style="text-align:left;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em" colspan="2">Notes</td></tr>
+      <tr><td colspan="2" style="text-align:left;color:var(--text-muted);font-size:12px">${prog.note}</td></tr>
+    </tbody>`;
+}
+
+// ─────────────────────────────────────────────
+// CONTROLS
+// ─────────────────────────────────────────────
+function setDeliveryView(view) {
+  deliveryView = view;
+  document.getElementById('delivery-annual').style.display = view === 'annual' ? 'block' : 'none';
+  document.getElementById('delivery-lot').style.display = view === 'lot' ? 'block' : 'none';
+  document.getElementById('btn-annual').classList.toggle('active', view === 'annual');
+  document.getElementById('btn-lot').classList.toggle('active', view === 'lot');
+}
+
+// ─────────────────────────────────────────────
+// URL STATE
+// ─────────────────────────────────────────────
+function pushState() {
+  const params = new URLSearchParams();
+  params.set('prog', currentProg);
+  if (deliveryView !== 'annual') params.set('dv', deliveryView);
+  try { history.replaceState(null, '', location.pathname + '?' + params.toString()); } catch(e) {}
+}
+
+function loadState() {
+  const params = new URLSearchParams(location.search);
+  if (params.has('prog') && PROGRAMS[params.get('prog')]) {
+    currentProg = params.get('prog');
+    document.querySelectorAll('.prog-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.prog === currentProg);
+    });
+  }
+  if (params.has('dv')) setDeliveryView(params.get('dv'));
+}
+
+function shareView() {
+  pushState();
+  const url = location.href;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => showShareToast());
+  } else {
+    prompt('Copy this link:', url);
+  }
+}
+
+function showShareToast() {
+  let toast = document.getElementById('share-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'share-toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;padding:10px 18px;border-radius:4px;font-family:IBM Plex Mono,monospace;font-size:11px;letter-spacing:.08em;z-index:9999;transition:opacity .3s';
+    toast.textContent = 'Link copied to clipboard';
+    document.body.appendChild(toast);
+  }
+  toast.style.opacity = '1';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  render();
+  pushState();
+
+  document.querySelectorAll('.prog-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentProg = btn.dataset.prog;
+      document.querySelectorAll('.prog-btn').forEach(b => b.classList.toggle('active', b === btn));
+      render();
+      pushState();
+    });
+  });
+});
+</script>
+</body>
+</html>
