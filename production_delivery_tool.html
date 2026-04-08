@@ -121,6 +121,7 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
     <button class="toggle-btn" data-prog="mse" onclick="selectProg(this)">PAC-3 MSE (Army)</button>
     <button class="toggle-btn" data-prog="amraam" onclick="selectProg(this)">AMRAAM (Joint)</button>
     <button class="toggle-btn" data-prog="sm6" onclick="selectProg(this)">SM-6 (Navy)</button>
+    <button class="toggle-btn" data-prog="aim9x" onclick="selectProg(this)">AIM-9X (Joint)</button>
   </div>
   <div style="flex:1"></div>
   <a id="jbook-link" href="https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf" target="_blank" class="btn-sm primary" style="text-decoration:none">↗ FY26 J-Book</a>
@@ -173,7 +174,6 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
     </div>
     <div class="pane-body">
       <div class="stat-grid" id="funding-stats"></div>
-      <div class="chart-wrap"><canvas id="funding-chart" style="max-height:260px"></canvas></div>
       <div class="table-wrap"><table id="funding-table"></table></div>
     </div>
   </div>
@@ -200,6 +200,7 @@ const JBOOK_URLS = {
   mse: 'https://www.asafm.army.mil/Portals/72/Documents/BudgetMaterial/2026/Procurement/Other%20Procurement/Missile_Procurement_Army.pdf',
   amraam: 'https://www.saffm.hq.af.mil/Portals/84/documents/FY2026/PROCUREMENT/FY2026_Air_Force_Missile_Procurement.pdf',
   sm6: 'https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf',
+  aim9x: 'https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf',
 };
 
 const PROGRAMS = {
@@ -385,6 +386,59 @@ const PROGRAMS = {
       { fy: 'FY2031', delivered: 0,   planned: 3,   note: 'FY2026 lot: 3 remaining' },
     ],
   }
+,
+
+  aim9x: {
+    label: 'AIM-9X Sidewinder Blk II (Joint)',
+    bli: '2209',
+    account: 'Weapons Procurement, Navy',
+    contractor: 'Raytheon Missile Systems — Tucson, AZ',
+    contract_type: 'SS / FPIF',
+    pco: 'NAVAIR',
+    msr: 300,
+    rate_185: 600,
+    max_rate: 2500,
+    lead_time_reorder: '35 months',
+    qty_unit: 'AURs',
+    note: 'Joint program; Navy is lead service. USAF procures via separate MPAF account. Unit cost is shared across all buyers (Navy, USAF, Army, FMS) and is quantity-dependent — identical to AMRAAM dynamic. Navy P-5a covers AUR Blk II only; CATMs and Blk II+ variant excluded. FY2024 Navy qty=345 includes 270 supplemental AURs (PL 118-50 Ukraine). FY2025 Navy qty=116 base only; additional 425 supplemental AURs not in P-5a. FY2026 P-1 mandatory ($50M) has no associated AUR qty — likely support/non-AUR costs. P-1 FY2025 qty (608) includes CATMs and IMU kits beyond AURs; J-book AUR+supplemental total is 582. All-buyer totals in lot table include FMS — delivery schedule tracks Navy-funded AURs only.',
+
+    funding: [
+      { fy: 'Prior Years (Navy)',  disc: 1572.638, mandatory: 0,       total: 1572.638, qty_disc: 3693, qty_mandatory: 0,   qty_total: 3693, note: 'Cumulative AURs; excl. CATMs and Blk I · Source: WPN J-book P-5' },
+      { fy: 'Prior Years (USAF)',  disc: 1636.074, mandatory: 0,       total: 1636.074, qty_disc: 3850, qty_mandatory: 0,   qty_total: 3850, note: 'Cumulative · Source: MPAF J-book P-5' },
+      { fy: 'Prior Years (Army)',  disc: 0,        mandatory: 0,       total: 0,        qty_disc: 0,    qty_mandatory: 0,   qty_total: 0,    note: 'Prior years reflect Iron Dome/IDDS-A rollup ($208.963M), not AIM-9X missile costs — shown as $0 · Source: MPA J-book P-5 C62001' },
+      { fy: 'FY2024 (Navy)',       disc: 197.650,  mandatory: 0,       total: 197.650,  qty_disc: 387,  qty_mandatory: 0,   qty_total: 387,  note: 'Gross incl. CATMs; AUR qty: 75 base + 270 supplemental (PL 118-50) = 345 AURs · Source: WPN J-book P-40' },
+      { fy: 'FY2024 (USAF)',       disc: 157.666,  mandatory: 0,       total: 157.666,  qty_disc: 198,  qty_mandatory: 0,   qty_total: 198,  note: 'Source: MPAF J-book P-5' },
+      { fy: 'FY2024 (Army)',       disc: 0,        mandatory: 0,       total: 0,        qty_disc: 0,    qty_mandatory: 0,   qty_total: 0,    note: 'No IFPC AIM-9X missile procurement in FY2024 · Source: MPA J-book P-5 C62001' },
+      { fy: 'FY2025 (Navy)',       disc: 295.280,  mandatory: 0,       total: 295.280,  qty_disc: 608,  qty_mandatory: 0,   qty_total: 608,  note: 'Actuals; P-1 qty (608) incl. CATMs/IMU; J-book AUR total = 582 (157 base + 425 suppl.) · Source: FY27 P-1' },
+      { fy: 'FY2025 (USAF)',       disc: 306.159,  mandatory: 0,       total: 306.159,  qty_disc: 579,  qty_mandatory: 0,   qty_total: 579,  note: 'Actuals · Source: FY27 P-1' },
+      { fy: 'FY2025 (Army/IFPC)', disc: 166.014,  mandatory: 0,       total: 166.014,  qty_disc: 234,  qty_mandatory: 0,   qty_total: 234,  note: 'Missile-only cost element (C62001); separate IFPC contract via Navy/Raytheon; Army unit cost higher than Navy (new warhead + containers) · Source: MPA J-book P-5' },
+      { fy: 'FY2026 (Navy)',       disc: 84.713,   mandatory: 50.000,  total: 134.713,  qty_disc: 146,  qty_mandatory: null, qty_total: 146, note: 'Enacted; mandatory $50M is non-AUR support (no qty) · Source: FY27 P-1' },
+      { fy: 'FY2026 (USAF)',       disc: 100.352,  mandatory: 0,       total: 100.352,  qty_disc: 173,  qty_mandatory: 0,   qty_total: 173,  note: 'Enacted · Source: FY27 P-1' },
+      { fy: 'FY2026 (Army/IFPC)', disc: 98.437,   mandatory: 188.000, total: 286.437,  qty_disc: 148,  qty_mandatory: 284, qty_total: 432,  note: 'Missile-only (C62001); mandatory funds 284 additional AIM-9X; separate IFPC contracts from Navy FRP lots · Source: MPA J-book P-5 + FY27 P-1' },
+      { fy: 'FY2027 (Navy)',       disc: 174.750,  mandatory: 0,       total: 174.750,  qty_disc: 306,  qty_mandatory: 0,   qty_total: 306,  note: 'Request · Source: FY27 P-1' },
+      { fy: 'FY2027 (USAF)',       disc: 419.238,  mandatory: 0,       total: 419.238,  qty_disc: 648,  qty_mandatory: 0,   qty_total: 648,  note: 'Request · Source: FY27 P-1' },
+      { fy: 'FY2027 (Army/IFPC)', disc: null,      mandatory: null,    total: null,     qty_disc: null, qty_mandatory: null, qty_total: null, note: 'FY27 P-1 shows $1,626.004M for full IFPC program; missile-only cost cannot be isolated without FY27 J-book · Source: FY27 P-1 (program total only)' },
+    ],
+
+    lots: [
+      { lot_fy: 2021, award_date: 'Jun 2021', first_delivery: 'Aug 2023', qty_navy: 220, qty_army: 0,   qty_mc: 0, qty_af: 206, qty_fms: 84,  qty_total_all: 510, unit_cost_k: 377.959, status: 'Complete',    delivered: 510,  balance: 0,    lot_label: 'FRP Lot 21' },
+      { lot_fy: 2022, award_date: 'Mar 2022', first_delivery: 'Aug 2024', qty_navy: 94,  qty_army: 104, qty_mc: 0, qty_af: 140, qty_fms: 157, qty_total_all: 495, unit_cost_k: 341.553, status: 'Complete',    delivered: 495,  balance: 0,    lot_label: 'FRP Lot 22' },
+      { lot_fy: 2023, award_date: 'Jun 2023', first_delivery: 'Aug 2025', qty_navy: 85,  qty_army: 12,  qty_mc: 0, qty_af: 431, qty_fms: 341, qty_total_all: 869, unit_cost_k: 404.477, status: 'In Delivery', delivered: 869,  balance: 0,    lot_label: 'FRP Lot 23' },
+      { lot_fy: 2024, award_date: 'Sep 2024', first_delivery: 'Aug 2026', qty_navy: 345, qty_army: 15,  qty_mc: 0, qty_af: 257, qty_fms: 592, qty_total_all: 1209,unit_cost_k: 473.954, status: 'In Delivery', delivered: 208,  balance: 1001, lot_label: 'FRP Lot 24' },
+      { lot_fy: 2025, award_date: 'Jun 2025', first_delivery: 'Aug 2027', qty_navy: 116, qty_army: 0,   qty_mc: 0, qty_af: 136, qty_fms: 808, qty_total_all: 1060,unit_cost_k: 457.771, status: 'Pending',     delivered: 0,    balance: 1060, lot_label: 'FRP Lot 25' },
+      { lot_fy: 2026, award_date: 'Mar 2026', first_delivery: 'Aug 2028', qty_navy: 110, qty_army: 330, qty_mc: 0, qty_af: 144, qty_fms: 276, qty_total_all: 860, unit_cost_k: 447.093, status: 'Pending',     delivered: 0,    balance: 860,  lot_label: 'FRP Lot 26' },
+    ],
+
+    annual_deliveries: [
+      { fy: 'FY2023', delivered: 38,  planned: 0,   note: 'FY2021 lot: 38 Navy (Aug–Sep 2023)' },
+      { fy: 'FY2024', delivered: 198, planned: 0,   note: 'FY2021 lot: 182 Navy + FY2022 lot: 16 Navy (Aug–Sep 2024)' },
+      { fy: 'FY2025', delivered: 93,  planned: 0,   note: 'FY2022 lot: 78 Navy + FY2023 lot: 15 Navy (Aug–Sep 2025)' },
+      { fy: 'FY2026', delivered: 0,   planned: 130, note: 'FY2023 lot: 70 Navy (Oct 2025–Jul 2026) + FY2024 lot: 60 Navy (Aug–Sep 2026)' },
+      { fy: 'FY2027', delivered: 0,   planned: 285, note: 'FY2024 lot: 285 Navy remaining' },
+      { fy: 'FY2028', delivered: 0,   planned: 116, note: 'FY2025 lot: 116 Navy (first del Aug 2027)' },
+      { fy: 'FY2029', delivered: 0,   planned: 110, note: 'FY2026 lot: 110 Navy (first del Aug 2028)' },
+    ],
+  }
 };
 
 let currentProg = 'tomahawk';
@@ -426,56 +480,41 @@ function destroyChart(id) {
 function renderFunding(prog) {
   const rows = prog.funding.filter(r => r.fy !== 'Prior Years');
 
-  // Stat cards
-  const totalObligated = rows.filter(r => ['FY2024','FY2025','FY2026'].includes(r.fy)).reduce((s,r) => s+r.total, 0);
-  const fy27 = rows.find(r => r.fy === 'FY2027') || {};
-  const fy26 = rows.find(r => r.fy === 'FY2026') || {};
+  // Stat cards — aggregate rows by FY prefix to handle joint programs (e.g. "FY2026 (USAF)" + "FY2026 (Navy)")
+  const aggFY = (fyPrefix) => rows
+    .filter(r => r.fy === fyPrefix || r.fy.startsWith(fyPrefix + ' '))
+    .reduce((a, r) => ({
+      total:        (a.total||0)        + (r.total||0),
+      mandatory:    (a.mandatory||0)    + (r.mandatory||0),
+      disc:         (a.disc||0)         + (r.disc||0),
+      qty_total:    (a.qty_total!=null && r.qty_total!=null) ? (a.qty_total||0) + (r.qty_total||0) : null,
+      qty_disc:     (a.qty_disc!=null  && r.qty_disc!=null)  ? (a.qty_disc||0)  + (r.qty_disc||0)  : null,
+      qty_mandatory:(a.qty_mandatory!=null && r.qty_mandatory!=null) ? (a.qty_mandatory||0) + (r.qty_mandatory||0) : null,
+    }), {});
+  const totalObligated = ['FY2024','FY2025','FY2026'].reduce((s, fy) => s + (aggFY(fy).total||0), 0);
+  const fy27 = aggFY('FY2027');
+  const fy26 = aggFY('FY2026');
   document.getElementById('funding-stats').innerHTML = `
     <div class="stat-card">
       <div class="stat-label">FY2026 Total</div>
       <div class="stat-value">${fmtM(fy26.total)}</div>
-      <div class="stat-sub">${fmtN(fy26.qty_total)} ${prog.qty_unit||'units'}</div>
+      <div class="stat-sub">${fy26.qty_total != null ? fmtN(fy26.qty_total) + ' ' + (prog.qty_unit||'units') : '—'}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">FY2026 Mandatory Share</div>
-      <div class="stat-value">${Math.round(fy26.mandatory/fy26.total*100)}%</div>
+      <div class="stat-value">${fy26.total ? Math.round(fy26.mandatory/fy26.total*100) + '%' : '—'}</div>
       <div class="stat-sub">${fmtM(fy26.mandatory)} of ${fmtM(fy26.total)}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">FY2027 Request</div>
       <div class="stat-value">${fmtM(fy27.total)}</div>
-      <div class="stat-sub">${fmtN(fy27.qty_disc)} ${prog.qty_unit||'units'} (disc.)</div>
+      <div class="stat-sub">${fy27.qty_disc != null ? fmtN(fy27.qty_disc) + ' ' + (prog.qty_unit||'units') + ' (disc.)' : '—'}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">FY24–26 Obligated</div>
       <div class="stat-value">${fmtM(totalObligated)}</div>
       <div class="stat-sub">Excl. supplementals</div>
     </div>`;
-
-  // Chart
-  destroyChart('funding-chart');
-  const ctx = document.getElementById('funding-chart').getContext('2d');
-  chartInstances['funding-chart'] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: rows.map(r => r.fy),
-      datasets: [
-        { label: 'Discretionary', data: rows.map(r => r.disc), backgroundColor: '#4a90d9cc', borderColor: '#4a90d9', borderWidth: 1 },
-        { label: 'Mandatory / Reconciliation', data: rows.map(r => r.mandatory), backgroundColor: '#e8a838cc', borderColor: '#e8a838', borderWidth: 1 },
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: '#d4dae8', font: { size: 11 }, boxWidth: 12 } },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmtM(ctx.parsed.y)}` } }
-      },
-      scales: {
-        x: { stacked: true, ticks: { color: '#6b7a99' }, grid: { color: '#2a3348' } },
-        y: { stacked: true, ticks: { color: '#6b7a99', callback: v => fmtM(v) }, grid: { color: '#2a3348' } }
-      }
-    }
-  });
 
   // Table
   const allRows = prog.funding;
@@ -493,9 +532,9 @@ function renderFunding(prog) {
     <tbody>
       ${allRows.map(r => `<tr ${r.fy==='Prior Years'?'class="total-row"':''}>
         <td style="text-align:left;font-family:'IBM Plex Mono',monospace;font-size:11px">${r.fy}</td>
-        <td>${fmtM(r.disc)}</td>
+        <td>${r.disc != null ? fmtM(r.disc) : '<span class="null-val">N/A</span>'}</td>
         <td>${r.mandatory ? fmtM(r.mandatory) : '<span class="null-val">—</span>'}</td>
-        <td>${fmtM(r.total)}</td>
+        <td>${r.total != null ? fmtM(r.total) : '<span class="null-val">N/A</span>'}</td>
         <td>${r.qty_disc != null && r.qty_disc > 0 ? r.qty_disc.toLocaleString() : '<span class="null-val">—</span>'}</td>
         <td>${r.qty_mandatory != null && r.qty_mandatory > 0 ? r.qty_mandatory.toLocaleString() : '<span class="null-val">—</span>'}</td>
         <td>${r.qty_total != null && r.qty_total > 0 ? r.qty_total.toLocaleString() : '<span class="null-val">—</span>'}</td>
@@ -549,8 +588,8 @@ function renderUnitCost(prog) {
   // Table
   const isJoint   = prog.lots.some(l => l.qty_af !== undefined);
   const ucHasNavy = prog.lots.some(l => l.qty_navy > 0);
-  const ucHasArmy = !isJoint && prog.lots.some(l => l.qty_army > 0);
-  const ucHasMC   = !isJoint && prog.lots.some(l => l.qty_mc > 0);
+  const ucHasArmy = prog.lots.some(l => l.qty_army > 0);
+  const ucHasMC   = prog.lots.some(l => l.qty_mc > 0);
   const ucHasAF   = isJoint;
   const ucHasFMS  = isJoint && prog.lots.some(l => l.qty_fms > 0);
   document.getElementById('cost-table').innerHTML = `
@@ -659,6 +698,9 @@ function renderDeliveryAnnual(prog) {
         <td>${rows.reduce((s,r)=>s+r.delivered+r.planned,0).toLocaleString()}</td>
         <td></td>
       </tr>
+      ${prog.lots.some(l => l.qty_fms > 0) ? `<tr><td colspan="5" style="text-align:left;font-size:11px;color:var(--text-muted);padding:8px 10px;border-top:1px solid var(--border)">
+        ⓘ Annual totals reflect USAF + Navy procurement only. FMS quantities (${prog.lots.reduce((s,l)=>s+(l.qty_fms||0),0).toLocaleString()} missiles across all lots) share the production line and affect unit costs but are funded outside the DoD appropriations process. Lot Breakdown totals include FMS. Discrepancy between pane totals is expected and correct.
+      </td></tr>` : ''}
     </tbody>`;
 }
 
@@ -666,8 +708,8 @@ function renderDeliveryLot(prog) {
   const lots = prog.lots;
   const isJointLot = prog.lots.some(l => l.qty_af !== undefined);
   const hasNavy = prog.lots.some(l => l.qty_navy > 0);
-  const hasArmy = !isJointLot && prog.lots.some(l => l.qty_army > 0);
-  const hasMC   = !isJointLot && prog.lots.some(l => l.qty_mc > 0);
+  const hasArmy = prog.lots.some(l => l.qty_army > 0);
+  const hasMC   = prog.lots.some(l => l.qty_mc > 0);
   const hasAF   = isJointLot;
   const hasFMS  = isJointLot && prog.lots.some(l => l.qty_fms > 0);
   document.getElementById('delivery-lot-table').innerHTML = `
