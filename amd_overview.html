@@ -14,6 +14,8 @@ body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-ser
 /* NAV */
 .app-nav{background:#0a0d14;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;height:44px;gap:4px}
 .app-nav .nav-brand{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);margin-right:20px;white-space:nowrap}
+.app-nav a{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--text-muted);padding:0 14px;height:44px;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.app-nav a:hover{color:var(--text)}.app-nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
 
 /* HEADER */
 header{border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:baseline;justify-content:space-between;background:var(--surface)}
@@ -134,8 +136,8 @@ td.pending{color:var(--text-muted)}
 </nav>
 
 <header>
-  <h1>Air and Missile Defense — Cost, Production &amp; Delivery</h1>
-  <span>FY27 P-1 · FY26 J-Books · CNAS AMD Cost Overview v2 · April 2026</span>
+  <h1>AMD Cost, Production &amp; Delivery</h1>
+  <span>FY27 P-1 &middot; FY26 J-Books &middot; PB2026</span>
 </header>
 
 <div class="selector-bar">
