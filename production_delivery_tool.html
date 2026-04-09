@@ -107,6 +107,7 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
   <a href="defense_budget_tool.html">P-1 Comparison</a>
   <a href="production_delivery_tool.html" class="active">Production &amp; Delivery</a>
   <a href="historical_budget_tool.html">Historical Trends</a>
+  <a href="amd_overview.html">AMD Overview</a>
 </nav>
 
 <header>
@@ -122,6 +123,9 @@ td.service-header{font-family:'IBM Plex Mono',monospace;font-size:10px;text-tran
     <button class="toggle-btn" data-prog="amraam" onclick="selectProg(this)">AMRAAM (Joint)</button>
     <button class="toggle-btn" data-prog="aim9x" onclick="selectProg(this)">AIM-9X (Joint)</button>
     <button class="toggle-btn" data-prog="hellfire" onclick="selectProg(this)">AGM-114 Hellfire (Joint)</button>
+    <button class="toggle-btn" data-prog="jagm" onclick="selectProg(this)">JAGM (Joint)</button>
+    <button class="toggle-btn" data-prog="tomahawk_mst" onclick="selectProg(this)">Tomahawk MST (USN)</button>
+    <button class="toggle-btn" data-prog="apkws" onclick="selectProg(this)">APKWS II (Joint)</button>
     <button class="toggle-btn" data-prog="sm6" onclick="selectProg(this)">SM-6 (Navy)</button>
     <button class="toggle-btn" data-prog="essm" onclick="selectProg(this)">ESSM Blk 2 (Navy)</button>
     <button class="toggle-btn" data-prog="mse" onclick="selectProg(this)">PAC-3 MSE (Army)</button>
@@ -209,6 +213,9 @@ const JBOOK_URLS = {
   essm: 'https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf',
   prsm: 'https://www.asafm.army.mil/Portals/72/Documents/BudgetMaterial/2026/Procurement/Other%20Procurement/Missile_Procurement_Army.pdf',
   hellfire: 'https://www.asafm.army.mil/Portals/72/Documents/BudgetMaterial/2026/Procurement/Other%20Procurement/Missile_Procurement_Army.pdf',
+  jagm:         'https://www.asafm.army.mil/Portals/72/Documents/BudgetMaterial/2026/Procurement/Other%20Procurement/Missile_Procurement_Army.pdf',
+  tomahawk_mst: 'https://www.secnav.navy.mil/fmc/fmb/Documents/26pres/WPN_Book.pdf',
+  apkws:        'https://www.saffm.hq.af.mil/Portals/84/documents/FY2026/PROCUREMENT/FY2026_Air_Force_Missile_Procurement.pdf',
   thaad: 'https://comptroller.defense.gov/Portals/45/Documents/defbudget/FY2026/FY2026_MDA_Procurement.pdf',
   sm3iia: 'https://comptroller.defense.gov/Portals/45/Documents/defbudget/FY2026/FY2026_MDA_Procurement.pdf',
   sm3ib: 'https://comptroller.defense.gov/Portals/45/Documents/defbudget/FY2026/FY2026_MDA_Procurement.pdf',
@@ -253,6 +260,7 @@ const PROGRAMS = {
     // Annual delivery summary (all services combined, actuals + planned)
     // Derived from P-21 delivery schedule
     annual_deliveries: [
+      { fy: 'Prior Years', delivered: 3301, planned: 0, note: 'Block V VLS AURs delivered thru FY2019 lot; 8,959 total procured incl. legacy Block IV / TLAM-C/D variants · Source: WPN P-21' },
       { fy: 'FY2022', delivered: 90,  planned: 0,   note: 'FY20 lot: 90 Navy (Aug–Dec 2022)' },
       { fy: 'FY2023', delivered: 0,   planned: 0,   note: 'Gap — FY21 lot first delivery Dec 2023; no deliveries this FY' },
       { fy: 'FY2024', delivered: 45,  planned: 0,   note: 'FY21 lot: 45 Navy (Dec 2023=30, Apr 2024=15)' },
@@ -291,6 +299,7 @@ const PROGRAMS = {
     ],
 
     annual_deliveries: [
+      { fy: 'Prior Years', delivered: 1764, planned: 0, note: 'MSE missiles delivered thru FY2022 lots; 2,047 total procured prior to active lots · Source: Army P-21' },
       { fy: 'FY2025', delivered: 100, planned: 0,   note: 'FY23 lot: 100 Army (May–Sep 2025)' },
       { fy: 'FY2026', delivered: 172, planned: 0,   note: 'FY23 lot complete (152) + FY24 lot begins (20 Army)' },
       { fy: 'FY2027', delivered: 0,   planned: 210, note: 'FY24 lot: 210 remaining Army' },
@@ -336,6 +345,8 @@ const PROGRAMS = {
     ],
 
     annual_deliveries: [
+      { fy: 'Prior Years (USAF)', delivered: 9494, planned: 0, note: 'USAF AURs delivered prior to FY2019 lot; 11,162 total USAF procured · Source: AF J-book P-21' },
+      { fy: 'Prior Years (Navy)', delivered: 2624, planned: 0, note: 'Navy AURs delivered prior to FY2019 lot; ~3,741 total Navy procured · Source: WPN P-21' },
       { fy: 'FY2021', delivered: 303, planned: 0,   note: 'Lot 37: 303 AF+Navy (190+113), first del Jul 2021' },
       { fy: 'FY2022', delivered: 193, planned: 0,   note: 'Lot 38 FY2020 portion: ~193 AF+Navy balance delivered' },
       { fy: 'FY2023', delivered: 443, planned: 0,   note: 'Lot 38 FY2021 portion: 443 AF+Navy (269+174)' },
@@ -384,6 +395,7 @@ const PROGRAMS = {
     ],
 
     annual_deliveries: [
+      { fy: 'Prior Years', delivered: 556, planned: 0, note: 'SM-6 AURs delivered thru FY2016 lot; 1,431 total procured · Source: WPN P-21' },
       { fy: 'FY2019', delivered: 6,   planned: 0,   note: 'FY2017 lot (Blk I): 6 AURs (Sep 2019 only)' },
       { fy: 'FY2020', delivered: 138, planned: 0,   note: 'FY2017 lot: 106 + FY2018 lot: 32 (Jul–Sep 2020)' },
       { fy: 'FY2021', delivered: 114, planned: 0,   note: 'FY2017 lot: 13 + FY2018 lot: 101 (incl. 8-unit contract)' },
@@ -443,6 +455,8 @@ const PROGRAMS = {
     ],
 
     annual_deliveries: [
+      { fy: 'Prior Years (Navy)', delivered: 1356, planned: 0, note: 'Navy AURs delivered prior to FY2021 lot (excl. CATMs); ~3,694 total Navy AURs procured · Source: WPN P-21' },
+      { fy: 'Prior Years (USAF)', delivered: 2215, planned: 0, note: 'USAF AURs delivered prior to FY2021 lot (excl. CATMs); ~3,850 total USAF AURs procured · Source: AF J-book P-21' },
       { fy: 'FY2023', delivered: 38,  planned: 0,   note: 'FY2021 lot: 38 Navy (Aug–Sep 2023)' },
       { fy: 'FY2024', delivered: 198, planned: 0,   note: 'FY2021 lot: 182 Navy + FY2022 lot: 16 Navy (Aug–Sep 2024)' },
       { fy: 'FY2025', delivered: 93,  planned: 0,   note: 'FY2022 lot: 78 Navy + FY2023 lot: 15 Navy (Aug–Sep 2025)' },
@@ -489,6 +503,7 @@ const PROGRAMS = {
     ],
 
     annual_deliveries: [
+      { fy: 'Prior Years', delivered: 1301, planned: 0, note: 'ESSM Block 2 AURs delivered thru FY2020 lots; 1,419 total procured · Source: WPN P-21' },
       { fy: 'FY2021', delivered: 13,  planned: 0,   note: 'FY2018 lot: 4 + FY2019 lot: 9 (Jul–Sep 2021)' },
       { fy: 'FY2022', delivered: 113, planned: 0,   note: 'FY2018 lot: 27 + FY2019 lot: 36 + FY2020 lot: 50 (Oct 2021–Sep 2022)' },
       { fy: 'FY2023', delivered: 9,   planned: 0,   note: 'FY2021 lot: 9 (Sep 2023 only)' },
@@ -534,6 +549,7 @@ const PROGRAMS = {
     ],
 
     annual_deliveries: [
+      { fy: 'Prior Years', delivered: 0, planned: 0, note: 'FY2021 is the first production lot; no prior delivery history · Source: Army P-21' },
       { fy: 'FY2024', delivered: 8,   planned: 0,   note: 'FY2021 lot: 8 missiles (Nov 2023–Sep 2024) · FY2024 lot deliveries classified' },
       { fy: 'FY2025', delivered: 52,  planned: 0,   note: 'FY2021 lot: 18 (Oct–Dec 2024) + FY2022 lot: 34 (Mar–Sep 2025) · FY2024 lot deliveries classified' },
       { fy: 'FY2026', delivered: 0,   planned: 70,  note: 'FY2022 lot: 20 (Oct 2025) + FY2023 lot: 50 (Mar–Sep 2026)' },
@@ -558,7 +574,7 @@ const PROGRAMS = {
     note: 'Terminal High Altitude Area Defense (THAAD) interceptor procured by MDA through FY2026 (BLI MD07) and shifted to Army Missile Procurement in FY2027 (BLI 8046C20200). MDA procures interceptors only; launchers, radars, and ground components are in separate line items. FY2021–FY2026 lots (Lots 13–18) being synergized — Lots 16, 17, and 18 (FY2024–FY2026) combined in a single contract award. FY2026 mandatory funding provides 12 additional interceptors; those 12 will deliver with Lot 18 in FY2029. FY2027 request ($11.435B) reflects a major ramp driven by the reconciliation act; 830 of 857 requested interceptors are mandatory-funded. Production capacity constrained to ~8/month maximum; critical obsolescence mitigation underway to prevent production break in FY2028. FY27 P-1 authoritative for funding; FY26 MDA J-book used for lot data and delivery schedule pending FY27 J-book.',
 
     funding: [
-      { fy: 'Prior Years', disc: 7910.551,  mandatory: 0,        total: 7910.551,  qty_disc: null, qty_mandatory: null, qty_total: null, note: 'Through FY2023 · Source: MDA J-book (FY26)' },
+      { fy: 'Prior Years', disc: 7910.551,  mandatory: 0,        total: 7910.551,  qty_disc: null, qty_mandatory: null, qty_total: 623,  note: 'Through FY2023; 623 total interceptors procured thru FY2026 J-book baseline · Source: MDA J-book (FY26)' },
       { fy: 'FY2024',      disc: 216.782,   mandatory: 0,        total: 216.782,   qty_disc: 11,   qty_mandatory: 0,    qty_total: 11,   note: 'Source: MDA J-book (FY26)' },
       { fy: 'FY2025',      disc: 246.995,   mandatory: 0,        total: 246.995,   qty_disc: 12,   qty_mandatory: 0,    qty_total: 12,   note: 'Source: MDA J-book (FY26)' },
       { fy: 'FY2026',      disc: 523.125,   mandatory: 317.000,  total: 840.125,   qty_disc: 25,   qty_mandatory: 12,   qty_total: 37,   note: 'Enacted; Lots 16–18 synergized in single award; mandatory provides 12 additional interceptors · Source: MDA J-book (FY26)' },
@@ -575,6 +591,7 @@ const PROGRAMS = {
     ],
 
     annual_deliveries: [
+      { fy: 'Prior Years', delivered: 534, planned: 0, note: '534 interceptors delivered prior to active lots (thru Oct 2024); 623 total procured · Source: MDA J-book (FY26)' },
       { fy: 'FY2024', delivered: 0,  planned: 0,  note: 'No deliveries scheduled — Lot 13 first delivery intentionally delayed to Apr 2027 to maintain production line after FMS completion' },
       { fy: 'FY2025', delivered: 0,  planned: 0,  note: 'No deliveries scheduled' },
       { fy: 'FY2026', delivered: 0,  planned: 0,  note: 'No deliveries scheduled' },
@@ -599,7 +616,7 @@ const PROGRAMS = {
     note: 'Standard Missile-3 Block IIA — sea-based ballistic missile defense interceptor for Aegis BMD. Transferred to BLI MD14 from MD09 per Consolidated Appropriations Act 2020; FY2018–FY2019 funding remains in MD09. FY2019–FY2023 were procured under a multi-year procurement (MYP) of 198 AURs; MYP lapsed in FY2024, resulting in single-year buys and higher unit costs. FY2026 mandatory provides $65M in additional funding (no additional qty). FY2027 request reflects major ramp: 22 disc + 114 mandatory = 136 total at $4.219B, driven by reconciliation act. Maximum production rate is 2/month. FY27 P-1 authoritative for funding; FY26 MDA J-book used for lot data and delivery schedule pending FY27 J-book.',
 
     funding: [
-      { fy: 'Prior Years', disc: 1714.000,  mandatory: 0,        total: 1714.000,  qty_disc: null, qty_mandatory: null, qty_total: null, note: 'Includes FY2018–FY2019 in MD09; FY2020–FY2023 MYP · Source: MDA J-book (FY26)' },
+      { fy: 'Prior Years', disc: 1714.000,  mandatory: 0,        total: 1714.000,  qty_disc: null, qty_mandatory: null, qty_total: 56,   note: 'Includes FY2018–FY2019 in MD09 (56 missiles procured before FY2020 transfer to MD14); FY2020–FY2023 MYP · Source: MDA J-book (FY26)' },
       { fy: 'FY2024',      disc: 440.824,   mandatory: 0,        total: 440.824,   qty_disc: 12,   qty_mandatory: 0,    qty_total: 12,   note: 'Single-year buy; MYP lapsed · Source: MDA J-book (FY26)' },
       { fy: 'FY2025',      disc: 406.370,   mandatory: 0,        total: 406.370,   qty_disc: 12,   qty_mandatory: 0,    qty_total: 12,   note: 'Single-year buy · Source: MDA J-book (FY26)' },
       { fy: 'FY2026',      disc: 444.835,   mandatory: 65.000,   total: 509.835,   qty_disc: 12,   qty_mandatory: 0,    qty_total: 12,   note: 'Enacted; mandatory $65M additional funding, no additional qty · Source: FY27 P-1' },
@@ -617,6 +634,7 @@ const PROGRAMS = {
     ],
 
     annual_deliveries: [
+      { fy: 'Prior Years', delivered: 0, planned: 0, note: '56 interceptors procured in MD09 prior to FY2020 transfer to MD14; delivery schedule for those lots not in FY26 J-book P-21 · Source: MDA J-book (FY26)' },
       { fy: 'FY2025', delivered: 6,  planned: 0,  note: 'FY2020 lot: 6 (Jul–Sep 2025)' },
       { fy: 'FY2026', delivered: 0,  planned: 25, note: 'FY2020 lot: 1 (Oct 2025) + FY2021 lot: 9 + FY2022 lot: 15 (Feb–Sep 2026)' },
       { fy: 'FY2027', delivered: 0,  planned: 1,  note: 'FY2022 lot: 1 (Oct 2026) — delivery gap until FY2028' },
@@ -642,7 +660,7 @@ const PROGRAMS = {
     note: 'Standard Missile-3 Block IB — sea-based ballistic missile defense interceptor for Aegis BMD. New production terminated after FY2024; DoD shifting to SM-3 Block IIA. FY2025 includes $110M congressional plus-up for 6 additional missiles and $85M for critical investment spares to support repair/recertification of fielded AURs in anticipation of supply chain attrition. FY2026 enacted: 26 disc + 16 mandatory = 42 qty, reflecting delivery of previously contracted lots and recertification activity. FY2027 request ($1.246B, 78 qty, all mandatory) covers recertification, spares, and sustainment — no new production. MD09 also covers Aegis BMD hardware, software, and ground systems; quantities and funding here represent interceptors/AURs only. FY27 P-1 authoritative for funding; FY26 MDA J-book used for lot data and delivery schedule pending FY27 J-book.',
 
     funding: [
-      { fy: 'Prior Years', disc: 7091.000,  mandatory: 0,        total: 7091.000,  qty_disc: null, qty_mandatory: null, qty_total: null, note: 'Source: MDA J-book (FY26)' },
+      { fy: 'Prior Years', disc: 7091.000,  mandatory: 0,        total: 7091.000,  qty_disc: null, qty_mandatory: null, qty_total: 504,  note: '504 AURs procured prior to FY26 J-book baseline · Source: MDA J-book (FY26)' },
       { fy: 'FY2024',      disc: 601.506,   mandatory: 0,        total: 601.506,   qty_disc: 36,   qty_mandatory: 0,    qty_total: 36,   note: 'Final new-production lot · Source: MDA J-book (FY26)' },
       { fy: 'FY2025',      disc: 695.180,   mandatory: 0,        total: 695.180,   qty_disc: 29,   qty_mandatory: 0,    qty_total: 29,   note: 'Incl. $110M congressional plus-up (6 missiles) + $85M investment spares; new production ends · Source: FY27 P-1' },
       { fy: 'FY2026',      disc: 475.000,   mandatory: 350.000,  total: 825.000,   qty_disc: 26,   qty_mandatory: 16,   qty_total: 42,   note: 'Enacted; recertification and delivery of contracted lots · Source: FY27 P-1' },
@@ -659,6 +677,7 @@ const PROGRAMS = {
     ],
 
     annual_deliveries: [
+      { fy: 'Prior Years', delivered: 347, planned: 0, note: '347 AURs delivered prior to active lots; 504 total procured prior to FY26 J-book baseline · Source: MDA J-book (FY26)' },
       { fy: 'FY2024', delivered: 8,  planned: 0,  note: 'FY2021 lot: 8 (Jun–Sep 2024)' },
       { fy: 'FY2025', delivered: 0,  planned: 61, note: 'FY2021 lot: 32 + FY2022 lot: 29' },
       { fy: 'FY2026', delivered: 0,  planned: 45, note: 'FY2022 lot: 11 + FY2023 lot: 34' },
@@ -700,6 +719,7 @@ const PROGRAMS = {
     ],
 
     annual_deliveries: [
+      { fy: 'Prior Years', delivered: 2832, planned: 0, note: 'All-services combined; 2,832 delivered prior to lots shown (incl. FY2018–FY2020 lots, complete) · Source: Army P-21' },
       { fy: 'FY2024', delivered: 725,  planned: 0,    note: 'FY2021 lot: 725 delivered (Army 662, AF 2, Navy 61 of 161); remaining 100 Navy missiles carry into FY2025' },
       { fy: 'FY2025', delivered: 0,    planned: 754,  note: 'FY2021 lot Navy remainder: 100 (Oct–Nov 2024) + FY2022 lot: 654 (Army 490, Oct 2024–Jun 2025; Navy 164, May–Sep 2025)' },
       { fy: 'FY2026', delivered: 0,    planned: 629,  note: 'FY2023 lot Army: 629 (Oct 2025–Jun 2026); FY2023 lot Navy (293) delivers Oct 2026 (FY2027)' },
@@ -708,6 +728,114 @@ const PROGRAMS = {
       { fy: 'FY2029', delivered: 0,    planned: 610,  note: 'FY2026 lot: 610 (Army 178, Navy 257, FMS 175)' },
     ],
   },
+
+  jagm: {
+    label: 'JAGM (Joint)',
+    bli: '2605C70302 / 2248',
+    account: 'Missile Procurement, Army / Weapons Procurement, Navy',
+    contractor: 'Lockheed Martin — Orlando, FL',
+    contract_type: 'SS / FPIF (FY2021–FY2025) · SS / FFP (FY2026+)',
+    pco: 'Redstone Arsenal, AL (Army lead) / Huntsville, AL (Navy)',
+    qty_unit: 'AURs',
+    msr: { val: 720, unit: 'year' },
+    rate_185: { val: 1200, unit: 'year' },
+    max_rate: { val: 1200, unit: 'year' },
+    lead_time_reorder: '24–29 months',
+    note: 'JAGM (AGM-179) is the multi-service replacement for AGM-114 Hellfire. Army is lead service (BLI 2605C70302, MPA); Navy procures separately (BLI 2248, WPN). Unit costs reflect all-buyer combined pricing per WPN P-5 footnote — Army J-book UC is the authoritative combined figure. FY2025 Army lot (23 AURs) has anomalously high UC ($376.870K) due to tiny Army buy on a large FMS-driven lot (963 FMS). FY2026 contract type changed from SS/FPIF to SS/FFP. DCMA MSR study (FY2022) established 720/year; sustained procurement below MSR increases unit costs and supply chain risk. FY2027 P-1: Army 269 ($104.059M) + Navy 282 ($73.226M) = 551 combined AURs ($177.285M). No mandatory funding in FY2026–FY2027. Navy prior years (654 AURs) reflects deliveries before FY2022 lot; all-services prior (2,832 AURs) reflects deliveries before FY2021 lot shown in Army P-21.',
+
+    funding: [
+      { fy: 'Prior Years (Army)', disc: 1263.321, mandatory: 0, total: 1263.321, qty_disc: 4583, qty_mandatory: 0, qty_total: 4583, note: 'Net procurement; $1,327.777M gross (incl. advance procurement) · Source: Army MPA J-book (FY26)' },
+      { fy: 'Prior Years (Navy)', disc: 294.746,  mandatory: 0, total: 294.746,  qty_disc: 1113, qty_mandatory: 0, qty_total: 1113, note: 'Net procurement · Source: WPN J-book (FY26)' },
+      { fy: 'FY2024 (Army)',      disc: 350.669,  mandatory: 0, total: 350.669,  qty_disc: 1137, qty_mandatory: 0, qty_total: 1137, note: 'Actuals · Source: FY27 P-1' },
+      { fy: 'FY2024 (Navy)',      disc: 73.924,   mandatory: 0, total: 73.924,   qty_disc: 263,  qty_mandatory: 0, qty_total: 263,  note: 'Actuals · Source: FY27 P-1' },
+      { fy: 'FY2025 (Army)',      disc: 334.102,  mandatory: 0, total: 334.102,  qty_disc: 231,  qty_mandatory: 0, qty_total: 231,  note: 'Actuals · Source: FY27 P-1' },
+      { fy: 'FY2025 (Navy)',      disc: 55.315,   mandatory: 0, total: 55.315,   qty_disc: 175,  qty_mandatory: 0, qty_total: 175,  note: 'Actuals · Source: FY27 P-1' },
+      { fy: 'FY2026 (Army)',      disc: 84.667,   mandatory: 0, total: 84.667,   qty_disc: 178,  qty_mandatory: 0, qty_total: 178,  note: 'Enacted · Source: FY27 P-1' },
+      { fy: 'FY2026 (Navy)',      disc: 74.152,   mandatory: 0, total: 74.152,   qty_disc: 277,  qty_mandatory: 0, qty_total: 277,  note: 'Enacted · Source: FY27 P-1' },
+      { fy: 'FY2027 (Army)',      disc: 104.059,  mandatory: 0, total: 104.059,  qty_disc: 269,  qty_mandatory: 0, qty_total: 269,  note: 'Request · Source: FY27 P-1' },
+      { fy: 'FY2027 (Navy)',      disc: 73.226,   mandatory: 0, total: 73.226,   qty_disc: 282,  qty_mandatory: 0, qty_total: 282,  note: 'Request · Source: FY27 P-1' },
+    ],
+
+    lots: [
+      { lot_fy: 2021, award_date: 'May 2021', first_delivery: 'Mar 2024', qty_navy: 161,  qty_army: 662,  qty_mc: 0, qty_af: 2,   qty_fms: 0,   qty_total_all: 825,  unit_cost_k: 209.320, status: 'Complete',    delivered: 825,  balance: 0,    lot_label: 'Lot 1' },
+      { lot_fy: 2022, award_date: 'Mar 2023', first_delivery: 'Dec 2024', qty_navy: 152,  qty_army: 490,  qty_mc: 0, qty_af: 0,   qty_fms: 0,   qty_total_all: 642,  unit_cost_k: 260.993, status: 'Complete',    delivered: 642,  balance: 0,    lot_label: 'Lot 2' },
+      { lot_fy: 2023, award_date: 'Jul 2023', first_delivery: 'Oct 2025', qty_navy: 276,  qty_army: 629,  qty_mc: 0, qty_af: 0,   qty_fms: 0,   qty_total_all: 905,  unit_cost_k: 260.301, status: 'In Delivery', delivered: null, balance: null, lot_label: 'Lot 3' },
+      { lot_fy: 2024, award_date: 'Mar 2024', first_delivery: 'Oct 2026', qty_navy: 253,  qty_army: 1117, qty_mc: 0, qty_af: 0,   qty_fms: 0,   qty_total_all: 1370, unit_cost_k: 254.605, status: 'Pending',     delivered: null, balance: null, lot_label: 'Lot 4' },
+      { lot_fy: 2025, award_date: 'Jul 2025', first_delivery: 'Oct 2027', qty_navy: 163,  qty_army: 23,   qty_mc: 0, qty_af: 0,   qty_fms: 963, qty_total_all: 1149, unit_cost_k: 268.806, status: 'Pending',     delivered: null, balance: null, lot_label: 'Lot 5' },
+      { lot_fy: 2026, award_date: 'Mar 2026', first_delivery: 'Oct 2028', qty_navy: 257,  qty_army: 178,  qty_mc: 0, qty_af: 0,   qty_fms: 175, qty_total_all: 610,  unit_cost_k: 249.506, status: 'Pending',     delivered: null, balance: null, lot_label: 'Lot 6' },
+    ],
+
+    annual_deliveries: [
+      { fy: 'Prior Years (Army+AF)', delivered: 2178, planned: 0,    note: 'Army + AF AURs delivered before FY2021 lot (all-services prior = 2,832 minus Navy prior 654) · Source: Army P-21' },
+      { fy: 'Prior Years (Navy)',    delivered: 654,  planned: 0,    note: 'Navy AURs delivered before FY2022 lot · Source: WPN P-21' },
+      { fy: 'FY2024',                delivered: 825,  planned: 0,    note: 'FY2021 lot: 825 all-services (Army 662, Navy 161, AF 2); first del Mar 2024' },
+      { fy: 'FY2025',                delivered: 642,  planned: 263,  note: 'FY2022 lot complete (642 Army+Navy); FY2023 lot Navy (276) + Army (629) first del Oct 2025 — partial 263 est.' },
+      { fy: 'FY2026',                delivered: 0,    planned: 905,  note: 'FY2023 lot balance (905 Army+Navy) deliver Oct 2025–Sep 2026' },
+      { fy: 'FY2027',                delivered: 0,    planned: 1370, note: 'FY2024 lot: 1,370 (Army 1,117 + Navy 253); first del Oct 2026' },
+      { fy: 'FY2028',                delivered: 0,    planned: 1149, note: 'FY2025 lot: 1,149 (Army 23 + Navy 163 + FMS 963); first del Oct 2027' },
+      { fy: 'FY2029',                delivered: 0,    planned: 610,  note: 'FY2026 lot: 610 (Army 178 + Navy 257 + FMS 175); first del Oct 2028' },
+    ],
+  },
+  tomahawk_mst: {
+    label: 'Tomahawk MST (USN)',
+    bli: '2301',
+    account: 'Weapons Procurement, Navy',
+    contractor: 'Raytheon Missile Systems — Tucson, AZ',
+    contract_type: 'SS / FPIF',
+    pco: 'NAVAIR',
+    qty_unit: 'kits',
+    msr: { val: null, unit: null },
+    rate_185: { val: null, unit: null },
+    max_rate: { val: null, unit: null },
+    lead_time_reorder: '24–29 months (kit)',
+    note: 'PLACEHOLDER — Awaiting FY2027 J-book data. Maritime Strike Tomahawk (Block Va) is a seeker-kit modification applied during the recertification cycle, funded under BLI 2301 (Tomahawk Mods). In the FY2026 J-book, MST costs are rolled into the P-3a modification exhibit alongside Recertification, NAV/COMMs, M-Code, and JMEWS — no standalone P-5a or per-kit unit cost is available. FY2025: 37 BLK Va missiles assembled at $28.961M (recertification cost); FY2026: 23 BLK Va at $0 discretionary ($19.464M reconciliation). Contract dates: FY2024 kit contract Jul 2025 / first delivery Jul 2027; FY2025 kit contract Jul 2025 / first delivery Jul 2027; FY2026 kit contract Feb 2026 / first delivery Feb 2028. Admin lead time: 5 months; production lead time: 24 months. Will be updated when FY2027 J-books are released.',
+    funding: [
+      { fy: 'Prior Years', disc: null, mandatory: 0, total: null, qty_disc: null, qty_mandatory: null, qty_total: null, note: 'Rolled into BLI 2301 Tomahawk Mods — not separately tracked in FY26 J-book' },
+      { fy: 'FY2025',      disc: 28.961, mandatory: 0, total: 28.961, qty_disc: 37,  qty_mandatory: 0, qty_total: 37,  note: 'Recertification cost for 37 BLK Va (MST) missiles; kit cost included in recert package · Source: WPN J-book P-3a (FY26)' },
+      { fy: 'FY2026',      disc: 0,      mandatory: 19.464, total: 19.464, qty_disc: 0, qty_mandatory: 23, qty_total: 23, note: '$0 discretionary; $19.464M reconciliation for 23 BLK Va missiles · Source: WPN J-book P-3a (FY26)' },
+      { fy: 'FY2027',      disc: null,   mandatory: 0, total: null, qty_disc: null, qty_mandatory: null, qty_total: null, note: 'PLACEHOLDER — FY2027 J-book data not yet available' },
+    ],
+    lots: [
+      { lot_fy: 2024, award_date: 'Jul 2025', first_delivery: 'Jul 2027', qty_navy: null, qty_army: 0, qty_mc: 0, unit_cost_k: null, status: 'Pending', delivered: null, balance: null, variant: 'BLK Va MST kit' },
+      { lot_fy: 2025, award_date: 'Jul 2025', first_delivery: 'Jul 2027', qty_navy: null, qty_army: 0, qty_mc: 0, unit_cost_k: null, status: 'Pending', delivered: null, balance: null, variant: 'BLK Va MST kit' },
+      { lot_fy: 2026, award_date: 'Feb 2026', first_delivery: 'Feb 2028', qty_navy: null, qty_army: 0, qty_mc: 0, unit_cost_k: null, status: 'Pending', delivered: null, balance: null, variant: 'BLK Va MST kit' },
+    ],
+    annual_deliveries: [
+      { fy: 'FY2027', delivered: 0, planned: 0, note: 'PLACEHOLDER — FY2024/FY2025 kit deliveries Jul 2027; quantities not yet broken out · Await FY2027 J-book' },
+      { fy: 'FY2028', delivered: 0, planned: 0, note: 'PLACEHOLDER — FY2026 kit deliveries Feb 2028; quantities not yet broken out · Await FY2027 J-book' },
+    ],
+  },
+
+  apkws: {
+    label: 'APKWS II (Joint)',
+    bli: 'APKWS0 / APN (Navy)',
+    account: 'Missile Procurement, Air Force / Aircraft Procurement, Navy',
+    contractor: 'BAE Systems — Minneapolis, MN',
+    contract_type: 'C / FP',
+    pco: 'NAVAIR PMA-242 (Navy lead) / Redstone Arsenal (AF)',
+    qty_unit: 'guidance sections',
+    msr: { val: null, unit: null },
+    rate_185: { val: null, unit: null },
+    max_rate: { val: null, unit: null },
+    lead_time_reorder: null,
+    note: 'PLACEHOLDER — Awaiting FY2027 J-books (Navy APN + AF MPAF). APKWS II (WGU-59/B) converts unguided 2.75-inch Hydra-70 rockets into precision laser-guided munitions. Navy is lead service (PMA-242, Patuxent River); Army also procures through separate accounts not in current J-book set. FY2026 P-1 combined: 1,000 guidance sections, $85.428M total ($13.428M MPAF FALCO variant + ~$72M Navy APN). FY2027 P-1: AF MPAF = $0 (no FY27 AF buy). Navy APN J-book not in current document set — required for lot data, delivery schedule, and prior years. Transition note: program historically procured retrofit kits for existing Hydra-70 rockets; FY2026+ procurement shifting to new-build AURs. Will be updated when FY2027 J-books are released.',
+    funding: [
+      { fy: 'Prior Years', disc: null, mandatory: 0, total: null, qty_disc: null, qty_mandatory: null, qty_total: null, note: 'PLACEHOLDER — Navy APN prior years data not in current J-book set' },
+      { fy: 'FY2025',      disc: 0,    mandatory: 0, total: 0,    qty_disc: 0,    qty_mandatory: 0,    qty_total: 0,    note: '$0 in MPAF; Navy APN FY2025 funding unknown · PLACEHOLDER' },
+      { fy: 'FY2026 (USAF)', disc: 13.428, mandatory: 0, total: 13.428, qty_disc: 340, qty_mandatory: 0, qty_total: 340, note: 'AF FALCO variant (A-10/F-15/F-16); $39.5K/unit · Source: MPAF J-book (FY26)' },
+      { fy: 'FY2026 (Navy)', disc: null, mandatory: 0, total: null, qty_disc: null, qty_mandatory: null, qty_total: null, note: 'PLACEHOLDER — Navy APN J-book not in current document set; combined FY26 P-1 total = 1,000 units / $85.428M' },
+      { fy: 'FY2027 (USAF)', disc: 0,   mandatory: 0, total: 0,    qty_disc: 0,    qty_mandatory: 0,    qty_total: 0,    note: 'No FY27 AF request · Source: FY27 P-1' },
+      { fy: 'FY2027 (Navy)', disc: null, mandatory: 0, total: null, qty_disc: null, qty_mandatory: null, qty_total: null, note: 'PLACEHOLDER — Navy APN FY2027 data not yet available' },
+    ],
+    lots: [
+      { lot_fy: 2026, award_date: 'TBD', first_delivery: 'TBD', qty_navy: null, qty_army: 0, qty_mc: 0, qty_af: 340, qty_fms: 0, qty_total_all: null, unit_cost_k: 39.494, status: 'Pending', delivered: null, balance: null, lot_label: 'FY26 AF (FALCO)' },
+    ],
+    annual_deliveries: [
+      { fy: 'Prior Years', delivered: 0, planned: 0, note: 'PLACEHOLDER — prior years delivery data requires Navy APN J-book' },
+      { fy: 'FY2027',      delivered: 0, planned: 0, note: 'PLACEHOLDER — delivery schedule requires Navy APN J-book' },
+    ],
+  },
+
 };
 
 let currentProg = 'tomahawk';
