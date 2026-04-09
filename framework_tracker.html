@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CNAS Defense Budget Suite · Framework Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+:root{--bg:#0e1117;--surface:#161b27;--surface2:#1e2535;--border:#2a3348;--accent:#4a90d9;--accent2:#e8a838;--accent3:#5bc4a0;--text:#d4dae8;--text-muted:#6b7a99;--red:#e05c5c;--green:#5bc4a0;--orange:#e8943a;--purple:#a07de8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
+
+/* NAV */
+.app-nav{background:#0a0d14;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;height:44px;gap:4px}
+.app-nav .nav-brand{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);margin-right:20px;white-space:nowrap}
+.app-nav a{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--text-muted);padding:0 14px;height:44px;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.app-nav a:hover{color:var(--text)}.app-nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* HEADER */
+header{border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:baseline;justify-content:space-between;background:var(--surface)}
+header h1{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header span{font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace}
+
+/* FILTER BAR */
+.filter-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 32px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.filter-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted)}
+.filter-group{display:flex;gap:4px;flex-wrap:wrap}
+.filter-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:4px 12px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;transition:all .15s}
+.filter-btn:hover{color:var(--text);border-color:var(--accent)}
+.filter-btn.active{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.filter-actions{margin-left:auto;display:flex;gap:8px}
+.btn-sm{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;transition:color .15s,border-color .15s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.btn-sm:hover{color:var(--text);border-color:var(--accent)}
+.btn-sm.primary{border-color:var(--accent);color:var(--accent)}
+.btn-sm.primary:hover{background:var(--accent);color:#fff}
+
+/* MAIN */
+.main{padding:24px 32px;display:flex;flex-direction:column;gap:24px}
+
+/* SUMMARY CARDS */
+.summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px 16px}
+.sum-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+.sum-value{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.sum-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+
+/* SECTION HEADER */
+.section-hdr{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:12px}
+
+/* DEAL CARDS */
+.deals-grid{display:flex;flex-direction:column;gap:12px}
+
+.deal-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:border-color .15s}
+.deal-card:hover{border-color:var(--border2, #253554)}
+
+.deal-header{padding:14px 20px;background:var(--surface2);border-bottom:1px solid var(--border);display:grid;grid-template-columns:220px 140px 1fr 160px 160px 160px;align-items:center;gap:16px}
+.deal-program{font-size:13px;font-weight:600;color:var(--text)}
+.deal-contractor{font-size:11px;color:var(--text-muted)}
+.deal-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.deal-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.06em;padding:2px 7px;border-radius:2px;white-space:nowrap}
+.tag-prime{background:rgba(74,144,217,.12);border:1px solid rgba(74,144,217,.3);color:var(--accent)}
+.tag-sub{background:rgba(160,125,232,.12);border:1px solid rgba(160,125,232,.3);color:var(--purple)}
+.tag-indbase{background:rgba(232,148,58,.12);border:1px solid rgba(232,148,58,.3);color:var(--orange)}
+
+.deal-rate-col{text-align:right}
+.deal-rate-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px}
+.deal-rate-val{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.deal-rate-val.target{color:var(--accent2)}
+.deal-rate-val.current{color:var(--text-muted)}
+.deal-rate-val.na{color:var(--text-muted);font-weight:400;font-size:11px}
+
+.status-select{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.04em;padding:4px 8px;border-radius:3px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;width:100%}
+
+.deal-body{padding:14px 20px;display:grid;grid-template-columns:220px 140px 1fr 160px 160px;gap:16px;align-items:start}
+.deal-announced{font-size:11px;color:var(--text-muted)}
+.deal-announced span{display:block;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px}
+.deal-announced b{color:var(--text)}
+.deal-p1-col{text-align:right}
+.deal-p1-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px}
+.deal-p1-val{font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.deal-p1-sub{font-size:10px;color:var(--text-muted)}
+.deal-gap{display:flex;flex-direction:column;gap:4px}
+.gap-bar-wrap{background:var(--surface2);border-radius:2px;height:6px;overflow:hidden;margin-top:4px}
+.gap-bar-fill{height:6px;border-radius:2px;background:var(--accent);transition:width .4s}
+.gap-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-muted)}
+.gap-pct{font-weight:600;font-size:12px}
+
+.deal-notes{padding:0 20px 14px;font-size:11px;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border);padding-top:10px}
+
+/* STATUS COLORS */
+.status-framework{color:var(--accent2)}
+.status-partial{color:var(--orange)}
+.status-converted{color:var(--green)}
+.status-myp{color:var(--accent3)}
+.status-stalled{color:var(--red)}
+
+/* NULL */
+.null-val{color:var(--text-muted);font-weight:400}
+
+@media print{
+  .app-nav,.filter-bar .filter-actions{display:none!important}
+  body{background:#fff;color:#111}
+  .deal-card,.sum-card{border:1px solid #ccc;break-inside:avoid}
+  .deal-header,.deal-body{background:#f5f5f5}
+}
+</style>
+</head>
+<body>
+
+<nav class="app-nav">
+  <span class="nav-brand">CNAS Defense Budget Suite</span>
+  <a href="index.html">Home</a>
+  <a href="defense_budget_tool.html">P-1 Comparison</a>
+  <a href="production_delivery_tool.html">Production &amp; Delivery</a>
+  <a href="historical_budget_tool.html">Historical Trends</a>
+  <a href="amd_overview.html">AMD Overview</a>
+  <a href="framework_tracker.html" class="active">Framework Tracker</a>
+</nav>
+
+<header>
+  <h1>Framework Milestones Tracker</h1>
+  <span>Pentagon Munitions Framework Deals · Last updated April 2026</span>
+</header>
+
+<div class="filter-bar">
+  <span class="filter-label">View</span>
+  <div class="filter-group">
+    <button class="filter-btn active" onclick="setFilter('all', this)">All Deals</button>
+    <button class="filter-btn" onclick="setFilter('Prime', this)">Prime Contracts</button>
+    <button class="filter-btn" onclick="setFilter('Sub-prime', this)">Sub-Prime</button>
+    <button class="filter-btn" onclick="setFilter('Industrial base', this)">Industrial Base</button>
+  </div>
+  <span class="filter-label" style="margin-left:16px">Status</span>
+  <div class="filter-group">
+    <button class="filter-btn active" onclick="setStatusFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setStatusFilter('Framework Only', this)">Framework Only</button>
+    <button class="filter-btn" onclick="setStatusFilter('Partially Converted', this)">Partially Converted</button>
+    <button class="filter-btn" onclick="setStatusFilter('Converted', this)">Converted</button>
+    <button class="filter-btn" onclick="setStatusFilter('MYP Pending', this)">MYP Pending</button>
+    <button class="filter-btn" onclick="setStatusFilter('Stalled', this)">Stalled</button>
+  </div>
+  <div class="filter-actions">
+    <button class="btn-sm primary" onclick="window.print()">⎙ Print</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="summary-grid" id="summary-grid"></div>
+  <div>
+    <div class="section-hdr" id="prime-hdr">Prime Contracts</div>
+    <div class="deals-grid" id="prime-deals"></div>
+  </div>
+  <div>
+    <div class="section-hdr" id="sub-hdr">Sub-Prime &amp; Industrial Base Deals</div>
+    <div class="deals-grid" id="sub-deals"></div>
+  </div>
+</div>
+
+<footer style="border-top:1px solid var(--border);padding:16px 32px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--text-muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+  <span>CNAS Defense Program · Internal Use Only</span>
+  <span>Data current as of April 2026 · FY2027 President's Budget cycle</span>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+const STATUSES = ['Framework Only', 'Partially Converted', 'Converted', 'MYP Pending', 'Stalled'];
+
+const DEALS = [
+  // ── PRIME ───────────────────────────────────────────
+  {
+    key: 'pac3_mse',
+    program: 'PAC-3 MSE',
+    contractor: 'Lockheed Martin',
+    type: 'Prime',
+    announced: 'Jan 2026',
+    term: '7 years',
+    current_rate: 600,
+    target_rate: 2000,
+    target_note: '2,000 / yr by ~2030',
+    bli: '8260C53101 (MPA)',
+    fy25_qty: 194,   fy25_amt: 905.060,
+    fy26_qty: 357,   fy26_amt: 1771.905,
+    fy27_qty: 2798,  fy27_amt: 12229.447,
+    status: 'Framework Only',
+    notes: 'Cannot convert to binding contract until 30 days after Congress receives FY27 budget detail (triggered ~Apr 2026). Multiyear procurement (MYP) authority required for full 7-year deal. Formal MYP contract targeted for later in 2026. Boeing (Huntsville, AL) seeker deal (Apr 1) is the complementary sub-prime action addressing the primary known bottleneck. FY27 P-1 request of 2,798 missiles ($12.2B) reflects the scale of the ramp ambition — but this is a request, not yet a funded contract.',
+  },
+  {
+    key: 'thaad_int',
+    program: 'THAAD Interceptor',
+    contractor: 'Lockheed Martin',
+    type: 'Prime',
+    announced: 'Jan 2026',
+    term: '7 years',
+    current_rate: 96,
+    target_rate: 400,
+    target_note: '400 / yr (4× current)',
+    bli: 'MD07 / 8046C20200 (Army FY27)',
+    fy25_qty: 12,   fy25_amt: 247.0,
+    fy26_qty: 37,   fy26_amt: 840.1,
+    fy27_qty: 857,  fy27_amt: 11435.205,
+    status: 'Framework Only',
+    notes: 'Approximately 100–150 interceptors expended in first 12 days of Operation Epic Fury. No new interceptor deliveries since Jul 2023; backlog not expected until Apr 2027. BAE Systems seeker deal (Mar 25) addresses the key THAAD production chokepoint. Program transferred from MDA to Army (BLI 8046C20200) in FY2027. MYP authority required for full 7-year deal.',
+  },
+  {
+    key: 'tomahawk',
+    program: 'Tomahawk (Block V)',
+    contractor: 'RTX / Raytheon',
+    type: 'Prime',
+    announced: 'Feb 4, 2026',
+    term: '7 years',
+    current_rate: 60,
+    target_rate: 1000,
+    target_note: '>1,000 / yr (>16×)',
+    bli: '2101 (WPN)',
+    fy25_qty: 752,  fy25_amt: null,
+    fy26_qty: 677,  fy26_amt: null,
+    fy27_qty: null, fy27_amt: null,
+    status: 'Framework Only',
+    notes: 'Current US-only production rate ~60/yr; FY26 lot total (incl. FMS) ~677. FY27 P-1 lot data awaiting J-book release. Target >1,000/yr — a 16× increase in the US-only rate, though FMS quantities on shared lots partially offset the gap. 24-month production lead time means funding decisions today affect deliveries in 2028+.',
+  },
+  {
+    key: 'amraam',
+    program: 'AMRAAM (AIM-120)',
+    contractor: 'RTX / Raytheon',
+    type: 'Prime',
+    announced: 'Feb 4, 2026',
+    term: '7 years',
+    current_rate: null,
+    target_rate: 1900,
+    target_note: '≥1,900 / yr',
+    bli: 'MAMRA0 (MPAF) / 2206 (WPN)',
+    fy25_qty: 657,  fy25_amt: 424.417,
+    fy26_qty: 464,  fy26_amt: 750.624,
+    fy27_qty: 1811, fy27_amt: 2865.097,
+    status: 'Framework Only',
+    notes: 'Joint USAF/Navy program. FY27 P-1: USAF 1,317 + Navy 494 = 1,811 combined ($2.865B). Target ≥1,900/yr. Honeywell separately committing $500M internal investment in AMRAAM navigation components and actuators. 5th-gen AMRAAM (enhanced EW/software-defined) in production since 2024.',
+  },
+  {
+    key: 'sm6',
+    program: 'SM-6',
+    contractor: 'RTX / Raytheon',
+    type: 'Prime',
+    announced: 'Feb 4, 2026',
+    term: '7 years',
+    current_rate: 125,
+    target_rate: 500,
+    target_note: '>500 / yr (4×)',
+    bli: '2234 (WPN)',
+    fy25_qty: 102,  fy25_amt: 788.2,
+    fy26_qty: 166,  fy26_amt: 1518.3,
+    fy27_qty: 540,  fy27_amt: 4332.380,
+    status: 'Framework Only',
+    notes: 'Target >500/yr vs. current ~125/yr (J-book MSR). FY27 P-1 request of 540 AURs ($4.3B) nearly matches the target rate. J-book max rate currently only 173/yr — reaching 500 requires significant facility and supply chain investment. 40-month reorder lead time is the key constraint.',
+  },
+  {
+    key: 'sm3iia',
+    program: 'SM-3 Block IIA',
+    contractor: 'RTX / Raytheon',
+    type: 'Prime',
+    announced: 'Feb 4, 2026',
+    term: '7 years',
+    current_rate: null,
+    target_rate: null,
+    target_note: 'Target undisclosed',
+    bli: 'MD14 (MDA)',
+    fy25_qty: 12,  fy25_amt: 406.4,
+    fy26_qty: 12,  fy26_amt: 509.8,
+    fy27_qty: 136, fy27_amt: 4218.604,
+    status: 'Framework Only',
+    notes: 'Announced as part of RTX 5-deal package. Production target not publicly disclosed. J-book max rate 2/month (24/yr). FY27 P-1 of 136 AURs ($4.2B) is a large increase from the 12/yr in FY25–FY26. MYP lapsed after FY23; single-year contracts since FY24 have driven unit cost up sharply.',
+  },
+  {
+    key: 'sm3ib',
+    program: 'SM-3 Block IB',
+    contractor: 'RTX / Raytheon',
+    type: 'Prime',
+    announced: 'Feb 4, 2026',
+    term: '7 years',
+    current_rate: null,
+    target_rate: null,
+    target_note: 'Target undisclosed',
+    bli: 'MD09 (MDA)',
+    fy25_qty: 29,  fy25_amt: 695.2,
+    fy26_qty: 42,  fy26_amt: 825.0,
+    fy27_qty: 78,  fy27_amt: 1245.759,
+    status: 'Framework Only',
+    notes: 'Announced as "accelerate" — no target disclosed. New production terminated after FY24; FY27 funding is recertification/sustainment only. Effective end-of-life program; framework likely focused on maintaining the recertification line rather than new production. Transitioning to SM-3 IIA.',
+  },
+  {
+    key: 'prsm',
+    program: 'PrSM (Precision Strike Missile)',
+    contractor: 'Lockheed Martin',
+    type: 'Prime',
+    announced: 'Mar 25, 2026',
+    term: '7 years (potential MYP)',
+    current_rate: 152,
+    target_rate: 550,
+    target_note: '~550 / yr (4×)',
+    bli: '8540C29600 (MPA)',
+    fy25_qty: null, fy25_amt: null,
+    fy26_qty: 152,  fy26_amt: 560.0,
+    fy27_qty: null, fy27_amt: null,
+    status: 'Framework Only',
+    notes: 'PrSM made combat debut in Operation Epic Fury. Target ~550/yr per open-source analysis; no official figure disclosed. No dollar amounts released. IDIQ ($4.9B) already in place for flexible procurement. Framework establishes potential for 7-year MYP if Congress authorizes. MYP authority is the critical legislative watch item — likely FY27 NDAA or reconciliation. FY25 quantities suppressed in J-book (classified).',
+  },
+
+  // ── SUB-PRIME / INDUSTRIAL BASE ──────────────────────
+  {
+    key: 'thaad_seeker_bae',
+    program: 'THAAD Seeker',
+    contractor: 'BAE Systems + Lockheed Martin',
+    type: 'Sub-prime',
+    announced: 'Mar 25, 2026',
+    term: '7 years',
+    current_rate: null,
+    target_rate: null,
+    target_note: '4× current seeker output',
+    bli: null,
+    fy25_qty: null, fy25_amt: null,
+    fy26_qty: null, fy26_amt: null,
+    fy27_qty: null, fy27_amt: null,
+    status: 'Framework Only',
+    notes: 'THAAD seeker is the identified production chokepoint for the interceptor ramp. BAE deal is a direct-to-supplier action per Pentagon\'s Acquisition Transformation Strategy. No unit quantities or dollar figures disclosed. Complements Jan 2026 Lockheed prime deal. 4× seeker output required to enable 4× interceptor production.',
+  },
+  {
+    key: 'pac3_seeker_boeing',
+    program: 'PAC-3 MSE Seeker',
+    contractor: 'Boeing (Huntsville, AL)',
+    type: 'Sub-prime',
+    announced: 'Apr 1, 2026',
+    term: '7 years',
+    current_rate: null,
+    target_rate: null,
+    target_note: '3× current seeker output',
+    bli: null,
+    fy25_qty: null, fy25_amt: null,
+    fy26_qty: null, fy26_amt: null,
+    fy27_qty: null, fy27_amt: null,
+    status: 'Framework Only',
+    notes: 'Boeing seeker (active guidance for PAC-3 MSE) has historically been the primary bottleneck to interceptor production. Boeing invested >$200M since 2024; deliveries up 30% in 2025. IDIQ structure; formal MYP contract with Boeing and Lockheed targeted for later in 2026. Direct-to-supplier deal — bypasses Lockheed as prime conduit. Boeing (Oct 2025) reported seeker output already exceeding Lockheed\'s two AUR assembly lines\' consumption.',
+  },
+  {
+    key: 'l3harris_srm',
+    program: 'Solid Rocket Motors',
+    contractor: 'L3Harris Technologies',
+    type: 'Industrial base',
+    announced: 'Early 2026',
+    term: 'Equity stake (IPO H2 2026)',
+    current_rate: null,
+    target_rate: null,
+    target_note: 'Industrial base capacity',
+    bli: null,
+    fy25_qty: null, fy25_amt: null,
+    fy26_qty: null, fy26_amt: null,
+    fy27_qty: null, fy27_amt: null,
+    status: 'Framework Only',
+    notes: 'DoD taking ~$1B equity stake in L3Harris solid rocket motor spinoff business. IPO planned H2 2026; government preferred stake converts to common equity at IPO. Flagship "direct-to-supplier" / "catalytic capital" deal. Legally novel — first time DoD has taken equity in a defense supplier spinoff. SRMs are a common cross-cutting input across multiple munitions (Tomahawk, AMRAAM, SM-6, PAC-3 MSE, etc.). Congressional and SEC oversight questions unresolved.',
+  },
+  {
+    key: 'honeywell_components',
+    program: 'Missile Components',
+    contractor: 'Honeywell Aerospace',
+    type: 'Industrial base',
+    announced: 'Mar 25, 2026',
+    term: 'Internal investment (not a DoD contract)',
+    current_rate: null,
+    target_rate: null,
+    target_note: '$500M internal investment',
+    bli: null,
+    fy25_qty: null, fy25_amt: null,
+    fy26_qty: null, fy26_amt: null,
+    fy27_qty: null, fy27_amt: null,
+    status: 'Framework Only',
+    notes: '$500M internal Honeywell investment — not a DoD contract, no government dollars obligated. Covers navigation systems (GPS/INS), actuators (Assure actuator — controls missile flight), and EW components for AMRAAM and other munitions. Demand signal approach: DoD long-term purchase commitments enable Honeywell to invest private capital without guaranteed contracts. Cross-cutting: Honeywell components appear in AMRAAM, SM-6, and other programs.',
+  },
+];
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let typeFilter = 'all';
+let statusFilter = 'all';
+
+// Load persisted statuses from localStorage
+function loadStatuses() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('framework_statuses') || '{}');
+    DEALS.forEach(d => { if (saved[d.key]) d.status = saved[d.key]; });
+  } catch(e) {}
+}
+
+function saveStatus(key, status) {
+  try {
+    const saved = JSON.parse(localStorage.getItem('framework_statuses') || '{}');
+    saved[key] = status;
+    localStorage.setItem('framework_statuses', JSON.stringify(saved));
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════
+// FORMATTING
+// ═══════════════════════════════════════════════════════
+function fmtM(v) {
+  if (v === null || v === undefined) return '<span class="null-val">—</span>';
+  if (v >= 1000) return '$' + (v/1000).toFixed(2) + 'B';
+  return '$' + v.toFixed(2) + 'M';
+}
+function fmtN(v) {
+  if (v === null || v === undefined) return '<span class="null-val">—</span>';
+  return v.toLocaleString();
+}
+
+function statusClass(s) {
+  return {
+    'Framework Only':     'status-framework',
+    'Partially Converted':'status-partial',
+    'Converted':          'status-converted',
+    'MYP Pending':        'status-myp',
+    'Stalled':            'status-stalled',
+  }[s] || '';
+}
+
+function typeTag(type) {
+  const map = {
+    'Prime':           ['Prime', 'tag-prime'],
+    'Sub-prime':       ['Sub-Prime', 'tag-sub'],
+    'Industrial base': ['Ind. Base', 'tag-indbase'],
+  };
+  const [label, cls] = map[type] || [type, 'tag-prime'];
+  return `<span class="deal-tag ${cls}">${label}</span>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function render() {
+  renderSummary();
+  renderDeals();
+}
+
+function renderSummary() {
+  const visible = filteredDeals();
+  const total   = visible.length;
+  const byStatus = {};
+  STATUSES.forEach(s => byStatus[s] = 0);
+  visible.forEach(d => { byStatus[d.status] = (byStatus[d.status]||0) + 1; });
+
+  // FY27 P-1 total vs target implied funding
+  const fy27Total = visible.filter(d=>d.fy27_amt).reduce((s,d)=>s+d.fy27_amt, 0);
+
+  document.getElementById('summary-grid').innerHTML = `
+    <div class="sum-card">
+      <div class="sum-label">Total Deals Tracked</div>
+      <div class="sum-value" style="color:var(--accent)">${total}</div>
+      <div class="sum-sub">${DEALS.filter(d=>d.type==='Prime').length} prime · ${DEALS.filter(d=>d.type!=='Prime').length} sub-prime/ind. base</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Framework Only</div>
+      <div class="sum-value" style="color:var(--accent2)">${byStatus['Framework Only']||0}</div>
+      <div class="sum-sub">Non-binding; not yet converted</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Partially Converted</div>
+      <div class="sum-value" style="color:var(--orange)">${byStatus['Partially Converted']||0}</div>
+      <div class="sum-sub">Some funding obligated</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Converted / MYP Pending</div>
+      <div class="sum-value" style="color:var(--green)">${(byStatus['Converted']||0)+(byStatus['MYP Pending']||0)}</div>
+      <div class="sum-sub">Contract in place</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">FY27 P-1 (Prime deals)</div>
+      <div class="sum-value" style="color:var(--text);font-size:18px">${fmtM(fy27Total)}</div>
+      <div class="sum-sub">Requested; not yet obligated</div>
+    </div>`;
+}
+
+function filteredDeals() {
+  return DEALS.filter(d => {
+    const typeMatch = typeFilter === 'all' || d.type === typeFilter ||
+      (typeFilter === 'Industrial base' && d.type === 'Industrial base') ||
+      (typeFilter === 'Sub-prime' && (d.type === 'Sub-prime' || d.type === 'Industrial base'));
+    const statusMatch = statusFilter === 'all' || d.status === statusFilter;
+    return typeMatch && statusMatch;
+  });
+}
+
+function renderDeals() {
+  const visible = filteredDeals();
+  const primes = visible.filter(d => d.type === 'Prime');
+  const subs   = visible.filter(d => d.type !== 'Prime');
+
+  document.getElementById('prime-deals').innerHTML = primes.length
+    ? primes.map(d => dealCardHTML(d)).join('')
+    : '<p style="color:var(--text-muted);font-size:12px;padding:12px 0">No deals match current filters.</p>';
+
+  document.getElementById('sub-deals').innerHTML = subs.length
+    ? subs.map(d => dealCardHTML(d)).join('')
+    : '<p style="color:var(--text-muted);font-size:12px;padding:12px 0">No deals match current filters.</p>';
+}
+
+function dealCardHTML(d) {
+  // Gap bar: FY27 requested qty vs target rate
+  let gapHTML = '';
+  if (d.type === 'Prime' && d.target_rate && d.fy27_qty) {
+    const pct = Math.min(100, Math.round(d.fy27_qty / d.target_rate * 100));
+    const color = pct >= 80 ? 'var(--green)' : pct >= 50 ? 'var(--accent2)' : 'var(--red)';
+    gapHTML = `
+      <div class="gap-label">FY27 requested vs. target rate</div>
+      <div class="gap-pct" style="color:${color}">${fmtN(d.fy27_qty)} / ${fmtN(d.target_rate)} · ${pct}%</div>
+      <div class="gap-bar-wrap"><div class="gap-bar-fill" style="width:${pct}%;background:${color}"></div></div>`;
+  } else if (d.type === 'Prime' && d.target_rate && !d.fy27_qty) {
+    gapHTML = `<div class="gap-label">FY27 P-1 qty</div><div class="gap-pct null-val">Awaiting FY27 J-book</div>`;
+  } else if (d.type === 'Prime' && !d.target_rate) {
+    gapHTML = `<div class="gap-label">Production target</div><div class="gap-pct null-val">Undisclosed</div>`;
+  } else {
+    gapHTML = `<div class="gap-label">Qty comparison</div><div class="null-val" style="font-size:11px">N/A — component-level deal</div>`;
+  }
+
+  const statusOpts = STATUSES.map(s =>
+    `<option value="${s}" ${d.status===s?'selected':''}>${s}</option>`
+  ).join('');
+
+  return `<div class="deal-card" id="card-${d.key}">
+    <div class="deal-header">
+      <div>
+        <div class="deal-program">${d.program}</div>
+        <div class="deal-contractor">${d.contractor}</div>
+      </div>
+      <div class="deal-meta">
+        ${typeTag(d.type)}
+        <span class="deal-tag" style="background:var(--surface);border:1px solid var(--border);color:var(--text-muted)">${d.term}</span>
+      </div>
+      <div></div>
+      <div class="deal-rate-col">
+        <div class="deal-rate-label">Current Rate</div>
+        <div class="deal-rate-val current">${d.current_rate ? d.current_rate.toLocaleString() + ' / yr' : '<span class="null-val">—</span>'}</div>
+      </div>
+      <div class="deal-rate-col">
+        <div class="deal-rate-label">Target Rate</div>
+        <div class="deal-rate-val target">${d.target_note}</div>
+      </div>
+      <div>
+        <div class="deal-rate-label">Conversion Status</div>
+        <select class="status-select ${statusClass(d.status)}" onchange="updateStatus('${d.key}', this)">
+          ${statusOpts}
+        </select>
+      </div>
+    </div>
+    <div class="deal-body">
+      <div class="deal-announced">
+        <span>Announced</span>
+        <b>${d.announced}</b>
+        ${d.bli ? `<span style="margin-top:6px">BLI</span><b style="font-size:11px">${d.bli}</b>` : ''}
+      </div>
+      <div></div>
+      <div class="deal-gap">${gapHTML}</div>
+      <div class="deal-p1-col">
+        <div class="deal-p1-label">FY26 Enacted</div>
+        <div class="deal-p1-val">${fmtM(d.fy26_amt)}</div>
+        <div class="deal-p1-sub">${d.fy26_qty ? d.fy26_qty.toLocaleString() + ' units' : '—'}</div>
+      </div>
+      <div class="deal-p1-col">
+        <div class="deal-p1-label">FY27 Request</div>
+        <div class="deal-p1-val" style="color:var(--accent2)">${fmtM(d.fy27_amt)}</div>
+        <div class="deal-p1-sub">${d.fy27_qty ? d.fy27_qty.toLocaleString() + ' units' : '—'}</div>
+      </div>
+    </div>
+    <div class="deal-notes">${d.notes}</div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════════════════════
+function setFilter(val, btn) {
+  typeFilter = val;
+  document.querySelectorAll('.filter-group:first-of-type .filter-btn').forEach(b => b.classList.toggle('active', b===btn));
+  render();
+}
+
+function setStatusFilter(val, btn) {
+  statusFilter = val;
+  document.querySelectorAll('.filter-group:last-of-type .filter-btn').forEach(b => b.classList.toggle('active', b===btn));
+  render();
+}
+
+function updateStatus(key, select) {
+  const deal = DEALS.find(d => d.key === key);
+  if (!deal) return;
+  deal.status = select.value;
+  select.className = `status-select ${statusClass(select.value)}`;
+  saveStatus(key, select.value);
+  renderSummary();
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  loadStatuses();
+  render();
+});
+</script>
+</body>
+</html>
