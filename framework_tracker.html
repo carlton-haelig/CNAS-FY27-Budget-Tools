@@ -86,6 +86,12 @@ header span{font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',m
 .gap-pct{font-weight:600;font-size:12px}
 
 .deal-notes{padding:0 20px 14px;font-size:11px;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border);padding-top:10px}
+.deal-notes ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px}
+.deal-notes li{padding-left:14px;position:relative}
+.deal-notes li::before{content:'·';position:absolute;left:0;color:var(--border)}
+.deal-notes li b{color:var(--text)}
+.deal-notes a{color:var(--accent);text-decoration:none}
+.deal-notes a:hover{text-decoration:underline}
 
 /* STATUS COLORS */
 .status-framework{color:var(--accent2)}
@@ -169,7 +175,7 @@ header span{font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',m
 const STATUSES = ['Framework Only', 'Partially Converted', 'Converted', 'MYP Pending', 'Stalled'];
 
 const DEALS = [
-  // ── PRIME ───────────────────────────────────────────
+  // ── PRIME ───────────────────────────────────────────────────
   {
     key: 'pac3_mse',
     program: 'PAC-3 MSE',
@@ -184,8 +190,12 @@ const DEALS = [
     fy25_qty: 194,   fy25_amt: 905.060,
     fy26_qty: 357,   fy26_amt: 1771.905,
     fy27_qty: 2798,  fy27_amt: 12229.447,
-    status: 'Framework Only',
-    notes: 'Cannot convert to binding contract until 30 days after Congress receives FY27 budget detail (triggered ~Apr 2026). Multiyear procurement (MYP) authority required for full 7-year deal. Formal MYP contract targeted for later in 2026. Boeing (Huntsville, AL) seeker deal (Apr 1) is the complementary sub-prime action addressing the primary known bottleneck. FY27 P-1 request of 2,798 missiles ($12.2B) reflects the scale of the ramp ambition — but this is a request, not yet a funded contract.',
+    status: 'Partially Converted',
+    notes: `<ul>
+      <li><b>[Apr 10, 2026]</b> Army awarded Lockheed Martin a $4.7B undefinitized contract action (UCA) — supplemental to the existing MYP, drawing on FY27 appropriations (2,798 missiles/$12.2B requested in FY27 P-1). UCA allows work to begin before FY27 funds are formally obligated. Not a conversion of the framework deal per se — the $9.8B MYP was already the active contract vehicle; this is the next tranche. Sources: <a href="https://www.army.mil/article/291670" target="_blank">U.S. Army</a>; <a href="https://www.prnewswire.com/news-releases/lockheed-martin-secures-first-contract-for-pac-3-r-mse-accelerated-production-strengthening-the-arsenal-of-freedom-302739266.html" target="_blank">Lockheed Martin PR</a> (Apr 10, 2026).</li>
+      <li><b>[Jan 6, 2026]</b> Framework agreement signed with Lockheed Martin to accelerate PAC-3 MSE production toward 2,000/yr over 7 years. MYP authority required for full deal. Boeing seeker deal (Apr 1, 2026) addresses primary known production bottleneck. Source: <a href="https://www.lockheedmartin.com/en-us/news/features/2026/Lockheed-Martin-and-U-S-Government-Reach-Historic-Deal-to-Turbo-Charge-PAC-3-Missile-Segment-Enhancement-MSE-Production-for-U-S-and-Allies.html" target="_blank">Lockheed Martin</a>.</li>
+      <li><b>[Sep 3, 2025]</b> Army definitized $9.8B multiyear contract (FY24–FY26) for 1,970 interceptors — 870 U.S.+allied (FY24, $4.5B), ~550 (FY25), ~550 (FY26). Largest contract in LM Missiles and Fire Control history. P-1 shows U.S. Army appropriation only (230/194/357 missiles); $9.8B includes FMS quantities on the same production line. Sources: <a href="https://www.defensenews.com/land/2025/09/03/us-army-awards-lockheed-record-98-billion-missile-contract/" target="_blank">Defense News</a>; <a href="https://breakingdefense.com/2025/09/army-awards-lockheed-multiyear-9-8-billion-contract-for-thousands-of-pac-3-missiles/" target="_blank">Breaking Defense</a> (Sep 3, 2025).</li>
+    </ul>`,
   },
   {
     key: 'thaad_int',
@@ -202,7 +212,9 @@ const DEALS = [
     fy26_qty: 37,   fy26_amt: 840.1,
     fy27_qty: 857,  fy27_amt: 11435.205,
     status: 'Framework Only',
-    notes: 'Approximately 100–150 interceptors expended in first 12 days of Operation Epic Fury. No new interceptor deliveries since Jul 2023; backlog not expected until Apr 2027. BAE Systems seeker deal (Mar 25) addresses the key THAAD production chokepoint. Program transferred from MDA to Army (BLI 8046C20200) in FY2027. MYP authority required for full 7-year deal.',
+    notes: `<ul>
+      <li><b>[Jan 2026]</b> Framework agreement signed with Lockheed Martin to quadruple THAAD interceptor production from 96 to 400/yr over 7 years. MYP authority required. ~100–150 interceptors expended in first 12 days of Operation Epic Fury; no new deliveries since Jul 2023, backlog not expected until Apr 2027. BAE Systems seeker deal (Mar 25, 2026) addresses primary production chokepoint. Program transferred from MDA to Army (BLI 8046C20200) in FY2027. Source: <a href="https://breakingdefense.com/2026/01/pentagon-lockheed-agree-to-quadruple-thaad-interceptor-production/" target="_blank">Breaking Defense</a> (Jan 2026).</li>
+    </ul>`,
   },
   {
     key: 'tomahawk',
@@ -219,7 +231,9 @@ const DEALS = [
     fy26_qty: 677,  fy26_amt: 1028.000,
     fy27_qty: 785,  fy27_amt: 3008.909,
     status: 'Framework Only',
-    notes: 'Current US-only production rate ~60/yr; FY26 lot total (incl. FMS) ~677. FY27 P-1 (Navy WPN BLI 2101): 785 total (58 disc + 727 mand), $3.009B. FY26: 677 total ($1.028B); FY25: 752 total ($208.5M Navy only). Target >1,000/yr — a 16× increase from the ~60/yr US-only baseline. 24-month production lead time means funding decisions today affect deliveries in 2028+.',
+    notes: `<ul>
+      <li><b>[Feb 4, 2026]</b> Framework agreement signed with RTX/Raytheon as part of five-deal package. Target &gt;1,000/yr — a 16× increase from the ~60/yr US-only baseline. FY27 P-1: 785 total (58 disc + 727 mand, $3.009B). 24-month production lead time means funding decisions today affect deliveries in 2028+. Source: <a href="https://www.armyrecognition.com/news/navy-news/2026/u-s-pentagon-signs-7-year-naval-missile-framework-deals-to-speed-key-deliveries" target="_blank">Army Recognition</a> (Feb 4, 2026).</li>
+    </ul>`,
   },
   {
     key: 'amraam',
@@ -236,7 +250,9 @@ const DEALS = [
     fy26_qty: 464,  fy26_amt: 750.624,
     fy27_qty: 1811, fy27_amt: 2865.097,
     status: 'Framework Only',
-    notes: 'Joint USAF/Navy program. FY27 P-1: USAF 1,317 + Navy 494 = 1,811 combined ($2.865B). Target ≥1,900/yr. Honeywell separately committing $500M internal investment in AMRAAM navigation components and actuators. 5th-gen AMRAAM (enhanced EW/software-defined) in production since 2024.',
+    notes: `<ul>
+      <li><b>[Feb 4, 2026]</b> Framework agreement signed with RTX/Raytheon as part of five-deal package. Target ≥1,900/yr. FY27 P-1: USAF 1,317 + Navy 494 = 1,811 combined ($2.865B). Honeywell separately committing $500M internal investment in AMRAAM navigation components and actuators (Mar 25, 2026). 5th-gen AMRAAM in production since 2024. Source: <a href="https://www.armyrecognition.com/news/navy-news/2026/u-s-pentagon-signs-7-year-naval-missile-framework-deals-to-speed-key-deliveries" target="_blank">Army Recognition</a> (Feb 4, 2026).</li>
+    </ul>`,
   },
   {
     key: 'sm6',
@@ -253,7 +269,9 @@ const DEALS = [
     fy26_qty: 166,  fy26_amt: 1518.3,
     fy27_qty: 540,  fy27_amt: 4332.380,
     status: 'Framework Only',
-    notes: 'Target >500/yr vs. current ~125/yr (J-book MSR). FY27 P-1 request of 540 AURs ($4.3B) nearly matches the target rate. J-book max rate currently only 173/yr — reaching 500 requires significant facility and supply chain investment. 40-month reorder lead time is the key constraint.',
+    notes: `<ul>
+      <li><b>[Feb 4, 2026]</b> Framework agreement signed with RTX/Raytheon as part of five-deal package. Target &gt;500/yr (4× from ~125/yr). FY27 P-1: 540 AURs ($4.3B), nearly matching the target rate. J-book max rate currently 173/yr — reaching 500 requires major facility and supply chain investment. 40-month reorder lead time is the key constraint. Source: <a href="https://www.armyrecognition.com/news/navy-news/2026/u-s-pentagon-signs-7-year-naval-missile-framework-deals-to-speed-key-deliveries" target="_blank">Army Recognition</a> (Feb 4, 2026).</li>
+    </ul>`,
   },
   {
     key: 'sm3iia',
@@ -270,7 +288,9 @@ const DEALS = [
     fy26_qty: 12,  fy26_amt: 509.8,
     fy27_qty: 136, fy27_amt: 4218.604,
     status: 'Framework Only',
-    notes: 'Announced as part of RTX 5-deal package. Production target not publicly disclosed. J-book max rate 2/month (24/yr). FY27 P-1 of 136 AURs ($4.2B) is a large increase from the 12/yr in FY25–FY26. MYP lapsed after FY23; single-year contracts since FY24 have driven unit cost up sharply.',
+    notes: `<ul>
+      <li><b>[Feb 4, 2026]</b> Framework agreement signed with RTX/Raytheon as part of five-deal package. Production target not publicly disclosed. FY27 P-1: 136 AURs ($4.2B), a large step up from 12/yr in FY25–FY26. MYP lapsed after FY23; single-year contracts since have driven unit cost sharply higher. Source: <a href="https://www.armyrecognition.com/news/navy-news/2026/u-s-pentagon-signs-7-year-naval-missile-framework-deals-to-speed-key-deliveries" target="_blank">Army Recognition</a> (Feb 4, 2026).</li>
+    </ul>`,
   },
   {
     key: 'sm3ib',
@@ -287,7 +307,9 @@ const DEALS = [
     fy26_qty: 42,  fy26_amt: 825.0,
     fy27_qty: 78,  fy27_amt: 1245.759,
     status: 'Framework Only',
-    notes: 'Announced as "accelerate" — no target disclosed. New production terminated after FY24; FY27 funding is recertification/sustainment only. Effective end-of-life program; framework likely focused on maintaining the recertification line rather than new production. Transitioning to SM-3 IIA.',
+    notes: `<ul>
+      <li><b>[Feb 4, 2026]</b> Framework agreement signed with RTX/Raytheon as part of five-deal package. Announced as "accelerate" — no production target disclosed. New production terminated after FY24; FY27 funding is recertification/sustainment only. Framework likely focused on maintaining the recertification line. Transitioning to SM-3 IIA. Source: <a href="https://www.armyrecognition.com/news/navy-news/2026/u-s-pentagon-signs-7-year-naval-missile-framework-deals-to-speed-key-deliveries" target="_blank">Army Recognition</a> (Feb 4, 2026).</li>
+    </ul>`,
   },
   {
     key: 'prsm',
@@ -304,10 +326,12 @@ const DEALS = [
     fy26_qty: 108,  fy26_amt: 546.542,
     fy27_qty: 1134, fy27_amt: 1918.526,
     status: 'Framework Only',
-    notes: 'PrSM made combat debut in Operation Epic Fury. Target ~550/yr per open-source analysis; no official figure disclosed. No dollar amounts released. IDIQ ($4.9B) already in place for flexible procurement. Framework establishes potential for 7-year MYP if Congress authorizes. MYP authority is the critical legislative watch item — likely FY27 NDAA or reconciliation. FY25 qty=338 ($491.5M); FY26 qty=108 ($546.5M). FY27 P-1: 680 disc + 454 mand = 1,134 total ($1.919B). FY25 quantities were suppressed in FY26 J-book (classified); FY27 P-1 actuals now available.',
+    notes: `<ul>
+      <li><b>[Mar 25, 2026]</b> Framework agreement signed with Lockheed Martin. Target ~550/yr (quadruple from ~152 baseline); no official figure or dollar amount disclosed. IDIQ ($4.9B) already in place; framework establishes potential for 7-year MYP pending congressional authorization. PrSM made combat debut in Operation Epic Fury. MYP authority is the key legislative watch item — FY27 NDAA or reconciliation. FY27 P-1: 1,134 total (680 disc + 454 mand, $1.919B). Sources: <a href="https://defensescoop.com/2026/03/25/army-precision-strike-missile-production-prsm-lockheed-martin/" target="_blank">DefenseScoop</a>; <a href="https://breakingdefense.com/2026/03/pentagon-lockheed-sign-plan-to-boost-prsm-missile-production/" target="_blank">Breaking Defense</a> (Mar 25, 2026).</li>
+    </ul>`,
   },
 
-  // ── SUB-PRIME / INDUSTRIAL BASE ──────────────────────
+  // ── SUB-PRIME / INDUSTRIAL BASE ──────────────────
   {
     key: 'thaad_seeker_bae',
     program: 'THAAD Seeker',
@@ -323,7 +347,9 @@ const DEALS = [
     fy26_qty: null, fy26_amt: null,
     fy27_qty: null, fy27_amt: null,
     status: 'Framework Only',
-    notes: 'THAAD seeker is the identified production chokepoint for the interceptor ramp. BAE deal is a direct-to-supplier action per Pentagon\'s Acquisition Transformation Strategy. No unit quantities or dollar figures disclosed. Complements Jan 2026 Lockheed prime deal. 4× seeker output required to enable 4× interceptor production.',
+    notes: `<ul>
+      <li><b>[Mar 25, 2026]</b> Framework agreement signed with BAE Systems and Lockheed Martin. Direct-to-supplier action per Pentagon Acquisition Transformation Strategy — bypasses prime conduit. THAAD seeker is the primary production chokepoint; 4× seeker output required to enable 4× interceptor production. No quantities or dollar figures disclosed. Complements Jan 2026 Lockheed prime deal. Source: <a href="https://breakingdefense.com/2026/03/pentagon-lockheed-sign-plan-to-boost-prsm-missile-production/" target="_blank">Breaking Defense</a> (Mar 25, 2026).</li>
+    </ul>`,
   },
   {
     key: 'pac3_seeker_boeing',
@@ -340,7 +366,9 @@ const DEALS = [
     fy26_qty: null, fy26_amt: null,
     fy27_qty: null, fy27_amt: null,
     status: 'Framework Only',
-    notes: 'Boeing seeker (active guidance for PAC-3 MSE) has historically been the primary bottleneck to interceptor production. Boeing invested >$200M since 2024; deliveries up 30% in 2025. IDIQ structure; formal MYP contract with Boeing and Lockheed targeted for later in 2026. Direct-to-supplier deal — bypasses Lockheed as prime conduit. Boeing (Oct 2025) reported seeker output already exceeding Lockheed\'s two AUR assembly lines\' consumption.',
+    notes: `<ul>
+      <li><b>[Apr 1, 2026]</b> Framework agreement signed with Boeing. Direct-to-supplier action — bypasses Lockheed as prime conduit. Boeing seeker has historically been the primary PAC-3 MSE production bottleneck. Boeing invested &gt;$200M since 2024; deliveries up 30% in 2025; seeker output already exceeding Lockheed’s two AUR assembly lines’ consumption (Oct 2025). IDIQ structure; formal MYP contract targeted for later in 2026. Sources: <a href="https://breakingdefense.com/2026/04/pentagon-boeing-announce-plan-to-triple-patriot-pac-3-seeker-production/" target="_blank">Breaking Defense</a>; <a href="https://boeing.mediaroom.com/news-releases-statements?item=131654" target="_blank">Boeing PR</a> (Apr 1, 2026).</li>
+    </ul>`,
   },
   {
     key: 'l3harris_srm',
@@ -357,7 +385,9 @@ const DEALS = [
     fy26_qty: null, fy26_amt: null,
     fy27_qty: null, fy27_amt: null,
     status: 'Framework Only',
-    notes: 'DoD taking ~$1B equity stake in L3Harris solid rocket motor spinoff business. IPO planned H2 2026; government preferred stake converts to common equity at IPO. Flagship "direct-to-supplier" / "catalytic capital" deal. Legally novel — first time DoD has taken equity in a defense supplier spinoff. SRMs are a common cross-cutting input across multiple munitions (Tomahawk, AMRAAM, SM-6, PAC-3 MSE, etc.). Congressional and SEC oversight questions unresolved.',
+    notes: `<ul>
+      <li><b>[Early 2026]</b> DoD agreed to take ~$1B equity stake in L3Harris solid rocket motor spinoff business. IPO planned H2 2026; government preferred stake converts to common equity at IPO. Legally novel — first time DoD has taken equity in a defense supplier spinoff. SRMs are a cross-cutting input across Tomahawk, AMRAAM, SM-6, PAC-3 MSE, and others. Congressional and SEC oversight questions unresolved. Source: <a href="https://insidedefense.com/daily-news/high-profile-munitions-frameworks-cant-be-formalized-until-after-congress-gets-fy-27" target="_blank">Inside Defense</a>.</li>
+    </ul>`,
   },
   {
     key: 'honeywell_components',
@@ -374,7 +404,9 @@ const DEALS = [
     fy26_qty: null, fy26_amt: null,
     fy27_qty: null, fy27_amt: null,
     status: 'Framework Only',
-    notes: '$500M internal Honeywell investment — not a DoD contract, no government dollars obligated. Covers navigation systems (GPS/INS), actuators (Assure actuator — controls missile flight), and EW components for AMRAAM and other munitions. Demand signal approach: DoD long-term purchase commitments enable Honeywell to invest private capital without guaranteed contracts. Cross-cutting: Honeywell components appear in AMRAAM, SM-6, and other programs.',
+    notes: `<ul>
+      <li><b>[Mar 25, 2026]</b> Honeywell committed $500M internal investment — not a DoD contract, no government dollars obligated. Covers navigation systems (GPS/INS), Assure actuators, and EW components for AMRAAM and other munitions. Demand signal model: DoD long-term purchase commitments enable Honeywell to invest private capital. Cross-cutting: Honeywell components appear in AMRAAM, SM-6, and other programs. Source: <a href="https://defensescoop.com/2026/03/25/army-precision-strike-missile-production-prsm-lockheed-martin/" target="_blank">DefenseScoop</a> (Mar 25, 2026).</li>
+    </ul>`,
   },
 ];
 
