@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CNAS Defense Budget Suite · Cost Exchange Tool</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+:root{--bg:#0e1117;--surface:#161b27;--surface2:#1e2535;--border:#2a3348;--accent:#4a90d9;--accent2:#e8a838;--accent3:#5bc4a0;--text:#d4dae8;--text-muted:#6b7a99;--red:#e05c5c;--green:#5bc4a0;--orange:#e8943a;--purple:#a07de8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;line-height:1.5;min-height:100vh}
+
+/* NAV */
+.app-nav{background:#0a0d14;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;height:44px;gap:4px;flex-wrap:nowrap;overflow-x:auto}
+.app-nav .nav-brand{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);margin-right:20px;white-space:nowrap}
+.app-nav a{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--text-muted);padding:0 14px;height:44px;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap}
+.app-nav a:hover{color:var(--text)}.app-nav a.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* HEADER */
+header{border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:baseline;justify-content:space-between;background:var(--surface)}
+header h1{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+header span{font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace}
+
+/* LAYOUT */
+.workspace{display:grid;grid-template-columns:340px 340px 1fr;gap:0;height:calc(100vh - 88px);overflow:hidden}
+.panel{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.panel:last-child{border-right:none}
+.panel-hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.panel-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted)}
+.panel-body{flex:1;overflow-y:auto;padding:12px 16px}
+
+/* BUTTONS */
+.btn{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:3px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;transition:all .15s}
+.btn:hover{color:var(--text);border-color:var(--accent)}
+.btn.primary{border-color:var(--accent);color:var(--accent)}
+.btn.primary:hover{background:var(--accent);color:#fff}
+.btn.danger{border-color:var(--red);color:var(--red)}
+.btn.danger:hover{background:var(--red);color:#fff}
+.btn.green{border-color:var(--green);color:var(--green)}
+.btn.green:hover{background:var(--green);color:#0e1117}
+.btn-xs{padding:2px 7px;font-size:9px}
+
+/* INPUTS */
+.field{margin-bottom:10px}
+.field label{display:block;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+.field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:3px;font-family:'IBM Plex Sans',sans-serif;font-size:12px}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field input[type=range]{padding:4px 0;accent-color:var(--accent)}
+.field .hint{font-size:10px;color:var(--text-muted);margin-top:2px}
+.inline-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.inline-fields-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+
+/* CARDS */
+.item-card{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:8px;position:relative}
+.item-card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.item-name{font-size:12px;font-weight:600;color:var(--text)}
+.item-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;padding:1px 6px;border-radius:2px}
+.tag-bm{background:rgba(224,92,92,.15);border:1px solid rgba(224,92,92,.3);color:var(--red)}
+.tag-cm{background:rgba(232,148,58,.15);border:1px solid rgba(232,148,58,.3);color:var(--orange)}
+.tag-uas1{background:rgba(160,125,232,.15);border:1px solid rgba(160,125,232,.3);color:var(--purple)}
+.tag-uas2{background:rgba(160,125,232,.2);border:1px solid rgba(160,125,232,.4);color:var(--purple)}
+.tag-uas3{background:rgba(91,196,160,.15);border:1px solid rgba(91,196,160,.3);color:var(--accent3)}
+.tag-uas4{background:rgba(74,144,217,.15);border:1px solid rgba(74,144,217,.3);color:var(--accent)}
+.tag-uas5{background:rgba(232,180,75,.15);border:1px solid rgba(232,180,75,.3);color:var(--accent2)}
+.item-stats{display:flex;gap:16px;font-size:11px;color:var(--text-muted)}
+.item-stat span{color:var(--text);font-weight:600}
+
+/* DIVIDER */
+.section-div{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);padding-bottom:6px;margin:14px 0 10px}
+
+/* RESULTS */
+.result-block{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:14px;margin-bottom:12px}
+.result-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.result-card{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:10px 12px;text-align:center}
+.result-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+.result-val{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.result-sub{font-size:10px;color:var(--text-muted);margin-top:2px}
+
+.laydown-table{width:100%;border-collapse:collapse;font-size:11px}
+.laydown-table th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);padding:6px 8px;border-bottom:1px solid var(--border);background:var(--surface)}
+.laydown-table td{padding:6px 8px;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums}
+.laydown-table tr:last-child td{border-bottom:none}
+.laydown-table tr:hover td{background:var(--surface)}
+
+.depletion-bar-wrap{height:8px;background:var(--surface);border-radius:2px;overflow:hidden;margin-top:4px}
+.depletion-bar{height:8px;border-radius:2px;transition:width .4s}
+
+/* SLIDERS */
+.tradeoff-wrap{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:12px}
+.tradeoff-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:4px}
+
+/* EMPTY STATE */
+.empty{color:var(--text-muted);font-size:12px;padding:20px 0;text-align:center;font-style:italic}
+
+/* LEAKER */
+.leaker-row{color:var(--red)}
+.leaker-badge{display:inline-block;background:rgba(224,92,92,.15);border:1px solid rgba(224,92,92,.3);color:var(--red);font-family:'IBM Plex Mono',monospace;font-size:9px;padding:1px 6px;border-radius:2px;margin-left:4px}
+
+/* PK INPUT */
+.pk-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px}
+.pk-cell{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:6px 8px}
+.pk-cell-label{font-size:9px;color:var(--text-muted);margin-bottom:3px;font-family:'IBM Plex Mono',monospace;letter-spacing:.04em}
+.pk-cell input{width:100%;background:transparent;border:none;color:var(--text);font-size:12px;font-variant-numeric:tabular-nums}
+.pk-cell input:focus{outline:none}
+.pk-range{font-size:9px;color:var(--text-muted);margin-top:2px}
+
+/* CAPABILITY CHECKBOX */
+.cap-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.cap-check{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);cursor:pointer}
+.cap-check input{accent-color:var(--accent);cursor:pointer}
+.cap-check.checked{color:var(--text)}
+
+@media print{
+  .app-nav,.panel-hdr .btn,.workspace{display:block!important}
+  body{background:#fff;color:#111}
+}
+</style>
+</head>
+<body>
+
+<nav class="app-nav">
+  <span class="nav-brand">CNAS Defense Budget Suite</span>
+  <a href="index.html">Home</a>
+  <a href="defense_budget_tool.html">P-1 Comparison</a>
+  <a href="production_delivery_tool.html">Production &amp; Delivery</a>
+  <a href="historical_budget_tool.html">Historical Trends</a>
+  <a href="amd_overview.html">AMD Overview</a>
+  <a href="framework_tracker.html">Framework Tracker</a>
+  <a href="exchange_ratio_tool.html" class="active">Cost Exchange</a>
+</nav>
+
+<header>
+  <h1>AMD Cost Exchange &amp; Optimization</h1>
+  <span>Blue vs. Red · Gulf / Iran Scenario Modeler</span>
+</header>
+
+<div class="workspace">
+
+  <!-- ══ PANEL 1: THREAT BUILDER ══ -->
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Red Threat Package</span>
+      <button class="btn btn-xs primary" onclick="openAddThreat()">+ Add Threat</button>
+    </div>
+    <div class="panel-body" id="threat-panel">
+      <div class="empty" id="threat-empty">No threats added. Click + Add Threat to begin.</div>
+      <div id="threat-list"></div>
+
+      <!-- ADD THREAT FORM (hidden by default) -->
+      <div id="threat-form" style="display:none">
+        <div class="section-div">New Threat Type</div>
+        <div class="field">
+          <label>Name</label>
+          <input type="text" id="tf-name" placeholder="e.g. Shahed-136">
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <select id="tf-cat">
+            <option value="bm">Ballistic Missile (SRBM/MRBM)</option>
+            <option value="cm">Cruise Missile</option>
+            <option value="uas1">UAS Group 1 (micro / &lt;9 lbs)</option>
+            <option value="uas2">UAS Group 2 (small / 9–55 lbs)</option>
+            <option value="uas3">UAS Group 3 (medium / 55–1,320 lbs)</option>
+            <option value="uas4">UAS Group 4 (large / &gt;1,320 lbs)</option>
+            <option value="uas5">UAS Group 5 (large / high alt.)</option>
+          </select>
+        </div>
+        <div class="inline-fields">
+          <div class="field">
+            <label>Quantity</label>
+            <input type="number" id="tf-qty" min="1" value="10">
+          </div>
+          <div class="field">
+            <label>Unit Cost ($K)</label>
+            <input type="number" id="tf-cost" min="0" placeholder="TBD">
+            <div class="hint">Leave blank if unknown</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn primary" onclick="addThreat()">Add</button>
+          <button class="btn" onclick="closeThreatForm()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL 2: BLUE FORCE ══ -->
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Blue Force Interceptors</span>
+      <button class="btn btn-xs primary" onclick="openAddInterceptor()">+ Add</button>
+    </div>
+    <div class="panel-body" id="blue-panel">
+      <div class="empty" id="blue-empty">No interceptors configured.</div>
+      <div id="interceptor-list"></div>
+
+      <!-- ADD INTERCEPTOR FORM -->
+      <div id="interceptor-form" style="display:none">
+        <div class="section-div">Configure Interceptor</div>
+        <div class="field">
+          <label>System</label>
+          <select id="if-preset" onchange="loadPreset()">
+            <option value="">— Custom —</option>
+            <option value="pac3mse">PAC-3 MSE</option>
+            <option value="thaad">THAAD Interceptor</option>
+            <option value="sm6">SM-6</option>
+            <option value="sm3iia">SM-3 Block IIA</option>
+            <option value="amraam">AMRAAM (NASAMS)</option>
+            <option value="aim9x">AIM-9X (IFPC/M-SHORAD)</option>
+            <option value="essm">ESSM Block 2</option>
+            <option value="skyhunter">SkyHunter/MRIC</option>
+          </select>
+        </div>
+        <div class="field"><label>Name</label><input type="text" id="if-name"></div>
+        <div class="inline-fields">
+          <div class="field"><label>Unit Cost ($K)</label><input type="number" id="if-cost" min="0"></div>
+          <div class="field"><label>Magazine Depth</label><input type="number" id="if-mag" min="1" value="48"></div>
+        </div>
+        <div class="field">
+          <label>Shot Doctrine (rounds per engagement)</label>
+          <input type="number" id="if-shot" min="1" max="4" value="2">
+          <div class="hint">Typical: 1 (cost-optimized) to 3 (high pk required)</div>
+        </div>
+
+        <div class="section-div">Threat Capabilities &amp; Pk</div>
+        <div class="hint" style="margin-bottom:8px">Check threat types this interceptor can engage, then set Pk (0–1)</div>
+
+        <div id="pk-matrix"></div>
+
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn primary" onclick="addInterceptor()">Add</button>
+          <button class="btn" onclick="closeInterceptorForm()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL 3: OPTIMIZATION + RESULTS ══ -->
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Optimization &amp; Results</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-xs green" onclick="runOptimization()">▶ Run</button>
+        <button class="btn btn-xs" onclick="clearResults()">Clear</button>
+      </div>
+    </div>
+    <div class="panel-body">
+
+      <!-- TRADEOFF SLIDER -->
+      <div class="tradeoff-wrap">
+        <div class="section-div" style="margin-top:0">Optimization Objective</div>
+        <div class="field">
+          <label>Tradeoff: Cost Minimization ↔ Kill Probability</label>
+          <input type="range" id="tradeoff-slider" min="0" max="100" value="50" oninput="updateTradeoffLabel()">
+          <div class="tradeoff-labels">
+            <span>Minimize blue cost</span>
+            <span id="tradeoff-label">Balanced (50/50)</span>
+            <span>Maximize Pk</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div id="results-area">
+        <div class="empty">Configure threats and interceptors, then click Run.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// THREAT CATEGORIES
+// ═══════════════════════════════════════════════════════
+const THREAT_CATS = {
+  bm:   { label: 'Ballistic Missile', tagClass: 'tag-bm' },
+  cm:   { label: 'Cruise Missile',    tagClass: 'tag-cm' },
+  uas1: { label: 'UAS Grp 1',         tagClass: 'tag-uas1' },
+  uas2: { label: 'UAS Grp 2',         tagClass: 'tag-uas2' },
+  uas3: { label: 'UAS Grp 3',         tagClass: 'tag-uas3' },
+  uas4: { label: 'UAS Grp 4',         tagClass: 'tag-uas4' },
+  uas5: { label: 'UAS Grp 5',         tagClass: 'tag-uas5' },
+};
+
+// ═══════════════════════════════════════════════════════
+// PRESETS — Blue unit costs from prod & del tool; pk from open-source estimates
+// pk format: { category: [min, suggested, max] }
+// ═══════════════════════════════════════════════════════
+const PRESETS = {
+  pac3mse:    { name: 'PAC-3 MSE',          cost_k: 3890,  mag: 48,  shot: 2,
+    caps: { bm: [0.75,0.88,0.93], cm: [0.75,0.85,0.92], uas3: [0.60,0.75,0.85], uas4: [0.65,0.78,0.88], uas5: [0.70,0.82,0.90] } },
+  thaad:      { name: 'THAAD Interceptor',  cost_k: 15534, mag: 48,  shot: 1,
+    caps: { bm: [0.80,0.90,0.95], cm: [0.60,0.70,0.80] } },
+  sm6:        { name: 'SM-6',               cost_k: 5300,  mag: 96,  shot: 2,
+    caps: { bm: [0.60,0.75,0.85], cm: [0.75,0.85,0.92], uas4: [0.65,0.78,0.85], uas5: [0.65,0.78,0.85] } },
+  sm3iia:     { name: 'SM-3 Block IIA',     cost_k: 28686, mag: 24,  shot: 1,
+    caps: { bm: [0.80,0.90,0.95] } },
+  amraam:     { name: 'AMRAAM (NASAMS)',     cost_k: 1030,  mag: 72,  shot: 2,
+    caps: { cm: [0.80,0.88,0.94], uas3: [0.70,0.82,0.90], uas4: [0.75,0.85,0.92], uas5: [0.75,0.85,0.92] } },
+  aim9x:      { name: 'AIM-9X (IFPC)',      cost_k: 479,   mag: 96,  shot: 1,
+    caps: { cm: [0.65,0.78,0.87], uas2: [0.55,0.70,0.82], uas3: [0.65,0.78,0.87], uas4: [0.70,0.82,0.90] } },
+  essm:       { name: 'ESSM Block 2',       cost_k: 1351,  mag: 64,  shot: 2,
+    caps: { cm: [0.75,0.85,0.92], uas3: [0.65,0.78,0.87], uas4: [0.70,0.80,0.88] } },
+  skyhunter:  { name: 'SkyHunter (MRIC)',   cost_k: null,  mag: 60,  shot: 1,
+    caps: { cm: [0.75,0.85,0.92], uas3: [0.70,0.80,0.88], uas4: [0.70,0.80,0.88] } },
+};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let threats = [];
+let interceptors = [];
+let threatId = 0;
+let interceptorId = 0;
+
+// ═══════════════════════════════════════════════════════
+// THREAT MANAGEMENT
+// ═══════════════════════════════════════════════════════
+function openAddThreat() {
+  document.getElementById('threat-form').style.display = 'block';
+  document.getElementById('tf-name').focus();
+}
+function closeThreatForm() {
+  document.getElementById('threat-form').style.display = 'none';
+}
+
+function addThreat() {
+  const name = document.getElementById('tf-name').value.trim();
+  const cat  = document.getElementById('tf-cat').value;
+  const qty  = parseInt(document.getElementById('tf-qty').value) || 1;
+  const costRaw = document.getElementById('tf-cost').value;
+  const cost = costRaw !== '' ? parseFloat(costRaw) : null;
+  if (!name) { alert('Please enter a threat name.'); return; }
+  threats.push({ id: threatId++, name, cat, qty, cost_k: cost });
+  closeThreatForm();
+  document.getElementById('tf-name').value = '';
+  document.getElementById('tf-qty').value = '10';
+  document.getElementById('tf-cost').value = '';
+  renderThreats();
+  refreshPkMatrix();
+}
+
+function removeThreat(id) {
+  threats = threats.filter(t => t.id !== id);
+  renderThreats();
+  refreshPkMatrix();
+}
+
+function renderThreats() {
+  const list = document.getElementById('threat-list');
+  const empty = document.getElementById('threat-empty');
+  empty.style.display = threats.length ? 'none' : 'block';
+  list.innerHTML = threats.map(t => {
+    const cat = THREAT_CATS[t.cat];
+    return `<div class="item-card">
+      <div class="item-card-hdr">
+        <span class="item-name">${t.name}</span>
+        <button class="btn btn-xs danger" onclick="removeThreat(${t.id})">×</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span class="item-tag ${cat.tagClass}">${cat.label}</span>
+        <span style="font-size:11px;color:var(--text-muted)">Qty: <b style="color:var(--text)">${t.qty}</b></span>
+        <span style="font-size:11px;color:var(--text-muted)">Unit cost: <b style="color:var(--accent2)">${t.cost_k != null ? '$'+t.cost_k.toLocaleString()+'K' : 'TBD'}</b></span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// INTERCEPTOR MANAGEMENT
+// ═══════════════════════════════════════════════════════
+function openAddInterceptor() {
+  document.getElementById('interceptor-form').style.display = 'block';
+  document.getElementById('if-preset').value = '';
+  refreshPkMatrix();
+}
+function closeInterceptorForm() {
+  document.getElementById('interceptor-form').style.display = 'none';
+}
+
+function loadPreset() {
+  const key = document.getElementById('if-preset').value;
+  if (!key) return;
+  const p = PRESETS[key];
+  document.getElementById('if-name').value = p.name;
+  document.getElementById('if-cost').value = p.cost_k || '';
+  document.getElementById('if-mag').value = p.mag;
+  document.getElementById('if-shot').value = p.shot;
+  refreshPkMatrix(p.caps);
+}
+
+function refreshPkMatrix(presetCaps) {
+  const matrix = document.getElementById('pk-matrix');
+  if (!matrix) return;
+  const cats = Object.entries(THREAT_CATS);
+  matrix.innerHTML = cats.map(([catKey, catInfo]) => {
+    const preset = presetCaps ? presetCaps[catKey] : null;
+    const enabled = preset ? 'checked' : '';
+    const suggestedPk = preset ? preset[1] : 0.80;
+    const rangeText = preset ? `Suggested: ${preset[0]}–${preset[2]} (public est.)` : 'No public data';
+    return `<div class="pk-cell" id="pkcell-${catKey}" style="opacity:${preset?1:0.5};margin-bottom:6px">
+      <div class="pk-cell-label" style="display:flex;align-items:center;gap:6px">
+        <input type="checkbox" id="pkcap-${catKey}" ${enabled} onchange="togglePkCell('${catKey}')">
+        <label for="pkcap-${catKey}" style="cursor:pointer">${catInfo.label}</label>
+      </div>
+      <div id="pkinput-wrap-${catKey}" style="display:${preset?'block':'none'}">
+        <input type="number" id="pk-${catKey}" min="0" max="1" step="0.01" value="${suggestedPk}" style="margin-top:4px;width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:2px">
+        <div class="pk-range">${rangeText}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function togglePkCell(catKey) {
+  const cb = document.getElementById(`pkcap-${catKey}`);
+  const cell = document.getElementById(`pkcell-${catKey}`);
+  const wrap = document.getElementById(`pkinput-wrap-${catKey}`);
+  cell.style.opacity = cb.checked ? 1 : 0.5;
+  wrap.style.display = cb.checked ? 'block' : 'none';
+}
+
+function addInterceptor() {
+  const name = document.getElementById('if-name').value.trim();
+  const costRaw = document.getElementById('if-cost').value;
+  const cost = costRaw !== '' ? parseFloat(costRaw) : null;
+  const mag  = parseInt(document.getElementById('if-mag').value) || 48;
+  const shot = parseInt(document.getElementById('if-shot').value) || 2;
+  if (!name) { alert('Please enter an interceptor name.'); return; }
+
+  // Collect pk per category
+  const pk = {};
+  Object.keys(THREAT_CATS).forEach(catKey => {
+    const cb = document.getElementById(`pkcap-${catKey}`);
+    if (cb && cb.checked) {
+      const val = parseFloat(document.getElementById(`pk-${catKey}`).value);
+      pk[catKey] = isNaN(val) ? 0.80 : Math.min(1, Math.max(0, val));
+    }
+  });
+
+  interceptors.push({ id: interceptorId++, name, cost_k: cost, mag, shot, pk, remaining: mag });
+  closeInterceptorForm();
+  document.getElementById('if-preset').value = '';
+  document.getElementById('if-name').value = '';
+  renderInterceptors();
+}
+
+function removeInterceptor(id) {
+  interceptors = interceptors.filter(i => i.id !== id);
+  renderInterceptors();
+}
+
+function renderInterceptors() {
+  const list = document.getElementById('interceptor-list');
+  const empty = document.getElementById('blue-empty');
+  empty.style.display = interceptors.length ? 'none' : 'block';
+  list.innerHTML = interceptors.map(ic => {
+    const caps = Object.entries(ic.pk).map(([cat, pk]) =>
+      `<span class="item-tag ${THREAT_CATS[cat].tagClass}" style="font-size:9px">${THREAT_CATS[cat].label} Pk:${(pk*100).toFixed(0)}%</span>`
+    ).join(' ');
+    return `<div class="item-card">
+      <div class="item-card-hdr">
+        <span class="item-name">${ic.name}</span>
+        <button class="btn btn-xs danger" onclick="removeInterceptor(${ic.id})">×</button>
+      </div>
+      <div class="item-stats" style="margin-bottom:6px">
+        <span>Cost: <span>${ic.cost_k != null ? '$'+ic.cost_k.toLocaleString()+'K' : 'TBD'}</span></span>
+        <span>Mag: <span>${ic.mag}</span></span>
+        <span>Doctrine: <span>${ic.shot}-shot</span></span>
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">${caps || '<span style="color:var(--text-muted);font-size:11px">No capabilities set</span>'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// OPTIMIZATION ENGINE
+// ═══════════════════════════════════════════════════════
+function runOptimization() {
+  if (!threats.length) { alert('Add at least one threat.'); return; }
+  if (!interceptors.length) { alert('Add at least one interceptor.'); return; }
+
+  const tradeoff = parseInt(document.getElementById('tradeoff-slider').value) / 100; // 0=cost, 1=pk
+
+  // Reset remaining inventory
+  interceptors.forEach(ic => ic.remaining = ic.mag);
+
+  const results = [];
+  let totalBlueCost = 0;
+  let totalRedCost = 0;
+  let totalRedQty = 0;
+  let totalDefeated = 0;
+  let totalLeakers = 0;
+
+  threats.forEach(threat => {
+    const eligible = interceptors.filter(ic => ic.pk[threat.cat] !== undefined && ic.remaining > 0);
+
+    let defeated = 0;
+    let leakers = 0;
+    const engagements = [];
+    let shotsExpended = 0;
+    let costExpended = 0;
+
+    // Process each incoming threat unit
+    for (let i = 0; i < threat.qty; i++) {
+      if (!eligible.some(ic => ic.remaining >= ic.shot)) {
+        // No interceptors remaining for this threat
+        leakers++;
+        continue;
+      }
+
+      // Score each eligible interceptor using tradeoff
+      const available = eligible.filter(ic => ic.remaining >= ic.shot);
+      if (!available.length) { leakers++; continue; }
+
+      const scored = available.map(ic => {
+        const pk_single = ic.pk[threat.cat];
+        const pk_salvo  = 1 - Math.pow(1 - pk_single, ic.shot);
+        const cost_shot = (ic.cost_k || 0) * ic.shot;
+        // Tradeoff score: 0=pure cost minimization, 1=pure pk maximization
+        // Normalize: lower cost is better for cost axis, higher pk is better for pk axis
+        const costScore = cost_shot > 0 ? 1 / cost_shot : 1;
+        const pkScore   = pk_salvo;
+        const score = (1 - tradeoff) * costScore * 1e6 + tradeoff * pkScore * 100;
+        return { ic, pk_single, pk_salvo, cost_shot, score };
+      }).sort((a, b) => b.score - a.score);
+
+      const chosen = scored[0];
+      chosen.ic.remaining -= chosen.ic.shot;
+      shotsExpended += chosen.ic.shot;
+      costExpended += chosen.cost_shot;
+
+      // Probabilistic kill
+      const killed = Math.random() < chosen.pk_salvo;
+      if (killed) defeated++;
+      else leakers++;
+
+      // Track engagement
+      const existing = engagements.find(e => e.interceptor === chosen.ic.name);
+      if (existing) {
+        existing.shots += chosen.ic.shot;
+        existing.cost += chosen.cost_shot;
+        existing.engagements++;
+      } else {
+        engagements.push({ interceptor: chosen.ic.name, shots: chosen.ic.shot, cost: chosen.cost_shot, engagements: 1, pk_salvo: chosen.pk_salvo });
+      }
+    }
+
+    totalBlueCost += costExpended;
+    totalRedCost += threat.cost_k != null ? threat.cost_k * threat.qty : 0;
+    totalRedQty += threat.qty;
+    totalDefeated += defeated;
+    totalLeakers += leakers;
+
+    results.push({ threat, defeated, leakers, engagements, costExpended });
+  });
+
+  renderResults(results, totalBlueCost, totalRedCost, totalRedQty, totalDefeated, totalLeakers);
+}
+
+function renderResults(results, totalBlueCost, totalRedCost, totalRedQty, totalDefeated, totalLeakers) {
+  const overallPk = totalRedQty > 0 ? totalDefeated / totalRedQty : 0;
+  const exchangeRatio = totalRedCost > 0 && totalBlueCost > 0 ? totalBlueCost / totalRedCost : null;
+  const redHasAllCosts = results.every(r => r.threat.cost_k != null);
+
+  const area = document.getElementById('results-area');
+  area.innerHTML = `
+    <!-- SUMMARY CARDS -->
+    <div class="result-block">
+      <div class="result-title">Engagement Summary</div>
+      <div class="result-grid">
+        <div class="result-card">
+          <div class="result-label">Overall Pk</div>
+          <div class="result-val" style="color:${overallPk>=0.85?'var(--green)':overallPk>=0.70?'var(--accent2)':'var(--red)'}">${(overallPk*100).toFixed(1)}%</div>
+          <div class="result-sub">${totalDefeated} / ${totalRedQty} defeated</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">Leakers</div>
+          <div class="result-val" style="color:${totalLeakers===0?'var(--green)':'var(--red)'}">${totalLeakers}</div>
+          <div class="result-sub">${totalRedQty > 0 ? ((totalLeakers/totalRedQty)*100).toFixed(1) : 0}% of threat package</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">Blue Cost Expended</div>
+          <div class="result-val" style="font-size:15px;color:var(--accent2)">${fmtM(totalBlueCost/1000)}</div>
+          <div class="result-sub">${totalRedCost > 0 ? 'Red cost: ' + fmtM(totalRedCost/1000) : 'Red cost: TBD'}</div>
+        </div>
+      </div>
+      ${exchangeRatio !== null && redHasAllCosts ? `
+      <div class="result-grid" style="grid-template-columns:1fr 1fr;margin-bottom:0">
+        <div class="result-card">
+          <div class="result-label">Cost Exchange Ratio (Blue:Red)</div>
+          <div class="result-val" style="color:${exchangeRatio<1?'var(--green)':exchangeRatio<3?'var(--accent2)':'var(--red)'}">${exchangeRatio.toFixed(1)}:1</div>
+          <div class="result-sub">${exchangeRatio<1?'Blue favored':'Red favored — blue spends more per threat'}</div>
+        </div>
+        <div class="result-card">
+          <div class="result-label">Blue Cost per Defeat</div>
+          <div class="result-val" style="font-size:15px">${totalDefeated>0?fmtM(totalBlueCost/totalDefeated/1000):'—'}</div>
+          <div class="result-sub">vs. Red cost per threat: ${redHasAllCosts?fmtM(totalRedCost/totalRedQty/1000):'TBD'}</div>
+        </div>
+      </div>` : `<div style="font-size:10px;color:var(--text-muted);font-style:italic;margin-top:6px">⚠ Cost exchange ratio requires all threat unit costs to be defined.</div>`}
+    </div>
+
+    <!-- LAYDOWN TABLE -->
+    <div class="result-block">
+      <div class="result-title">Intercept Laydown by Threat</div>
+      <table class="laydown-table">
+        <thead><tr>
+          <th>Threat</th>
+          <th>Qty</th>
+          <th>Interceptor(s) Used</th>
+          <th style="text-align:right">Rounds</th>
+          <th style="text-align:right">Blue Cost</th>
+          <th style="text-align:right">Defeated</th>
+          <th style="text-align:right">Leakers</th>
+        </tr></thead>
+        <tbody>
+          ${results.map(r => {
+            const icSummary = r.engagements.map(e =>
+              `${e.interceptor} ×${e.shots} (Pk ${(e.pk_salvo*100).toFixed(0)}%)`
+            ).join('; ') || '—';
+            const leakerClass = r.leakers > 0 ? 'leaker-row' : '';
+            return `<tr class="${leakerClass}">
+              <td><b>${r.threat.name}</b><br><span style="font-size:10px;color:var(--text-muted)">${THREAT_CATS[r.threat.cat].label}</span></td>
+              <td>${r.threat.qty}</td>
+              <td style="font-size:10px;color:var(--text-muted)">${icSummary}</td>
+              <td style="text-align:right">${r.engagements.reduce((s,e)=>s+e.shots,0)}</td>
+              <td style="text-align:right">${fmtM(r.costExpended/1000)}</td>
+              <td style="text-align:right;color:var(--green)">${r.defeated}</td>
+              <td style="text-align:right">${r.leakers > 0 ? `<span class="leaker-badge">${r.leakers}</span>` : '—'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- INVENTORY DEPLETION -->
+    <div class="result-block">
+      <div class="result-title">Interceptor Inventory Depletion</div>
+      ${interceptors.map(ic => {
+        const expended = ic.mag - ic.remaining;
+        const pct = ic.mag > 0 ? expended / ic.mag : 0;
+        const color = pct > 0.8 ? 'var(--red)' : pct > 0.5 ? 'var(--accent2)' : 'var(--green)';
+        return `<div style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">
+            <span><b>${ic.name}</b></span>
+            <span style="color:var(--text-muted)">${expended} / ${ic.mag} expended (${(pct*100).toFixed(0)}%)</span>
+          </div>
+          <div class="depletion-bar-wrap">
+            <div class="depletion-bar" style="width:${pct*100}%;background:${color}"></div>
+          </div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px">${ic.remaining} remaining · ${ic.cost_k != null ? fmtM(expended*ic.cost_k/1000) + ' blue cost expended' : 'cost TBD'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div style="font-size:10px;color:var(--text-muted);font-style:italic;padding:8px 0">
+      ⚠ Results are probabilistic — re-run for different outcomes. Pk values reflect single-shot single-engagement probability; salvo Pk calculated as 1-(1-Pk)^shots. Optimization assigns cheapest capable interceptor weighted by tradeoff slider. Pk values are team inputs; suggested ranges based on open-source public estimates.
+    </div>`;
+}
+
+function clearResults() {
+  document.getElementById('results-area').innerHTML = '<div class="empty">Configure threats and interceptors, then click Run.</div>';
+  interceptors.forEach(ic => ic.remaining = ic.mag);
+}
+
+function updateTradeoffLabel() {
+  const v = parseInt(document.getElementById('tradeoff-slider').value);
+  const label = v === 0 ? 'Cost only' : v === 100 ? 'Pk only' : v < 30 ? 'Cost-weighted' : v > 70 ? 'Pk-weighted' : 'Balanced';
+  document.getElementById('tradeoff-label').textContent = `${label} (${v}/${100-v})`;
+}
+
+function fmtM(v) {
+  if (!v && v !== 0) return '—';
+  const abs = Math.abs(v);
+  if (abs >= 1000) return '$' + (v/1000).toFixed(2) + 'B';
+  if (abs >= 1)    return '$' + v.toFixed(2) + 'M';
+  return '$' + (v*1000).toFixed(0) + 'K';
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  updateTradeoffLabel();
+  refreshPkMatrix();
+});
+</script>
+</body>
+</html>
